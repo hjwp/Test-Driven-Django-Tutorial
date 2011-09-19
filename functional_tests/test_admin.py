@@ -13,6 +13,9 @@ class TestPollsAdmin(unittest.TestCase):
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(5)
 
+    def tearDown(self):
+        self.browser.close()
+
 
     def test_can_create_new_poll_via_admin_site(self):
         self.browser.get(ROOT + '/admin/')
