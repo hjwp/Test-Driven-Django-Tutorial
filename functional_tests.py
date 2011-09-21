@@ -1,6 +1,8 @@
 #!/usr/bin/python
+try: import unittest2 as unittest #for Python <= 2.6
+except: import unittest
 import pexpect
-import unittest
+from selenium import webdriver
 
 
 def start_selenium_server():
@@ -38,4 +40,16 @@ if __name__ == '__main__':
     start_selenium_server()
     start_django_server()
     run_all_functional_tests()
+
+
+ROOT = 'http://127.0.0.1:8000'
+
+class FunctionalTest(unittest.TestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(5)
+
+    def tearDown(self):
+        self.browser.close()
 

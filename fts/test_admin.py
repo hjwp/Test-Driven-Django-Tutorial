@@ -1,21 +1,6 @@
-try: import unittest2 as unittest #for Python <= 2.6
-except: import unittest
+from functional_tests import FunctionalTest, ROOT
 
-from selenium import webdriver
-
-
-ROOT = 'http://127.0.0.1:8000'
-
-
-class TestPollsAdmin(unittest.TestCase):
-
-    def setUp(self):
-        self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(5)
-
-    def tearDown(self):
-        self.browser.close()
-
+class TestPollsAdmin(FunctionalTest):
 
     def test_can_create_new_poll_via_admin_site(self):
         self.browser.get(ROOT + '/admin/')
