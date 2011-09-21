@@ -80,14 +80,14 @@ Setting up the functional test runner
 The next thing we need is a single command that will run all our FT's, 
 and a place to keep them all::
 
-    mkdir functional_tests
-    touch functional_tests/__init__.py
+    mkdir fts
+    touch fts/__init__.py
 
 Here's one I made earlier... A little Python script that'll run all your tests
 for you.::
 
-    wget -O run_functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/run_functional_tests.py
-    chmod +x run_functional_tests.py
+    wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/functional_tests.py
+    chmod +x functional_tests.py
 
 
 Our first test: The django admin
@@ -104,7 +104,7 @@ can log into it using an admin username and password, and that we can see the
 
 <pic>
 
-Open up a file inside the ``functional_tests`` directory called ``test_polls_admin.py``
+Open up a file inside the ``fts`` directory called ``test_polls_admin.py``
 
 
 add test_admin.py
