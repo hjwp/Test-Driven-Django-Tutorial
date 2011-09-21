@@ -93,25 +93,113 @@ for you.::
 Our first test: The django admin
 --------------------------------
 
-In our test-driven methodology, what comes first is a "user story" - a description
-of our objective, in terms of what the user can do.  We have to go all the way
-to the second page of the django tutorial to see an actual user-visible part
-of the application:  the django admin site.
+In our test-driven methodology, what comes first is a "user story" - a
+description of our objective, in terms of what the user can do.  We have to go
+all the way to the second page of the django tutorial to see an actual
+user-visible part of the application:  the django admin site.
 
-So, our first test will just check that the django admin site works, that we
-can log into it using an admin username and password, and that we can see the
-"Polls" application as one of the options.
+So, our first test will track our first user story, and our first user
+story is that the user should be able to log into the django admin site
+using an admin username and password, and that we can see the "Polls"
+application as one of the options.
 
 <pic>
 
-Open up a file inside the ``fts`` directory called ``test_polls_admin.py``
+Open up a file inside the ``fts`` directory called ``test_polls_admin.py`` and
+enter the following code.
+
+Note the nice, descriptive names for the test functions, and the comments,
+which describe in human-readable text the actions that our user will take.
+
+It's always nice to give the user a name... Mine is called Gertrude...::
+
+    from functional_tests import FunctionalTest, ROOT
+
+    class TestPollsAdmin(FunctionalTest):
+
+        def test_can_create_new_poll_via_admin_site(self):
+
+            # Gertrude opens her web browser, and goes to the admin page
+            self.browser.get(ROOT + '/admin/')
+
+            # She sees the familiar 'Django Administration' heading
+            body = self.browser.find_element_by_tag_name('body')
+            self.assertIn('Django Administration', body.text)
+
+            # She sees a hyperlink that says "Polls"
+            polls_link = self.browser.find_element_by_link_text('Polls')
+
+            # So, she clicks it
+            polls_link.click()
+
+            # She is taken to a new page on which she sees a link to "Add poll"
+            new_poll_link = self.browser.find_element_by_link_text('Add poll')
+
+            # So she clicks that too
+            new_poll_link.click()
 
 
-add test_admin.py
+
+Let's try running our first test::
+    ./functional_tests.py
+
+<pic>
+
+The test output will looks something like this::
+
+    Starting Selenium
+    selenium started
+    starting django test server
+    django test server running
+    running tests
+    F
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 12, in test_can_create_new_poll_via_admin_site
+        self.assertIn('Django Administration', body.text)
+    AssertionError: 'Django Administration' not found in u"It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\nStart your first app by running python mysite/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!"
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 4.754s
+
+    FAILED (failures=1)
+
+
+First few steps...
+------------------
+
+So, let's start trying to get our test to pass... or at least get a little
+further on.  We'll need to set up the django admin site.  This is on
+page two of the official django tutorial.
+
+    * Add "django.contrib.admin" to your INSTALLED_APPS setting.
+
+    * Run python manage.py syncdb. Since you have added a new application to
+      INSTALLED_APPS, the database tables need to be updated.
+
+    * Edit your mysite/urls.py file and uncomment the lines that reference the
+      admin
+
+When we run the syncdb, we'll need to enter a username and password. Let's use
+the ultra-secure  "admin" and "adm1n".
+
+That's these lines::
+
+    from django.contrib import admin
+    admin.autodiscover()
+    urlpatterns = patterns('',
+        # [...]
+        # Uncomment the next line to enable the admin:
+        url(r'^admin/', include(admin.site.urls)),
+    )
 
 
 Our first unit tests
 --------------------
+
+First we need
 
 rm polls/tests.py
 mkdir polls/tests
@@ -128,3 +216,12 @@ first test
 Now we can setup the database::
 syncdb
 
+
+LINKS
+=====
+
+https://docs.djangoproject.com/en/dev/intro/tutorial02/
+
+http://pypi.python.org/pypi/selenium
+http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
+http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py

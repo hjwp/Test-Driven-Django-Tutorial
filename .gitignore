@@ -1,2 +1,4 @@
 *.pyc
 selenium-server-standalone-2.6.0.jar
+database.sqlite
+django_server_logfile.txt

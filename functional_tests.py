@@ -19,9 +19,12 @@ def start_selenium_server():
 
 def start_django_server():
     print 'starting django test server'
+    logfile = open('django_server_logfile.txt', 'w')
     django_server_process = pexpect.spawn(
             'python',
-            args=['manage.py', 'runserver']
+            args=['manage.py', 'runserver'],
+            logfile=logfile
+
     )
     django_server_process.expect(
         'Quit the server with CONTROL-C'
