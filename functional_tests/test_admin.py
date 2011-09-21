@@ -4,7 +4,7 @@ except: import unittest
 from selenium import webdriver
 
 
-ROOT = 'http://127.0.0.1'
+ROOT = 'http://127.0.0.1:8000'
 
 
 class TestPollsAdmin(unittest.TestCase):

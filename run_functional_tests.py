@@ -1,8 +1,7 @@
 #!/usr/bin/python
-try: import unittest2 as unittest #for Python <=2.6
-except: import unittest
-
 import pexpect
+import unittest
+
 
 def start_selenium_server():
     print 'Starting Selenium'
@@ -26,7 +25,6 @@ def start_django_server():
         'Quit the server with CONTROL-C'
     )
     print 'django test server running'
-
 
 
 def run_all_functional_tests():
