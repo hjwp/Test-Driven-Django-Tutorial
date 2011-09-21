@@ -29,7 +29,7 @@ def start_django_server():
 
 def run_all_functional_tests():
     print 'running tests'
-    tests = unittest.defaultTestLoader.discover('functional_tests')
+    tests = unittest.defaultTestLoader.discover('fts')
     runner = unittest.TextTestRunner()
     runner.run(tests)
 
