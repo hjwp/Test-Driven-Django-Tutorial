@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
-class Poll(object):
+class Poll(models.Model):
+    name = ''
     pass

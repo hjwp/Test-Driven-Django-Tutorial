@@ -200,6 +200,32 @@ In our `urls.py`, we'll be looking to uncomment these two lines::
         url(r'^admin/', include(admin.site.urls)),
     )
 
+Let's re-run our tests.  We should find they get a little further::
+
+    ./functional_tests.py
+    ======================================================================
+    ERROR: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 24, in test_can_create_new_poll_via_admin_site
+        polls_link = self.browser.find_element_by_link_text('Polls')
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 208, in find_element_by_link_text
+        return self.find_element(by=By.LINK_TEXT, value=link_text)
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 525, in find_element
+        {'using': by, 'value': value})['value']
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 144, in execute
+        self.error_handler.check_response(response)
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 118, in check_response
+        raise exception_class(message, screen, stacktrace)
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"Polls"}' 
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 10.203s
+
+Well, the test is happy that there's a django admin site, and it can log in fine,
+but it can't find a link to administer "Polls".  So next we need to create our
+Polls object.
+
 
 Our first unit tests
 --------------------
@@ -208,11 +234,90 @@ The django unit test runner will automatically run any tests we put in
 `tests.py`.  Later on, we might decide we want to put our tests somewhere
 else, but for now, let's use that file::
 
+    from django.test import TestCase
+    from polls.models import Poll
+
+    class TestPollsModel(TestCase):
+
+    def test_creating_a_poll(self):
+        poll = Poll()
+        poll.save()
+        self.assertEquals(poll.name, '')
 
 
-Now we can setup the database::
-syncdb
+Unit tests are designed to check that the individual parts of our code work
+the way we want them too.  Aside from being useful as tests, they're useful
+to help us think about the way we design our code... It forces us to think 
+about how things are going to work, from a slightly external point of view.
 
+Here we're creating a new Poll object, and making an assertion about what
+its default "name" attribute is. Let's run the unit tests::
+
+    ./manage.py test
+
+You should see an error like this::
+
+      File "/usr/local/lib/python2.7/dist-packages/django/test/simple.py", line 35, in get_tests
+        test_module = __import__('.'.join(app_path + [TEST_MODULE]), {}, {}, TEST_MODULE)
+      File "/home/harry/workspace/mysite/polls/tests.py", line 2, in <module>
+        from polls.models import Poll
+      ImportError: cannot import name Poll
+
+Not the most interesting of test errors - we need to create a Poll object for the
+test to import.  In TDD, once we've got a test that fails, we're finally allowed
+to write some "real" code.  But only the minimum required to get the tests to get 
+a tiny bit further on!
+
+So let's create a minimal Poll class, in `polls/models.py`::
+
+    from django.db import models
+
+    class Poll(object):
+        pass 
+
+And re-run the tests.  Pretty soon you'll get into the rhythm of TDD - run the
+tests, change a tiny bit of code, check the tests again, see what tiny bit of
+code to write next. Run the tests...::
+
+    Creating test database for alias 'default'...
+    ........................................................................................................................................................................................................................................................................E..........................................................
+    ======================================================================
+    ERROR: test_creating_a_poll (polls.tests.TestPollsModel)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/polls/tests.py", line 8, in test_creating_a_poll
+        self.assertEquals(poll.name, '')
+    AttributeError: 'Poll' object has no attribute 'save'
+
+    ----------------------------------------------------------------------
+    Ran 323 tests in 2.504s
+
+    FAILED (errors=1)
+    Destroying test database for alias 'default'...
+
+
+Right, the tests are telling us that we can't "save" our Poll.  That's because
+it's not a django model object.  Let's make the minimal change required to get 
+our tests further on::
+
+    class Poll(models.Model):
+        pass
+
+
+Running the tests again, we should see a slight change to the error message::
+
+    ======================================================================
+    ERROR: test_creating_a_poll (polls.tests.TestPollsModel)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/polls/tests.py", line 9, in test_creating_a_poll
+        self.assertEquals(poll.name, '')
+    AttributeError: 'Poll' object has no attribute 'name'
+
+    ----------------------------------------------------------------------
+
+Notice that we've got the tests moving a tiny bit further forwards - from line 8 to
+line 9.  Now we need to give our poll a "name" attribute
 
 LINKS
 =====
