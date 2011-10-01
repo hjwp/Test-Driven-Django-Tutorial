@@ -44,7 +44,6 @@ A few python modules we'll need::
     easy_install selenium
     easy_install pexpect
 
-
 We also need the selenium java server::
 
     wget -O selenium-server-standalone-2.6.0.jar http://selenium.googlecode.com/files/selenium-server-standalone-2.6.0.jar 
@@ -55,16 +54,18 @@ Setting up our Django project
 -----------------------------
 
 We set up a django project, then within that our first application. It will
-be a simple application to handle polls.
+be a simple application to handle polls, as per the official tutorial.
 
-At the command line::
+We use the django command line tools to set up the project and the app. At the
+command line::
 
     django-admin startproject mysite
+    mv selenium-server-standalone-2.6.0.jar mysite/
     cd mysite
     ./manage.py startapp polls
 
-Let's set up the easiest possible database - sqlite.  Find the file in mysite called
-settings.py, and open it up in your favourite text editor...::
+Let's set up the easiest possible database - sqlite.  Find the file in mysite
+called ``settings.py``, and open it up in your favourite text editor...::
 
     DATABASES = {
         'default': {
@@ -93,20 +94,24 @@ for you.::
 Our first test: The django admin
 --------------------------------
 
-In our test-driven methodology, what comes first is a "user story" - a
-description of our objective, in terms of what the user can do.  We have to go
-all the way to the second page of the django tutorial to see an actual
-user-visible part of the application:  the django admin site.
+In the test-driven methodology, we tend to group functionality up into
+bite-size chunks, and write functional tests for each one of them. You
+can describe the chunks of functionality as "user stories", if you like,
+and each user story tends to have a set of tests associated with it,
+and the tests track the potential behaviour of a user.
 
-So, our first test will track our first user story, and our first user
-story is that the user should be able to log into the django admin site
-using an admin username and password, and that we can see the "Polls"
-application as one of the options.
+
+We have to go all the way to the second page of the django tutorial to see an
+actual user-visible part of the application:  the `django admin site`.
+
+So, our first user story is that the user should be able to log into the django
+admin site using an admin username and password, and that we can see the
+"Polls" application as one of the options.
 
 <pic>
 
 Open up a file inside the ``fts`` directory called ``test_polls_admin.py`` and
-enter the following code.
+enter the code below.
 
 Note the nice, descriptive names for the test functions, and the comments,
 which describe in human-readable text the actions that our user will take.
@@ -172,7 +177,7 @@ First few steps...
 
 So, let's start trying to get our test to pass... or at least get a little
 further on.  We'll need to set up the django admin site.  This is on
-page two of the official django tutorial.
+page two of the official django tutorial::
 
     * Add "django.contrib.admin" to your INSTALLED_APPS setting.
 
@@ -183,9 +188,9 @@ page two of the official django tutorial.
       admin
 
 When we run the syncdb, we'll need to enter a username and password. Let's use
-the ultra-secure  "admin" and "adm1n".
+the ultra-secure  `admin` and `adm1n`.
 
-That's these lines::
+In our `urls.py`, we'll be looking to uncomment these two lines::
 
     from django.contrib import admin
     admin.autodiscover()
@@ -199,18 +204,10 @@ That's these lines::
 Our first unit tests
 --------------------
 
-First we need
+The django unit test runner will automatically run any tests we put in
+`tests.py`.  Later on, we might decide we want to put our tests somewhere
+else, but for now, let's use that file::
 
-rm polls/tests.py
-mkdir polls/tests
-touch polls/tests/__init__.py
-
-from test_models import *
-
-test_models.py
-models.py
-
-first test 
 
 
 Now we can setup the database::
