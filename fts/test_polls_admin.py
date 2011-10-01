@@ -20,9 +20,6 @@ class TestPollsAdmin(FunctionalTest):
         password_field.send_keys('adm1n')
         password_field.send_keys(Keys.RETURN)
 
-        import time
-        time.sleep(10)
-
         # She now sees a hyperlink that says "Polls"
         polls_link = self.browser.find_element_by_link_text('Polls')
 
