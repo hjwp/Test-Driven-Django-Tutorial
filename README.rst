@@ -144,11 +144,11 @@ Django has a couple of command line tools to set these up::
     ./manage.py startapp polls
 
 
-Django stores project-wide settings in a file called `settings.py`. One of the key
+Django stores project-wide settings in a file called ``settings.py``. One of the key
 settings is what kind of database to use.  We'll use the easiest possible, sqlite.
 
 Find settings ``settings.py`` in the root of the new ``mysite`` folder, and
-open it up in your favourite text editor. Find the lines that mention `DATABASES`,
+open it up in your favourite text editor. Find the lines that mention ``DATABASES``,
 and change them, like so::
 
     DATABASES = {
@@ -284,9 +284,9 @@ page two of the official django tutorial::
       admin
 
 When we run the syncdb, we'll need to enter a username and password. Let's use
-the ultra-secure  `admin` and `adm1n`.
+the ultra-secure  ``admin`` and ``adm1n``.
 
-In our `urls.py`, we'll be looking to uncomment these two lines::
+In our ``urls.py``, we'll be looking to uncomment these two lines::
 
     from django.contrib import admin
     admin.autodiscover()
@@ -327,7 +327,7 @@ Our first unit tests
 --------------------
 
 The django unit test runner will automatically run any tests we put in
-`tests.py`.  Later on, we might decide we want to put our tests somewhere
+``tests.py``.  Later on, we might decide we want to put our tests somewhere
 else, but for now, let's use that file::
 
     from django.test import TestCase
@@ -381,7 +381,7 @@ test to import.  In TDD, once we've got a test that fails, we're finally allowed
 to write some "real" code.  But only the minimum required to get the tests to get 
 a tiny bit further on!
 
-So let's create a minimal Poll class, in `polls/models.py`::
+So let's create a minimal Poll class, in ``polls/models.py``::
 
     from django.db import models
 
@@ -494,5 +494,7 @@ LINKS
 https://docs.djangoproject.com/en/dev/intro/tutorial02/
 
 http://pypi.python.org/pypi/selenium
+
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
+
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py
