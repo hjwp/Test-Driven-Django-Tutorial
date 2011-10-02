@@ -29,8 +29,9 @@ class TestPollsAdmin(FunctionalTest):
         # So, she clicks it
         polls_link.click()
 
-        # She is taken to a new page on which she sees a link to "Add poll"
-        new_poll_link = self.browser.find_element_by_link_text('Add poll')
+        # She is taken to a new page on which she sees a link to "Add" a new
+        # poll
+        new_poll_link = self.browser.find_element_by_link_text('Add')
 
         # So she clicks that too
         new_poll_link.click()

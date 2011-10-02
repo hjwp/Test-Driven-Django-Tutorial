@@ -6,14 +6,12 @@ class TestPollsModel(TestCase):
 
     def test_creating_a_new_poll_and_saving_it_to_the_database(self):
         # start by creating a new Poll object and setting its 'question'
+        # and 'pub_date' attributes
         poll = Poll()
         poll.question="What's up?"
+        poll.pub_date = datetime.datetime(2012, 12, 25)
 
         # check we can save it to the database
-        poll.save()
-
-        # check we can adjust its publication date
-        poll.pub_date = datetime.datetime(2012, 12, 25)
         poll.save()
 
         # now check we can find it in the database again

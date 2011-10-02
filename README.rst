@@ -1,4 +1,5 @@
-The Concept:
+
+The Concept
 -----------
 
 This idea is to provide an introduction to Test-Driven web development using
@@ -435,6 +436,57 @@ question attribute.  Let's fix that::
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
+
+(note on max_length=200)?
+
+Now our tests get slightly further - they tell us we need to add a pub_date::
+
+    ======================================================================
+    ERROR: test_creating_a_new_poll_and_saving_it_to_the_database (polls.tests.TestPollsModel)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/polls/tests.py", line 27, in test_creating_a_new_poll_and_saving_it_to_the_database
+        self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
+    AttributeError: 'Poll' object has no attribute 'pub_date'
+    ----------------------------------------------------------------------
+
+Let's add that too::
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField()
+
+
+And run the tests again::
+
+    ...................................................................................................................................................................................................................................................................................................................................
+    ----------------------------------------------------------------------
+    Ran 323 tests in 2.402s
+
+    OK
+
+
+Hooray!  The joy of that unbroken string of dots!  That lovely, understated "OK".
+Does this mean our functional test will pass?::
+
+
+
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"Polls"}' 
+
+
+<syncdb!>
+
+
+Ah, not quite.  We still need to add the "Poll" model to the django admin site.
+To do that, we just need to create a file called ``admin.py`` to the ``polls``
+directory, with the following three lines::
+
+    from polls.models import Poll
+    from django.contrib import admin
+
+    admin.site.register(Poll)
+
+
 
 LINKS
 =====

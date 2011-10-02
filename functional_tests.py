@@ -1,6 +1,7 @@
 #!/usr/bin/python
 try: import unittest2 as unittest #for Python <= 2.6
 except: import unittest
+import sys
 import pexpect
 import subprocess
 from selenium import webdriver
@@ -8,21 +9,27 @@ from selenium import webdriver
 
 def start_selenium_server():
     print 'Starting Selenium'
-    selenium_server_process = pexpect.spawn(
+    selenium_server = pexpect.spawn(
         'java',
         args=['-jar', 'selenium-server-standalone-2.6.0.jar']
     )
-    selenium_server_process.expect(
-        'Started org.openqa.jetty.jetty.Server'
-    )
+    try:
+        selenium_server.expect(
+            'Started org.openqa.jetty.jetty.Server'
+        )
+    except pexpect.TIMEOUT:
+        print 'timeout waiting for selenium to start... try again?'
+        sys.exit()
     print 'selenium started'
+    return selenium_server
 
 
 def start_django_server():
     print 'starting django test server'
-    subprocess.Popen('python manage.py runserver', shell=True)
+    django_server = subprocess.Popen('python manage.py runserver', shell=True)
     #dev server starts quickly, no need to check it's running
     print 'django test server started'
+    return django_server
 
 
 def run_all_functional_tests():
@@ -33,9 +40,11 @@ def run_all_functional_tests():
 
 
 if __name__ == '__main__':
-    start_selenium_server()
-    start_django_server()
+    selenium = start_selenium_server()
+    django = start_django_server()
     run_all_functional_tests()
+    selenium.terminate()
+    django.kill() #TODO: doesn't kill child processes, fix
 
 
 ROOT = 'http://127.0.0.1:8000'
