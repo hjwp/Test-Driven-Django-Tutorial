@@ -20,7 +20,7 @@ def start_selenium_server():
 
 def start_django_server():
     print 'starting django test server'
-    subprocess.Popen('python manage.py runserver', shell=True, stdout=subprocess.PIPE)
+    subprocess.Popen('python manage.py runserver', shell=True)
     #dev server starts quickly, no need to check it's running
     print 'django test server started'
 

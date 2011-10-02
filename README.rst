@@ -85,22 +85,38 @@ someone else with experience.  They know.  Now, onto the practicals.
 What's the approach?
 --------------------
 
-FTs first
-then unit tests
-then code
+Test-First!  So, before we're allowed to write any real production code, we write
+some tests.  We start by writing some browser tests - what I call `functional`
+tests, which simulate what an actual user would see and do.  We'll use `Selenium`,
+a test tool which actually opens up a real web browser, and then drives it like
+a real user, clicking on links and buttons, and checking what is shown on the
+screen.  These are the tests that will tell us whether or not our application
+behaves the way we want it to, from the user's point of view.
 
-simple commands to run each
+Once we've written our functional tests (which, incidentally, have forced us
+to thing through the way our application will work, from the point of view
+of the user - never a bad thing...) we can start to think about how we want
+to implement that functionality from a technical point of view.
+
+Thankfully we won't have to do too much difficult thinking, because the functional
+tests will be our guide - what do we have to do to get the functional tests to
+get a bit further towards passing?  How would we implement that?
+
+Once we've settled on the function or the class that will solve our first problem,
+we can write a unit test for it.  Again, it forces us to think about how it will
+work from the outside, before we write it.
 
 
 Some setup before we start
 --------------------------
 
-For functional testing, we'll be using the excellent Selenium
-A few Python modules we'll need::
+For functional testing, we'll be using the excellent Selenium.  Let's install that,
+and Django, and a couple of other Python modules we might need::
 
     easy_install django
     easy_install selenium
     easy_install pexpect
+    easy_install mock
 
 We also need the selenium java server::
 
@@ -108,22 +124,31 @@ We also need the selenium java server::
 
 
 
-Setting up our Django project
------------------------------
+Setting up our Django project, and settings.py
+----------------------------------------------
 
-We set up a django project, then within that our first application. It will
-be a simple application to handle polls, as per the official tutorial.
+Django structures websites as "projects", each of which can have several
+constituent "apps"... Ostensibly, the idea is that apps can be self-contained,
+so that you could use one app in several projects... Well, I've never actually
+seen that done, but it remains a nice way of splitting up your code.
 
-We use the django command line tools to set up the project and the app. At the
-command line::
+As per the official Django tutorial, we'll set up our project, and its first app,
+a simple application to handle online polls.
+
+Django has a couple of command line tools to set these up::
 
     django-admin startproject mysite
     mv selenium-server-standalone-2.6.0.jar mysite/
     cd mysite
     ./manage.py startapp polls
 
-Let's set up the easiest possible database - sqlite.  Find the file in mysite
-called ``settings.py``, and open it up in your favourite text editor...::
+
+Django stores project-wide settings in a file called `settings.py`. One of the key
+settings is what kind of database to use.  We'll use the easiest possible, sqlite.
+
+Find settings ``settings.py`` in the root of the new ``mysite`` folder, and
+open it up in your favourite text editor. Find the lines that mention `DATABASES`,
+and change them, like so::
 
     DATABASES = {
         'default': {
@@ -136,8 +161,8 @@ called ``settings.py``, and open it up in your favourite text editor...::
 Setting up the functional test runner
 -------------------------------------
 
-The next thing we need is a single command that will run all our FT's, 
-and a place to keep them all::
+The next thing we need is a single command that will run all our FT's, as well
+as a folder to keep them all in::
 
     mkdir fts
     touch fts/__init__.py
@@ -160,19 +185,29 @@ and the tests track the potential behaviour of a user.
 
 
 We have to go all the way to the second page of the django tutorial to see an
-actual user-visible part of the application:  the `django admin site`.
+actual user-visible part of the application:  the `django admin site`.  The 
+django admin site is a really useful part of Django, which generates a UI
+for site administrators to manage key bits of information in your database:
+user accounts, permissions groups, and, in our case, polls.  The admin site
+will let admin users create new polls, enter their descriptive text and start
+and end dates and so on, before they are published via the user-facing website.
+
+All this stuff comes 'for free' and automatically, just using the django admin
+site.  
+
+<link>
 
 So, our first user story is that the user should be able to log into the django
-admin site using an admin username and password, and that we can see the
-"Polls" application as one of the options.
+admin site using an admin username and password, and create a new poll.
 
 <pic>
 
-Open up a file inside the ``fts`` directory called ``test_polls_admin.py`` and
-enter the code below.
+Let's open up a file inside the ``fts`` directory called
+``test_polls_admin.py`` and enter the code below.
 
 Note the nice, descriptive names for the test functions, and the comments,
 which describe in human-readable text the actions that our user will take.
+Mhhhh, descriptive names.....
 
 It's always nice to give the user a name... Mine is called Gertrude...::
 
@@ -200,6 +235,8 @@ It's always nice to give the user a name... Mine is called Gertrude...::
 
             # So she clicks that too
             new_poll_link.click()
+
+            <to be added - creating new poll, with dates etc>
 
 
 
@@ -296,11 +333,27 @@ else, but for now, let's use that file::
     from polls.models import Poll
 
     class TestPollsModel(TestCase):
+        def test_creating_a_new_poll_and_saving_it_to_the_database(self):
+            # start by creating a new Poll object with its "question" set
+            poll = Poll()
+            poll.question = "What's up?"
 
-    def test_creating_a_poll(self):
-        poll = Poll()
-        poll.save()
-        self.assertEquals(poll.name, '')
+            # check we can save it to the database
+            poll.save()
+
+            # check we can adjust its publication date
+            poll.pub_date = datetime.datetime(2012, 12, 25)
+            poll.save()
+
+            # now check we can find it in the database again
+            all_polls_in_database = Poll.objects.all()
+            self.assertEquals(len(all_polls_in_database), 1)
+            only_poll_in_database = all_polls_in_database[0]
+            self.assertEquals(only_poll_in_database, poll)
+
+            # and check that it's saved its two attributes: question and pub_date
+            self.assertEquals(only_poll_in_database.question, "What's up?")
+            self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
 
 
 Unit tests are designed to check that the individual parts of our code work
@@ -308,8 +361,9 @@ the way we want them too.  Aside from being useful as tests, they're useful
 to help us think about the way we design our code... It forces us to think 
 about how things are going to work, from a slightly external point of view.
 
-Here we're creating a new Poll object, and making an assertion about what
-its default "name" attribute is. Let's run the unit tests::
+Here we're creating a new Poll object, and checking that we can save it to 
+the database, as well as checking that we can set and store a Poll's main two
+attributes: the question and the publication date.
 
     ./manage.py test
 
@@ -365,17 +419,22 @@ our tests further on::
 Running the tests again, we should see a slight change to the error message::
 
     ======================================================================
-    ERROR: test_creating_a_poll (polls.tests.TestPollsModel)
+    ERROR: test_creating_a_new_poll_and_saving_it_to_the_database (polls.tests.TestPollsModel)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/polls/tests.py", line 9, in test_creating_a_poll
-        self.assertEquals(poll.name, '')
-    AttributeError: 'Poll' object has no attribute 'name'
+      File "/home/harry/workspace/mysite/polls/tests.py", line 26, in test_creating_a_new_poll_and_saving_it_to_the_database
+        self.assertEquals(only_poll_in_database.question, "What's up?")
+    AttributeError: 'Poll' object has no attribute 'question'
 
-    ----------------------------------------------------------------------
+----------------------------------------------------------------------
 
-Notice that we've got the tests moving a tiny bit further forwards - from line 8 to
-line 9.  Now we need to give our poll a "name" attribute
+
+Notice that the tests have got all the way through to line 26, where we retrieve
+the object back out of the database, and it's telling us that we haven't saved the
+question attribute.  Let's fix that::
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
 
 LINKS
 =====
