@@ -8,7 +8,7 @@ class TestPollsAdmin(FunctionalTest):
         # Gertrude opens her web browser, and goes to the admin page
         self.browser.get(ROOT + '/admin/')
 
-        # She sees the familiar 'Django Administration' heading
+        # She sees the familiar 'Django administration' heading
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Django administration', body.text)
 
@@ -35,5 +35,13 @@ class TestPollsAdmin(FunctionalTest):
 
         # So she clicks that too
         new_poll_link.click()
+
+        #TODO:
+        # She sees some input fields for "Question" and "Publication date"
+
+        # She fills these in and clicks "Save" to create the new poll
+
+        # She is returned to the "Polls" listing, where she can see her
+        # new poll
 
 
