@@ -1,3 +1,16 @@
+Project Status
+--------------
+
+This project is still very much under construction.  Any feedback is welcome!
+
+Current progress
+
+    - started on django admin view (p. 2 of tutorial)
+
+    - started on django models  (p. 1 of tutorial)
+
+    - todo: views, forms (pp 3, 4)
+
 
 The Concept
 -----------
@@ -23,18 +36,29 @@ where you're scared to make changes, and you wished there had been better
 testing from the get-go.
 
 
+Who is this not for?
+--------------------
+
+If you know Python, Django and Selenium inside out, I suspect there's better things
+that you can do with your time. If you're a total beginner programmer, I also
+think it might not be quite right for you - you might do better to get a couple
+of other tutorials under your belt first.  If you're already a programmer, but
+have never tried Python, you'll be fine, but I thoroughly recommend the excellent
+"Dive into Python" for a bit more of an insight into the language itself.
+
+
 
 Why should you listen to me?
 ----------------------------
 
-I was lucky enough to get my first "proper" software development job with a
-bunch of Extreme Programming fanatics, who've thoroughly inculcated me into
-their cult of Test-Driven development.  Believe me when I say I'm contrary
-enough to have questioned every single practice, challenged every single
-decision, moaned about every extra minute spent doing "pointless" tests instead
-of writing "proper" code.  But I've come round to the idea now, and whenever
-I've had to go back to some of my old projects which don't have tests, boy have
-I ever realised the wisdom of the approach.
+I was lucky enough to get my first "proper" software development job about a
+year ago with a bunch of Extreme Programming fanatics, who've thoroughly
+inculcated me into their cult of Test-Driven development.  Believe me when I
+say I'm contrary enough to have questioned every single practice, challenged
+every single decision, moaned about every extra minute spent doing "pointless"
+tests instead of writing "proper" code.  But I've come round to the idea now,
+and whenever I've had to go back to some of my old projects which don't have
+tests, boy have I ever realised the wisdom of the approach.
 
 So, I've learnt from some really good people, and the learning process is still 
 fresh in my mind, so I hope I'll be good at communicating it.  Most importantly,
