@@ -37,9 +37,21 @@ class TestPollsAdmin(FunctionalTest):
         new_poll_link.click()
 
         #TODO:
-        # She sees some input fields for "Question" and "Publication date"
+        # She sees some input fields for "Question" and "Date published"
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Question:', body.text)
+        self.assertIn('Date published:', body.text)
 
-        # She fills these in and clicks "Save" to create the new poll
+        # She types in an interesting question for the Poll
+        question_field = self.browser.find_element_by_name('question')
+        question_field.send_keys("How awesome is Test-Driven Development?")
+
+        # She sets the date and time of publication - it'll be a new year's
+        # poll!
+        date_field = self.browser.find_element_by_name('pub_date')
+        date_field.send_keys('01/01/12')
+        time_field = self.browser.find_element_by_name('pub_date_1')
+        time_field.send_keys('00:00')
 
         # She is returned to the "Polls" listing, where she can see her
         # new poll

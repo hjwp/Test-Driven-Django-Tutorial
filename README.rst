@@ -12,6 +12,11 @@ Current progress
     - todo: views, forms (pp 3, 4)
 
 
+So it's not *really* ready for someone to use as a proper tutorial yet.  If
+you're impatient and you want to give it a go anyway, feel free!  The selenium
+test runner should be of some use at least...
+
+
 The Concept
 -----------
 
@@ -273,7 +278,7 @@ It's always nice to give the user a name... Mine is called Gertrude...::
             # So she clicks that too
             new_poll_link.click()
 
-            #TODO:
+            #TODO: (we'll write the rest of the test code later)
             # She sees some input fields for "Question" and "Publication date"
 
             # She fills these in and clicks "Save" to create the new poll
@@ -301,8 +306,8 @@ The test output will looks something like this::
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 12, in test_can_create_new_poll_via_admin_site
-        self.assertIn('Django Administration', body.text)
-    AssertionError: 'Django Administration' not found in u"It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\nStart your first app by running python mysite/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!"
+        self.assertIn('Django administration', body.text)
+    AssertionError: 'Django administration' not found in u"It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\nStart your first app by running python mysite/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!"
 
     ----------------------------------------------------------------------
     Ran 1 test in 4.754s
@@ -516,12 +521,14 @@ Does this mean our functional test will pass?::
     NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"Polls"}' 
 
 
-<syncdb!>
+<syncdb?? i think the test server doesn't need it??>
 
 
-Ah, not quite.  We still need to add the "Poll" model to the django admin site.
-To do that, we just need to create a file called ``admin.py`` to the ``polls``
-directory, with the following three lines::
+Ah, not quite.  The Django admin site doesn't automatically contain every model
+you define - you need to tell it which models you want to be able to administer.
+Let's "register" the "Poll" model. To do that, we just need to create a file
+called ``admin.py`` to the ``polls`` directory, with the following three
+lines::
 
     from polls.models import Poll
     from django.contrib import admin
@@ -529,6 +536,77 @@ directory, with the following three lines::
     admin.site.register(Poll)
 
 
+Now if run the tests again::
+
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 43, in test_can_create_new_poll_via_admin_site
+        self.assertIn('Date published:', body.text)
+    AssertionError: 'Date published:' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls \u203a Add poll\nAdd poll\nQuestion:\nPub date:\nDate:  Today | \nTime:  Now | '
+
+    ----------------------------------------------------------------------
+
+We get a little further - our tests are now complaining that they can't find the 
+words "Date published:".  If we look a little more closely in the output, we can
+see that the page actually had the words "Pub date:".
+
+That's because the django admin site automatically converts model fields to 
+text descriptions, by capitalising the first letter, and converting underscores
+to spaces.  This works well for the ``question`` field, but not so well for 
+``pub_date``.  Let's fix that.  First of all, as usual, we write a new unit
+test.  Let's add the following method to ``polls\tests.py``::
+
+    def test_verbose_name_for_pub_date(self):
+        for field in Poll._meta.fields:
+            if field.name ==  'pub_date':
+                self.assertEquals(field.verbose_name, 'Date published')
+
+
+To write this test, we have to grovel through the ``_meta`` attribute on the
+Poll class.  That's some Django-voodoo right there, and you may have to take my
+word for it, but it's a way to get at some of the information about the
+metadata on the model. There's more info here (James Bennet is one of the
+original Django developers, and wrote a book about it too)
+
+http://www.b-list.org/weblog/2007/nov/04/working-models/
+
+Anyway, running our tests with ``python manage.py test`` gives us our expected
+fail::
+
+    AssertionError: 'pub date' != 'Date published'
+
+And we can make the change in ``models.py``::
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField(verbose_name='Date published')
+
+
+<attempt to look at site manually:  barfs because need syncdb::
+
+    DatabaseError at /admin/polls/poll/
+
+    no such table: polls_poll
+
+    Request Method: 	GET
+    Request URL: 	http://localhost:8000/admin/polls/poll/
+    Django Version: 	1.3.1
+    Exception Type: 	DatabaseError
+    Exception Value: 	
+
+    no such table: polls_poll
+
+    Exception Location: 	/usr/local/lib/python2.7/dist-packages/django/db/backends/sqlite3/base.py in execute, line 234
+
+
+    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py syncdb
+    Creating tables ...
+    Creating table polls_poll
+    Installing custom SQL ...
+    Installing indexes ...
+    No fixtures found.
 
 LINKS
 =====
