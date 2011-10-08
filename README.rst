@@ -273,7 +273,7 @@ It's always nice to give the user a name... Mine is called Gertrude...::
 
             # She is taken to a new page on which she sees a link to "Add" a new
             # poll
-            new_poll_link = self.browser.find_element_by_link_text('Add')
+            new_poll_link = self.browser.find_element_by_link_text('Add poll')
 
             # So she clicks that too
             new_poll_link.click()
@@ -536,7 +536,19 @@ lines::
     admin.site.register(Poll)
 
 
-Now if run the tests again::
+Now if run the tests again... they pass!::
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 5.654s
+
+    OK
+
+Well, we've left a few items as "TODO", but at this point we're not quite 
+sure what we want... We know we want to be able to enter a new Poll object,
+but we're not quite sure exactly what we want things to look like.  At this
+point, it's worth having a little look around "manually".
+
+Let's start up the django test server, and go see 
 
     ======================================================================
     FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
