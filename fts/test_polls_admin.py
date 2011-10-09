@@ -20,22 +20,22 @@ class TestPollsAdmin(FunctionalTest):
         password_field.send_keys('adm1n')
         password_field.send_keys(Keys.RETURN)
 
-        # She now sees a hyperlink that says "Polls"
-        polls_link = self.browser.find_element_by_link_text('Polls')
+        # She now sees a couple of hyperlink that says "Polls"
+        polls_links = self.browser.find_elements_by_link_text('Polls')
+        self.assertEquals(len(polls_links), 2)
 
-        # So, she clicks it
-        polls_link.click()
+        # The second one looks more exciting, so she clicks it
+        polls_links[1].click()
 
-        # She is taken to a new page on which she sees a link to 'add' a new
-        # poll
+        # She is taken to the polls listing page, which shows she has
+        # no polls yet
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('0 polls', body.text)
+
+        # She sees a link to 'add' a new poll, so she clicks it
         new_poll_link = self.browser.find_element_by_link_text('Add poll')
-
-        # So she clicks that too
         new_poll_link.click()
 
-
-        #TODO:
-        return
         # She sees some input fields for "Question" and "Date published"
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Question:', body.text)
@@ -47,12 +47,19 @@ class TestPollsAdmin(FunctionalTest):
 
         # She sets the date and time of publication - it'll be a new year's
         # poll!
-        date_field = self.browser.find_element_by_name('pub_date')
+        date_field = self.browser.find_element_by_name('pub_date_0')
         date_field.send_keys('01/01/12')
         time_field = self.browser.find_element_by_name('pub_date_1')
         time_field.send_keys('00:00')
 
+        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+        save_button.click()
+
         # She is returned to the "Polls" listing, where she can see her
-        # new poll
+        # new poll, listed as a clickable link
+        new_poll_links = self.browser.find_elements_by_link_text(
+                "How awesome is Test-Driven Development?"
+        )
+        self.assertEquals(len(new_poll_links), 1)
 
 

@@ -262,20 +262,20 @@ It's always nice to give the user a name... Mine is called Gertrude...::
             password_field.send_keys('adm1n')
             password_field.send_keys(Keys.RETURN)
 
-            # She now sees a hyperlink that says "Polls"
-            polls_link = self.browser.find_element_by_link_text('Polls')
+            # She now sees a couple of hyperlink that says "Polls"
+            polls_links = self.browser.find_elements_by_link_text('Polls')
+            self.assertEquals(len(polls_links), 2)
 
-            # She sees a hyperlink that says "Polls"
-            polls_link = self.browser.find_element_by_link_text('Polls')
+            # The second one looks more exciting, so she clicks it
+            polls_links[1].click()
 
-            # So, she clicks it
-            polls_link.click()
+            # She is taken to the polls listing page, which shows she has
+            # no polls yet
+            body = self.browser.find_element_by_tag_name('body')
+            self.assertIn('0 polls', body.text)
 
-            # She is taken to a new page on which she sees a link to "Add" a new
-            # poll
+            # She sees a link to 'add' a new poll, so she clicks it
             new_poll_link = self.browser.find_element_by_link_text('Add poll')
-
-            # So she clicks that too
             new_poll_link.click()
 
             #TODO: (we'll write the rest of the test code later)
@@ -521,9 +521,6 @@ Does this mean our functional test will pass?::
     NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"Polls"}' 
 
 
-<syncdb?? i think the test server doesn't need it??>
-
-
 Ah, not quite.  The Django admin site doesn't automatically contain every model
 you define - you need to tell it which models you want to be able to administer.
 Let's "register" the "Poll" model. To do that, we just need to create a file
@@ -536,19 +533,167 @@ lines::
     admin.site.register(Poll)
 
 
-Now if run the tests again... they pass!::
+Let's try again...::
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 33, in test_can_create_new_poll_via_admin_site
+        self.assertIn('0 polls', body.text)
+    AssertionError: '0 polls' not found in u"DatabaseError at /admin/polls/poll/\nno such table: polls_poll\nRequest Method: GET\nRequest URL: http://127.0.0.1:8000/admin/polls/poll/\nDjango Version: 1.3.1\nException Type: DatabaseError\nException Value:\nno such table: polls_poll\[...]
+
+This traceback is a bit hard to read, so it may be worth going to take a look
+manually.  To run the django test server, type::
+    python manage.py runserver
+
+Then, open your web browser and go to ``http://localhost:8000/admin``.
+Follow the steps in the FT - click "Polls', and you should see an error
+message.  When Django encounters an error trying to render a page, it
+displays a page full of debugging information like this::
+
+    DatabaseError at /admin/polls/poll/
+
+    no such table: polls_poll
+
+    Request Method: 	GET
+    Request URL: 	http://localhost:8000/admin/polls/poll/
+    Django Version: 	1.3.1
+    Exception Type: 	DatabaseError
+    Exception Value: 	
+
+    no such table: polls_poll
+
+    Exception Location: 	/usr/local/lib/python2.7/dist-packages/django/db/backends/sqlite3/base.py in execute, line 234
+    Python Executable: 	/usr/bin/python
+    Python Version: 	2.7.1
+    [etc]
+
+
+When your application is ready to show to real users, you'll want to
+set ``DEBUG = False`` in your settings.py, because you don't want
+your users seeing that sort of information (django can email it to
+you instead).  In the meantime, it's very useful!
+
+Django is telling us it can't find a database table called ``poll_poll``.
+
+Django names tables using the convention ``appname_lowercasemodelname``,
+So this is the table for our Poll object, and we haven't told Django to 
+create it for us yet.  "What about the unit tests", I hear you ask, "they
+seemed to run fine?!"  Well, the Django unit test runner uses a different
+database to the production one, and it does a syncdb automatically.
+
+So we need to do it manually, each time we create a new object in the database::
+
+    python manage.py syncb
+
+    Creating tables ...
+    Creating table polls_poll
+    Installing custom SQL ...
+    Installing indexes ...
+    No fixtures found.
+
+Let's see if our tests now get a little further.::
 
     ----------------------------------------------------------------------
-    Ran 1 test in 5.654s
+    Ran 1 test in 5.843s
 
     OK
 
-Well, we've left a few items as "TODO", but at this point we're not quite 
-sure what we want... We know we want to be able to enter a new Poll object,
-but we're not quite sure exactly what we want things to look like.  At this
-point, it's worth having a little look around "manually".
 
-Let's start up the django test server, and go see 
+They sure do!  Hooray.  But, we still have a few items left as "TODO" in our
+tests.  At this point we may not be quite sure what we want though.  This is a
+good time to fire up the django dev server, and have a look around manually,
+to look for some inspiration on the next steps to take for our site.
+
+
+If you run ``python manage.py runserver`` and go look at the admin pages, and
+try and create a new Poll, you should see a menu a bit like this.
+
+Pretty neat, but `Pub date` isn't a very nice label for our publication date
+field.  Django normally generates labels for its admin fields automatically,
+by just taking the field name and capitalising it, converting underscores
+to spaces.  So that works well for ``question``, but not so well for ``pub_date``.
+
+So that's one thing we'll want to change.  Let's add a test for that to the end of
+our FT::
+
+        # She sees a link to 'add' a new poll, so she clicks it
+        new_poll_link = self.browser.find_element_by_link_text('Add poll')
+        new_poll_link.click()
+
+        # She sees some input fields for "Question" and "Date published"
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Question:', body.text)
+        self.assertIn('Date published:', body.text)
+
+
+If you try filling in a new Poll (delete it when you're done), and you don't
+fill in the 'time' field, you'll see that it's required.  So, in our test,
+we need to fill in `question`, `date`, and `time`.  In order to get Selenium
+to retrieve those fields, there are several options::
+
+    find_element_by_id 
+    find_element_by_xpath
+    find_element_by_link_text
+    find_element_by_name
+    find_element_by_tag_name
+    find_element_by_css_selector
+
+And several others - the Selenium Webdriver documentation is still a bit sparse,
+but you can look at the source code, and most of the methods have fairly self-
+explanatory names...
+
+http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
+
+In our case "name" is a useful way of finding fields, because it's usually associated
+with input fields from forms.  If you take a look at the HTML source for the django
+admin page for entering a new poll (either the raw source, or using a tool like Firebug, or
+developer tools in google chrome), you can find out that the 'name' for our three fields are
+`question`, `pub_date_0` and `pub_date_1`.  Let's use them in our FT::
+
+        # She sees some input fields for "Question" and "Date published"
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Question:', body.text)
+        self.assertIn('Date published:', body.text)
+
+        # She types in an interesting question for the Poll
+        question_field = self.browser.find_element_by_name('question')
+        question_field.send_keys("How awesome is Test-Driven Development?")
+
+        # She sets the date and time of publication - it'll be a new year's
+        # poll!
+        date_field = self.browser.find_element_by_name('pub_date_0')
+        date_field.send_keys('01/01/12')
+        time_field = self.browser.find_element_by_name('pub_date_1')
+        time_field.send_keys('00:00')
+
+
+We can also use the CSS selector to pick up the "Save" button::
+
+        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+        save_button.click()
+
+
+Finally, we'll want to have our test check that the new Poll appears on the listings
+page.  If you've entered a Poll, you'll have noticed that the polls are just described
+as "Poll object".  Django lets you give them more descriptive names, including
+any attribute of the object.  So let's say we want our polls listed by their
+question::
+
+        # She is returned to the "Polls" listing, where she can see her
+        # new poll, listed as a clickable link
+        new_poll_links = self.browser.find_elements_by_link_text(
+                "How awesome is Test-Driven Development?"
+        )
+        self.assertEquals(len(new_poll_links), 1)
+
+That's our FT finished.  If you've lost track in amongst all the copy & pasting,
+you can compare your version to mine, which is hosted here:
+https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_polls_admin.py
+
+
+Let's re-run our tests.  Here's our first expected failure, the fact that "Pub date"
+isn't the label we want for our field ("Date published")::
 
     ======================================================================
     FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
@@ -556,19 +701,25 @@ Let's start up the django test server, and go see
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 43, in test_can_create_new_poll_via_admin_site
         self.assertIn('Date published:', body.text)
+        django.kill() #TODO: doesn't kill child processes, fix
     AssertionError: 'Date published:' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls \u203a Add poll\nAdd poll\nQuestion:\nPub date:\nDate:  Today | \nTime:  Now | '
 
     ----------------------------------------------------------------------
 
-We get a little further - our tests are now complaining that they can't find the 
-words "Date published:".  If we look a little more closely in the output, we can
-see that the page actually had the words "Pub date:".
 
-That's because the django admin site automatically converts model fields to 
-text descriptions, by capitalising the first letter, and converting underscores
-to spaces.  This works well for the ``question`` field, but not so well for 
-``pub_date``.  Let's fix that.  First of all, as usual, we write a new unit
-test.  Let's add the following method to ``polls\tests.py``::
+**NB** 
+    if you get a different error, which looks like this::
+        AssertionError: '0 polls' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls\nSelect poll to change\nAdd poll\nAction:\n---------\nDelete selected polls\nGo 0 of 1 selected\nPoll\nPoll object\n1 poll'
+
+    It's because you've forgotten to tidy up after yourself while playing around with
+    the admin site.  Go back in and delete all the polls objects.
+    Alternatively, you can run ``python manage.py reset polls`` which will clear
+    down the polls table.  We'll look into making our FTs use a different database
+    in future.
+
+Django stores human-readable names for model attributes in a special attribute
+called `verbose_name`.  Let's write a unit test that checks the verbose name
+for our ``pub_date`` field.  Add the following method to ``polls\tests.py``::
 
     def test_verbose_name_for_pub_date(self):
         for field in Poll._meta.fields:
@@ -595,30 +746,77 @@ And we can make the change in ``models.py``::
         question = models.CharField(max_length=200)
         pub_date = models.DateTimeField(verbose_name='Date published')
 
+Re-running our functional tests, things have move on::
 
-<attempt to look at site manually:  barfs because need syncdb::
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 63, in test_can_create_new_poll_via_admin_site
+        self.assertEquals(len(new_poll_links), 1)
+    AssertionError: 0 != 1
 
-    DatabaseError at /admin/polls/poll/
+    ----------------------------------------------------------------------
 
-    no such table: polls_poll
+We're almost there - the FT is complaining it can't find a link to a Poll
+which has the text of our question.  To make this work, we need to tell
+Django how to print out a Poll object.  this happens in the ``__unicode__``
+method.  As usual, we unit test first, in this case it's a very simple one::
 
-    Request Method: 	GET
-    Request URL: 	http://localhost:8000/admin/polls/poll/
-    Django Version: 	1.3.1
-    Exception Type: 	DatabaseError
-    Exception Value: 	
+    def test_poll_objects_are_named_after_their_question(self):
+        p = Poll()
+        p.question = 'How is babby formed?'
+        self.assertEquals(unicode(p), 'How is babby formed?')
 
-    no such table: polls_poll
+Running the unit tests shows the following error::
 
-    Exception Location: 	/usr/local/lib/python2.7/dist-packages/django/db/backends/sqlite3/base.py in execute, line 234
+    ======================================================================
+    FAIL: test_poll_objects_are_named_after_their_question (polls.tests.TestPollsModel)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/polls/tests.py", line 37, in test_poll_objects_are_named_after_their_question
+        self.assertEquals(unicode(p), 'How is babby formed?')
+    AssertionError: u'Poll object' != 'How is babby formed?'
+
+    ----------------------------------------------------------------------
+
+And the fix is simple too - we define a ``__unicode__`` method on our Poll class,
+in ``models.py``::
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField(verbose_name='Date published')
+
+        def __unicode__(self):
+            return self.question
 
 
-    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py syncdb
-    Creating tables ...
-    Creating table polls_poll
-    Installing custom SQL ...
-    Installing indexes ...
-    No fixtures found.
+And you should now find that the unit tests pass::
+    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py test
+    Creating test database for alias 'default'...
+    .....................................................................................................................................................................................................................................................................................................................................
+    ----------------------------------------------------------------------
+    Ran 325 tests in 2.526s
+
+
+ Let's do a quick cleanup of our database::
+    python manage.py reset polls
+ <note - fix this, get FTs to use separate DB>
+
+ And now, our functional tests should pass::
+
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 7.065s
+
+    OK
+ 
+
+Hooray!  That's it, there's our first, well-tested, proper-TDD, Django model.
+
+Tune in next week for more!
+
+
 
 LINKS
 =====
