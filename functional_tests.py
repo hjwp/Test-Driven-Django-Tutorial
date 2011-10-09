@@ -26,7 +26,9 @@ def start_selenium_server():
 
 def start_django_server():
     print 'starting django test server'
-    django_server = subprocess.Popen('python manage.py runserver', shell=True)
+    django_server = subprocess.Popen(
+            ['python', 'manage.py', 'runserver', '--noreload']
+    )
     #dev server starts quickly, no need to check it's running
     print 'django test server started'
     return django_server
