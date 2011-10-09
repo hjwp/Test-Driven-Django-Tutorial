@@ -46,7 +46,7 @@ if __name__ == '__main__':
     django = start_django_server()
     run_all_functional_tests()
     selenium.terminate()
-    django.kill() #TODO: doesn't kill child processes, fix
+    django.kill()
 
 
 ROOT = 'http://127.0.0.1:8000'
