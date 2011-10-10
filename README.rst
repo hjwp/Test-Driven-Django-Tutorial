@@ -289,6 +289,7 @@ It's always nice to give the user a name... Mine is called Gertrude...::
 
 
 Let's try running our first test::
+
     ./functional_tests.py
 
 <pic>
@@ -370,8 +371,8 @@ but it can't find a link to administer "Polls".  So next we need to create our
 Polls object.
 
 
-Our first unit tests
---------------------
+Our first unit tests: testing a new "Poll" model
+------------------------------------------------
 
 The django unit test runner will automatically run any tests we put in
 ``tests.py``.  Later on, we might decide we want to put our tests somewhere
@@ -411,7 +412,7 @@ about how things are going to work, from a slightly external point of view.
 
 Here we're creating a new Poll object, and checking that we can save it to 
 the database, as well as checking that we can set and store a Poll's main two
-attributes: the question and the publication date.
+attributes: the question and the publication date.::
 
     ./manage.py test
 
@@ -484,7 +485,7 @@ question attribute.  Let's fix that::
     class Poll(models.Model):
         question = models.CharField(max_length=200)
 
-(note on max_length=200)?
+<(note on max_length=200)?>
 
 Now our tests get slightly further - they tell us we need to add a pub_date::
 
@@ -514,10 +515,15 @@ And run the tests again::
 
 
 Hooray!  The joy of that unbroken string of dots!  That lovely, understated "OK".
-Does this mean our functional test will pass?::
 
 
+Back to the functional tests: registering the model with the admin site
+-----------------------------------------------------------------------
 
+
+The unit tests all pass. Does this mean our functional test will pass?::
+
+    [...]
     NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"Polls"}' 
 
 
@@ -532,6 +538,9 @@ lines::
 
     admin.site.register(Poll)
 
+
+Exploring the site manually & running syncdb
+--------------------------------------------
 
 Let's try again...::
 
@@ -602,6 +611,9 @@ Let's see if our tests now get a little further.::
     OK
 
 
+Inspecting the admin site to decide what to test next
+-----------------------------------------------------
+
 They sure do!  Hooray.  But, we still have a few items left as "TODO" in our
 tests.  At this point we may not be quite sure what we want though.  This is a
 good time to fire up the django dev server, and have a look around manually,
@@ -610,6 +622,8 @@ to look for some inspiration on the next steps to take for our site.
 
 If you run ``python manage.py runserver`` and go look at the admin pages, and
 try and create a new Poll, you should see a menu a bit like this.
+
+<insert screenshot>
 
 Pretty neat, but `Pub date` isn't a very nice label for our publication date
 field.  Django normally generates labels for its admin fields automatically,
@@ -628,6 +642,10 @@ our FT::
         self.assertIn('Question:', body.text)
         self.assertIn('Date published:', body.text)
 
+
+
+More ways of finding elements on the page using Selenium
+--------------------------------------------------------
 
 If you try filling in a new Poll (delete it when you're done), and you don't
 fill in the 'time' field, you'll see that it's required.  So, in our test,
@@ -711,6 +729,7 @@ isn't the label we want for our field ("Date published")::
 
 **NB** 
     if you get a different error, which looks like this::
+
         AssertionError: '0 polls' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls\nSelect poll to change\nAdd poll\nAction:\n---------\nDelete selected polls\nGo 0 of 1 selected\nPoll\nPoll object\n1 poll'
 
     It's because you've forgotten to tidy up after yourself while playing around with
@@ -718,6 +737,10 @@ isn't the label we want for our field ("Date published")::
     Alternatively, you can run ``python manage.py reset polls`` which will clear
     down the polls table.  We'll look into making our FTs use a different database
     in future.
+
+
+Human-readable names for models and their attributes
+----------------------------------------------------
 
 Django stores human-readable names for model attributes in a special attribute
 called `verbose_name`.  Let's write a unit test that checks the verbose name
@@ -748,7 +771,7 @@ And we can make the change in ``models.py``::
         question = models.CharField(max_length=200)
         pub_date = models.DateTimeField(verbose_name='Date published')
 
-Re-running our functional tests, things have move on::
+Re-running our functional tests, things have moved on::
 
     ======================================================================
     FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)

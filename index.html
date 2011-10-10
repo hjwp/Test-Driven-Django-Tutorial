@@ -557,10 +557,10 @@ class TestPollsAdmin(FunctionalTest):
         # She is returned to the &quot;Polls&quot; listing, where she can see her
         # new poll
 </pre>
-<dl class="docutils">
-<dt>Let's try running our first test::</dt>
-<dd>./functional_tests.py</dd>
-</dl>
+<p>Let's try running our first test:</p>
+<pre class="literal-block">
+./functional_tests.py
+</pre>
 <p>&lt;pic&gt;</p>
 <p>The test output will looks something like this:</p>
 <pre class="literal-block">
@@ -636,8 +636,8 @@ Ran 1 test in 10.203s
 but it can't find a link to administer &quot;Polls&quot;.  So next we need to create our
 Polls object.</p>
 </div>
-<div class="section" id="our-first-unit-tests">
-<h1>Our first unit tests</h1>
+<div class="section" id="our-first-unit-tests-testing-a-new-poll-model">
+<h1>Our first unit tests: testing a new &quot;Poll&quot; model</h1>
 <p>The django unit test runner will automatically run any tests we put in
 <tt class="docutils literal">tests.py</tt>.  Later on, we might decide we want to put our tests somewhere
 else, but for now, let's use that file:</p>
@@ -674,9 +674,10 @@ to help us think about the way we design our code... It forces us to think
 about how things are going to work, from a slightly external point of view.</p>
 <p>Here we're creating a new Poll object, and checking that we can save it to
 the database, as well as checking that we can set and store a Poll's main two
-attributes: the question and the publication date.</p>
-<blockquote>
-./manage.py test</blockquote>
+attributes: the question and the publication date.:</p>
+<pre class="literal-block">
+./manage.py test
+</pre>
 <p>You should see an error like this:</p>
 <pre class="literal-block">
 File &quot;/usr/local/lib/python2.7/dist-packages/django/test/simple.py&quot;, line 35, in get_tests
@@ -741,7 +742,7 @@ question attribute.  Let's fix that:</p>
 class Poll(models.Model):
     question = models.CharField(max_length=200)
 </pre>
-<p>(note on max_length=200)?</p>
+<p>&lt;(note on max_length=200)?&gt;</p>
 <p>Now our tests get slightly further - they tell us we need to add a pub_date:</p>
 <pre class="literal-block">
 ======================================================================
@@ -767,9 +768,13 @@ Ran 323 tests in 2.402s
 
 OK
 </pre>
-<p>Hooray!  The joy of that unbroken string of dots!  That lovely, understated &quot;OK&quot;.
-Does this mean our functional test will pass?:</p>
+<p>Hooray!  The joy of that unbroken string of dots!  That lovely, understated &quot;OK&quot;.</p>
+</div>
+<div class="section" id="back-to-the-functional-tests-registering-the-model-with-the-admin-site">
+<h1>Back to the functional tests: registering the model with the admin site</h1>
+<p>The unit tests all pass. Does this mean our functional test will pass?:</p>
 <pre class="literal-block">
+[...]
 NoSuchElementException: Message: u'Unable to locate element: {&quot;method&quot;:&quot;link text&quot;,&quot;selector&quot;:&quot;Polls&quot;}'
 </pre>
 <p>Ah, not quite.  The Django admin site doesn't automatically contain every model
@@ -783,6 +788,9 @@ from django.contrib import admin
 
 admin.site.register(Poll)
 </pre>
+</div>
+<div class="section" id="exploring-the-site-manually-running-syncdb">
+<h1>Exploring the site manually &amp; running syncdb</h1>
 <p>Let's try again...:</p>
 <pre class="literal-block">
 ======================================================================
@@ -847,12 +855,16 @@ Ran 1 test in 5.843s
 
 OK
 </pre>
+</div>
+<div class="section" id="inspecting-the-admin-site-to-decide-what-to-test-next">
+<h1>Inspecting the admin site to decide what to test next</h1>
 <p>They sure do!  Hooray.  But, we still have a few items left as &quot;TODO&quot; in our
 tests.  At this point we may not be quite sure what we want though.  This is a
 good time to fire up the django dev server, and have a look around manually,
 to look for some inspiration on the next steps to take for our site.</p>
 <p>If you run <tt class="docutils literal">python manage.py runserver</tt> and go look at the admin pages, and
 try and create a new Poll, you should see a menu a bit like this.</p>
+<p>&lt;insert screenshot&gt;</p>
 <p>Pretty neat, but <cite>Pub date</cite> isn't a very nice label for our publication date
 field.  Django normally generates labels for its admin fields automatically,
 by just taking the field name and capitalising it, converting underscores
@@ -869,6 +881,9 @@ body = self.browser.find_element_by_tag_name('body')
 self.assertIn('Question:', body.text)
 self.assertIn('Date published:', body.text)
 </pre>
+</div>
+<div class="section" id="more-ways-of-finding-elements-on-the-page-using-selenium">
+<h1>More ways of finding elements on the page using Selenium</h1>
 <p>If you try filling in a new Poll (delete it when you're done), and you don't
 fill in the 'time' field, you'll see that it's required.  So, in our test,
 we need to fill in <cite>question</cite>, <cite>date</cite>, and <cite>time</cite>.  In order to get Selenium
@@ -944,10 +959,10 @@ AssertionError: 'Date published:' not found in u'Django administration\nWelcome,
 </pre>
 <dl class="docutils">
 <dt><strong>NB</strong></dt>
-<dd><dl class="first docutils">
-<dt>if you get a different error, which looks like this::</dt>
-<dd>AssertionError: '0 polls' not found in u'Django administrationnWelcome, admin. Change password / Log outnHome u203a Polls u203a PollsnSelect poll to changenAdd pollnAction:n---------nDelete selected pollsnGo 0 of 1 selectednPollnPoll objectn1 poll'</dd>
-</dl>
+<dd><p class="first">if you get a different error, which looks like this:</p>
+<pre class="literal-block">
+AssertionError: '0 polls' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls\nSelect poll to change\nAdd poll\nAction:\n---------\nDelete selected polls\nGo 0 of 1 selected\nPoll\nPoll object\n1 poll'
+</pre>
 <p class="last">It's because you've forgotten to tidy up after yourself while playing around with
 the admin site.  Go back in and delete all the polls objects.
 Alternatively, you can run <tt class="docutils literal">python manage.py reset polls</tt> which will clear
@@ -955,6 +970,9 @@ down the polls table.  We'll look into making our FTs use a different database
 in future.</p>
 </dd>
 </dl>
+</div>
+<div class="section" id="human-readable-names-for-models-and-their-attributes">
+<h1>Human-readable names for models and their attributes</h1>
 <p>Django stores human-readable names for model attributes in a special attribute
 called <cite>verbose_name</cite>.  Let's write a unit test that checks the verbose name
 for our <tt class="docutils literal">pub_date</tt> field.  Add the following method to <tt class="docutils literal">polls\tests.py</tt>:</p>
