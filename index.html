@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.8.1: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
 <title></title>
 <style type="text/css">
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 7056 2011-06-17 10:50:48Z milde $
+:Id: $Id: html4css1.css 6253 2010-03-02 00:24:53Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
@@ -46,10 +46,6 @@ blockquote.epigraph {
 
 dl.docutils dd {
   margin-bottom: 0.5em }
-
-object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
-  overflow: hidden;
-}
 
 /* Uncomment (and remove this text!) to get bold-faced definition list terms
 dl.docutils dt {
@@ -189,7 +185,7 @@ img.align-center, .figure.align-center, object.align-center {
 
 /* reset inner alignment in figures */
 div.align-right {
-  text-align: inherit }
+  text-align: left }
 
 /* div.align-center * { */
 /*   text-align: left } */
@@ -249,7 +245,7 @@ pre.address {
   margin-top: 0 ;
   font: inherit }
 
-pre.literal-block, pre.doctest-block, pre.math {
+pre.literal-block, pre.doctest-block {
   margin-left: 2em ;
   margin-right: 2em }
 
@@ -317,6 +313,21 @@ ul.auto-toc {
 <div class="document">
 
 
+<div class="section" id="project-status">
+<h1>Project Status</h1>
+<p>This project is still very much under construction.  Any feedback is welcome!</p>
+<p>Current progress</p>
+<blockquote>
+<ul class="simple">
+<li>started on django admin view (p. 2 of tutorial)</li>
+<li>started on django models  (p. 1 of tutorial)</li>
+<li>todo: views, forms (pp 3, 4)</li>
+</ul>
+</blockquote>
+<p>So it's not <em>really</em> ready for someone to use as a proper tutorial yet.  If
+you're impatient and you want to give it a go anyway, feel free!  The selenium
+test runner should be of some use at least...</p>
+</div>
 <div class="section" id="the-concept">
 <h1>The Concept</h1>
 <p>This idea is to provide an introduction to Test-Driven web development using
@@ -336,16 +347,25 @@ of, working on a project where complexity has started to get the better of you,
 where you're scared to make changes, and you wished there had been better
 testing from the get-go.</p>
 </div>
+<div class="section" id="who-is-this-not-for">
+<h1>Who is this not for?</h1>
+<p>If you know Python, Django and Selenium inside out, I suspect there's better things
+that you can do with your time. If you're a total beginner programmer, I also
+think it might not be quite right for you - you might do better to get a couple
+of other tutorials under your belt first.  If you're already a programmer, but
+have never tried Python, you'll be fine, but I thoroughly recommend the excellent
+&quot;Dive into Python&quot; for a bit more of an insight into the language itself.</p>
+</div>
 <div class="section" id="why-should-you-listen-to-me">
 <h1>Why should you listen to me?</h1>
-<p>I was lucky enough to get my first &quot;proper&quot; software development job with a
-bunch of Extreme Programming fanatics, who've thoroughly inculcated me into
-their cult of Test-Driven development.  Believe me when I say I'm contrary
-enough to have questioned every single practice, challenged every single
-decision, moaned about every extra minute spent doing &quot;pointless&quot; tests instead
-of writing &quot;proper&quot; code.  But I've come round to the idea now, and whenever
-I've had to go back to some of my old projects which don't have tests, boy have
-I ever realised the wisdom of the approach.</p>
+<p>I was lucky enough to get my first &quot;proper&quot; software development job about a
+year ago with a bunch of Extreme Programming fanatics, who've thoroughly
+inculcated me into their cult of Test-Driven development.  Believe me when I
+say I'm contrary enough to have questioned every single practice, challenged
+every single decision, moaned about every extra minute spent doing &quot;pointless&quot;
+tests instead of writing &quot;proper&quot; code.  But I've come round to the idea now,
+and whenever I've had to go back to some of my old projects which don't have
+tests, boy have I ever realised the wisdom of the approach.</p>
 <p>So, I've learnt from some really good people, and the learning process is still
 fresh in my mind, so I hope I'll be good at communicating it.  Most importantly,
 I still have the passion of a recent convert, so I hope I'll be good at conveying
@@ -433,10 +453,10 @@ mv selenium-server-standalone-2.6.0.jar mysite/
 cd mysite
 ./manage.py startapp polls
 </pre>
-<p>Django stores project-wide settings in a file called <cite>settings.py</cite>. One of the key
+<p>Django stores project-wide settings in a file called <tt class="docutils literal">settings.py</tt>. One of the key
 settings is what kind of database to use.  We'll use the easiest possible, sqlite.</p>
 <p>Find settings <tt class="docutils literal">settings.py</tt> in the root of the new <tt class="docutils literal">mysite</tt> folder, and
-open it up in your favourite text editor. Find the lines that mention <cite>DATABASES</cite>,
+open it up in your favourite text editor. Find the lines that mention <tt class="docutils literal">DATABASES</tt>,
 and change them, like so:</p>
 <pre class="literal-block">
 DATABASES = {
@@ -497,23 +517,41 @@ class TestPollsAdmin(FunctionalTest):
         # Gertrude opens her web browser, and goes to the admin page
         self.browser.get(ROOT + '/admin/')
 
-        # She sees the familiar 'Django Administration' heading
+        # She sees the familiar 'Django administration' heading
         body = self.browser.find_element_by_tag_name('body')
-        self.assertIn('Django Administration', body.text)
+        self.assertIn('Django administration', body.text)
 
-        # She sees a hyperlink that says &quot;Polls&quot;
-        polls_link = self.browser.find_element_by_link_text('Polls')
+        # She types in her username and passwords and hits return
+        username_field = self.browser.find_element_by_name('username')
+        username_field.send_keys('admin')
 
-        # So, she clicks it
-        polls_link.click()
+        password_field = self.browser.find_element_by_name('password')
+        password_field.send_keys('adm1n')
+        password_field.send_keys(Keys.RETURN)
 
-        # She is taken to a new page on which she sees a link to &quot;Add poll&quot;
+        # She now sees a couple of hyperlink that says &quot;Polls&quot;
+        polls_links = self.browser.find_elements_by_link_text('Polls')
+        self.assertEquals(len(polls_links), 2)
+
+        # The second one looks more exciting, so she clicks it
+        polls_links[1].click()
+
+        # She is taken to the polls listing page, which shows she has
+        # no polls yet
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('0 polls', body.text)
+
+        # She sees a link to 'add' a new poll, so she clicks it
         new_poll_link = self.browser.find_element_by_link_text('Add poll')
-
-        # So she clicks that too
         new_poll_link.click()
 
-        &lt;to be added - creating new poll, with dates etc&gt;
+        #TODO: (we'll write the rest of the test code later)
+        # She sees some input fields for &quot;Question&quot; and &quot;Publication date&quot;
+
+        # She fills these in and clicks &quot;Save&quot; to create the new poll
+
+        # She is returned to the &quot;Polls&quot; listing, where she can see her
+        # new poll
 </pre>
 <dl class="docutils">
 <dt>Let's try running our first test::</dt>
@@ -533,8 +571,8 @@ FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
   File &quot;/home/harry/workspace/mysite/fts/test_polls_admin.py&quot;, line 12, in test_can_create_new_poll_via_admin_site
-    self.assertIn('Django Administration', body.text)
-AssertionError: 'Django Administration' not found in u&quot;It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\nStart your first app by running python mysite/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!&quot;
+    self.assertIn('Django administration', body.text)
+AssertionError: 'Django administration' not found in u&quot;It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\nStart your first app by running python mysite/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!&quot;
 
 ----------------------------------------------------------------------
 Ran 1 test in 4.754s
@@ -557,8 +595,8 @@ page two of the official django tutorial:</p>
   admin
 </pre>
 <p>When we run the syncdb, we'll need to enter a username and password. Let's use
-the ultra-secure  <cite>admin</cite> and <cite>adm1n</cite>.</p>
-<p>In our <cite>urls.py</cite>, we'll be looking to uncomment these two lines:</p>
+the ultra-secure  <tt class="docutils literal">admin</tt> and <tt class="docutils literal">adm1n</tt>.</p>
+<p>In our <tt class="docutils literal">urls.py</tt>, we'll be looking to uncomment these two lines:</p>
 <pre class="literal-block">
 from django.contrib import admin
 admin.autodiscover()
@@ -597,7 +635,7 @@ Polls object.</p>
 <div class="section" id="our-first-unit-tests">
 <h1>Our first unit tests</h1>
 <p>The django unit test runner will automatically run any tests we put in
-<cite>tests.py</cite>.  Later on, we might decide we want to put our tests somewhere
+<tt class="docutils literal">tests.py</tt>.  Later on, we might decide we want to put our tests somewhere
 else, but for now, let's use that file:</p>
 <pre class="literal-block">
 from django.test import TestCase
@@ -647,7 +685,7 @@ ImportError: cannot import name Poll
 test to import.  In TDD, once we've got a test that fails, we're finally allowed
 to write some &quot;real&quot; code.  But only the minimum required to get the tests to get
 a tiny bit further on!</p>
-<p>So let's create a minimal Poll class, in <cite>polls/models.py</cite>:</p>
+<p>So let's create a minimal Poll class, in <tt class="docutils literal">polls/models.py</tt>:</p>
 <pre class="literal-block">
 from django.db import models
 
@@ -730,22 +768,295 @@ Does this mean our functional test will pass?:</p>
 <pre class="literal-block">
 NoSuchElementException: Message: u'Unable to locate element: {&quot;method&quot;:&quot;link text&quot;,&quot;selector&quot;:&quot;Polls&quot;}'
 </pre>
-<p>&lt;syncdb!&gt;</p>
-<p>Ah, not quite.  We still need to add the &quot;Poll&quot; model to the django admin site.
-To do that, we just need to create a file called <tt class="docutils literal">admin.py</tt> to the <tt class="docutils literal">polls</tt>
-directory, with the following three lines:</p>
+<p>Ah, not quite.  The Django admin site doesn't automatically contain every model
+you define - you need to tell it which models you want to be able to administer.
+Let's &quot;register&quot; the &quot;Poll&quot; model. To do that, we just need to create a file
+called <tt class="docutils literal">admin.py</tt> to the <tt class="docutils literal">polls</tt> directory, with the following three
+lines:</p>
 <pre class="literal-block">
 from polls.models import Poll
 from django.contrib import admin
 
 admin.site.register(Poll)
 </pre>
+<p>Let's try again...:</p>
+<pre class="literal-block">
+======================================================================
+FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;/home/harry/workspace/mysite/fts/test_polls_admin.py&quot;, line 33, in test_can_create_new_poll_via_admin_site
+    self.assertIn('0 polls', body.text)
+AssertionError: '0 polls' not found in u&quot;DatabaseError at /admin/polls/poll/\nno such table: polls_poll\nRequest Method: GET\nRequest URL: http://127.0.0.1:8000/admin/polls/poll/\nDjango Version: 1.3.1\nException Type: DatabaseError\nException Value:\nno such table: polls_poll\[...]
+</pre>
+<p>This traceback is a bit hard to read, so it may be worth going to take a look
+manually.  To run the django test server, type:</p>
+<div class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">README.rst</tt>, line 548)</p>
+Unexpected indentation.</div>
+<pre class="literal-block">
+python manage.py runserver
+</pre>
+<p>Then, open your web browser and go to <tt class="docutils literal"><span class="pre">http://localhost:8000/admin</span></tt>.
+Follow the steps in the FT - click &quot;Polls', and you should see an error
+message.  When Django encounters an error trying to render a page, it
+displays a page full of debugging information like this:</p>
+<pre class="literal-block">
+DatabaseError at /admin/polls/poll/
+
+no such table: polls_poll
+
+Request Method:     GET
+Request URL:        http://localhost:8000/admin/polls/poll/
+Django Version:     1.3.1
+Exception Type:     DatabaseError
+Exception Value:
+
+no such table: polls_poll
+
+Exception Location:         /usr/local/lib/python2.7/dist-packages/django/db/backends/sqlite3/base.py in execute, line 234
+Python Executable:  /usr/bin/python
+Python Version:     2.7.1
+[etc]
+</pre>
+<p>When your application is ready to show to real users, you'll want to
+set <tt class="docutils literal">DEBUG = False</tt> in your settings.py, because you don't want
+your users seeing that sort of information (django can email it to
+you instead).  In the meantime, it's very useful!</p>
+<p>Django is telling us it can't find a database table called <tt class="docutils literal">poll_poll</tt>.</p>
+<p>Django names tables using the convention <tt class="docutils literal">appname_lowercasemodelname</tt>,
+So this is the table for our Poll object, and we haven't told Django to
+create it for us yet.  &quot;What about the unit tests&quot;, I hear you ask, &quot;they
+seemed to run fine?!&quot;  Well, the Django unit test runner uses a different
+database to the production one, and it does a syncdb automatically.</p>
+<p>So we need to do it manually, each time we create a new object in the database:</p>
+<pre class="literal-block">
+python manage.py syncb
+
+Creating tables ...
+Creating table polls_poll
+Installing custom SQL ...
+Installing indexes ...
+No fixtures found.
+</pre>
+<p>Let's see if our tests now get a little further.:</p>
+<pre class="literal-block">
+----------------------------------------------------------------------
+Ran 1 test in 5.843s
+
+OK
+</pre>
+<p>They sure do!  Hooray.  But, we still have a few items left as &quot;TODO&quot; in our
+tests.  At this point we may not be quite sure what we want though.  This is a
+good time to fire up the django dev server, and have a look around manually,
+to look for some inspiration on the next steps to take for our site.</p>
+<p>If you run <tt class="docutils literal">python manage.py runserver</tt> and go look at the admin pages, and
+try and create a new Poll, you should see a menu a bit like this.</p>
+<p>Pretty neat, but <cite>Pub date</cite> isn't a very nice label for our publication date
+field.  Django normally generates labels for its admin fields automatically,
+by just taking the field name and capitalising it, converting underscores
+to spaces.  So that works well for <tt class="docutils literal">question</tt>, but not so well for <tt class="docutils literal">pub_date</tt>.</p>
+<p>So that's one thing we'll want to change.  Let's add a test for that to the end of
+our FT:</p>
+<pre class="literal-block">
+# She sees a link to 'add' a new poll, so she clicks it
+new_poll_link = self.browser.find_element_by_link_text('Add poll')
+new_poll_link.click()
+
+# She sees some input fields for &quot;Question&quot; and &quot;Date published&quot;
+body = self.browser.find_element_by_tag_name('body')
+self.assertIn('Question:', body.text)
+self.assertIn('Date published:', body.text)
+</pre>
+<p>If you try filling in a new Poll (delete it when you're done), and you don't
+fill in the 'time' field, you'll see that it's required.  So, in our test,
+we need to fill in <cite>question</cite>, <cite>date</cite>, and <cite>time</cite>.  In order to get Selenium
+to retrieve those fields, there are several options:</p>
+<pre class="literal-block">
+find_element_by_id
+find_element_by_xpath
+find_element_by_link_text
+find_element_by_name
+find_element_by_tag_name
+find_element_by_css_selector
+</pre>
+<p>And several others - the Selenium Webdriver documentation is still a bit sparse,
+but you can look at the source code, and most of the methods have fairly self-
+explanatory names...</p>
+<p><a class="reference external" href="http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py">http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py</a></p>
+<p>In our case &quot;name&quot; is a useful way of finding fields, because it's usually associated
+with input fields from forms.  If you take a look at the HTML source for the django
+admin page for entering a new poll (either the raw source, or using a tool like Firebug, or
+developer tools in google chrome), you can find out that the 'name' for our three fields are
+<cite>question</cite>, <cite>pub_date_0</cite> and <cite>pub_date_1</cite>.  Let's use them in our FT:</p>
+<pre class="literal-block">
+# She sees some input fields for &quot;Question&quot; and &quot;Date published&quot;
+body = self.browser.find_element_by_tag_name('body')
+self.assertIn('Question:', body.text)
+self.assertIn('Date published:', body.text)
+
+# She types in an interesting question for the Poll
+question_field = self.browser.find_element_by_name('question')
+question_field.send_keys(&quot;How awesome is Test-Driven Development?&quot;)
+
+# She sets the date and time of publication - it'll be a new year's
+# poll!
+date_field = self.browser.find_element_by_name('pub_date_0')
+date_field.send_keys('01/01/12')
+time_field = self.browser.find_element_by_name('pub_date_1')
+time_field.send_keys('00:00')
+</pre>
+<p>We can also use the CSS selector to pick up the &quot;Save&quot; button:</p>
+<pre class="literal-block">
+save_button = self.browser.find_element_by_css_selector(&quot;input[value='Save']&quot;)
+save_button.click()
+</pre>
+<p>Finally, we'll want to have our test check that the new Poll appears on the listings
+page.  If you've entered a Poll, you'll have noticed that the polls are just described
+as &quot;Poll object&quot;.  Django lets you give them more descriptive names, including
+any attribute of the object.  So let's say we want our polls listed by their
+question:</p>
+<pre class="literal-block">
+# She is returned to the &quot;Polls&quot; listing, where she can see her
+# new poll, listed as a clickable link
+new_poll_links = self.browser.find_elements_by_link_text(
+        &quot;How awesome is Test-Driven Development?&quot;
+)
+self.assertEquals(len(new_poll_links), 1)
+</pre>
+<p>That's our FT finished.  If you've lost track in amongst all the copy &amp; pasting,
+you can compare your version to mine, which is hosted here:
+<a class="reference external" href="https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_polls_admin.py">https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_polls_admin.py</a></p>
+<p>Let's re-run our tests.  Here's our first expected failure, the fact that &quot;Pub date&quot;
+isn't the label we want for our field (&quot;Date published&quot;):</p>
+<pre class="literal-block">
+======================================================================
+FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;/home/harry/workspace/mysite/fts/test_polls_admin.py&quot;, line 43, in test_can_create_new_poll_via_admin_site
+    self.assertIn('Date published:', body.text)
+    django.kill() #TODO: doesn't kill child processes, fix
+AssertionError: 'Date published:' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls \u203a Add poll\nAdd poll\nQuestion:\nPub date:\nDate:  Today | \nTime:  Now | '
+
+----------------------------------------------------------------------
+</pre>
+<dl class="docutils">
+<dt><strong>NB</strong></dt>
+<dd><dl class="first docutils">
+<dt>if you get a different error, which looks like this::</dt>
+<dd>AssertionError: '0 polls' not found in u'Django administrationnWelcome, admin. Change password / Log outnHome u203a Polls u203a PollsnSelect poll to changenAdd pollnAction:n---------nDelete selected pollsnGo 0 of 1 selectednPollnPoll objectn1 poll'</dd>
+</dl>
+<p class="last">It's because you've forgotten to tidy up after yourself while playing around with
+the admin site.  Go back in and delete all the polls objects.
+Alternatively, you can run <tt class="docutils literal">python manage.py reset polls</tt> which will clear
+down the polls table.  We'll look into making our FTs use a different database
+in future.</p>
+</dd>
+</dl>
+<p>Django stores human-readable names for model attributes in a special attribute
+called <cite>verbose_name</cite>.  Let's write a unit test that checks the verbose name
+for our <tt class="docutils literal">pub_date</tt> field.  Add the following method to <tt class="docutils literal">polls\tests.py</tt>:</p>
+<pre class="literal-block">
+def test_verbose_name_for_pub_date(self):
+    for field in Poll._meta.fields:
+        if field.name ==  'pub_date':
+            self.assertEquals(field.verbose_name, 'Date published')
+</pre>
+<p>To write this test, we have to grovel through the <tt class="docutils literal">_meta</tt> attribute on the
+Poll class.  That's some Django-voodoo right there, and you may have to take my
+word for it, but it's a way to get at some of the information about the
+metadata on the model. There's more info here (James Bennet is one of the
+original Django developers, and wrote a book about it too)</p>
+<p><a class="reference external" href="http://www.b-list.org/weblog/2007/nov/04/working-models/">http://www.b-list.org/weblog/2007/nov/04/working-models/</a></p>
+<p>Anyway, running our tests with <tt class="docutils literal">python manage.py test</tt> gives us our expected
+fail:</p>
+<pre class="literal-block">
+AssertionError: 'pub date' != 'Date published'
+</pre>
+<p>And we can make the change in <tt class="docutils literal">models.py</tt>:</p>
+<pre class="literal-block">
+class Poll(models.Model):
+    question = models.CharField(max_length=200)
+    pub_date = models.DateTimeField(verbose_name='Date published')
+</pre>
+<p>Re-running our functional tests, things have move on:</p>
+<pre class="literal-block">
+======================================================================
+FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;/home/harry/workspace/mysite/fts/test_polls_admin.py&quot;, line 63, in test_can_create_new_poll_via_admin_site
+    self.assertEquals(len(new_poll_links), 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+</pre>
+<p>We're almost there - the FT is complaining it can't find a link to a Poll
+which has the text of our question.  To make this work, we need to tell
+Django how to print out a Poll object.  this happens in the <tt class="docutils literal">__unicode__</tt>
+method.  As usual, we unit test first, in this case it's a very simple one:</p>
+<pre class="literal-block">
+def test_poll_objects_are_named_after_their_question(self):
+    p = Poll()
+    p.question = 'How is babby formed?'
+    self.assertEquals(unicode(p), 'How is babby formed?')
+</pre>
+<p>Running the unit tests shows the following error:</p>
+<pre class="literal-block">
+======================================================================
+FAIL: test_poll_objects_are_named_after_their_question (polls.tests.TestPollsModel)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File &quot;/home/harry/workspace/mysite/polls/tests.py&quot;, line 37, in test_poll_objects_are_named_after_their_question
+    self.assertEquals(unicode(p), 'How is babby formed?')
+AssertionError: u'Poll object' != 'How is babby formed?'
+
+----------------------------------------------------------------------
+</pre>
+<p>And the fix is simple too - we define a <tt class="docutils literal">__unicode__</tt> method on our Poll class,
+in <tt class="docutils literal">models.py</tt>:</p>
+<pre class="literal-block">
+class Poll(models.Model):
+    question = models.CharField(max_length=200)
+    pub_date = models.DateTimeField(verbose_name='Date published')
+
+    def __unicode__(self):
+        return self.question
+</pre>
+<dl class="docutils">
+<dt>And you should now find that the unit tests pass::</dt>
+<dd><blockquote class="first">
+<a class="reference external" href="mailto:harry&#64;harry-laptop">harry&#64;harry-laptop</a>:~/workspace/mysite:master$ ./manage.py test
+Creating test database for alias 'default'...
+.....................................................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 325 tests in 2.526s</blockquote>
+<dl class="docutils">
+<dt>Let's do a quick cleanup of our database::</dt>
+<dd>python manage.py reset polls</dd>
+</dl>
+<div class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">README.rst</tt>, line 805)</p>
+Definition list ends without a blank line; unexpected unindent.</div>
+<p>&lt;note - fix this, get FTs to use separate DB&gt;</p>
+<p>And now, our functional tests should pass:</p>
+<pre class="last literal-block">
+----------------------------------------------------------------------
+Ran 1 test in 7.065s
+
+OK
+</pre>
+</dd>
+</dl>
+<p>Hooray!  That's it, there's our first, well-tested, proper-TDD, Django model.</p>
+<p>Tune in next week for more!</p>
 <div class="section" id="links">
 <h2>LINKS</h2>
 <p><a class="reference external" href="https://docs.djangoproject.com/en/dev/intro/tutorial02/">https://docs.djangoproject.com/en/dev/intro/tutorial02/</a></p>
-<p><a class="reference external" href="http://pypi.python.org/pypi/selenium">http://pypi.python.org/pypi/selenium</a>
-<a class="reference external" href="http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py">http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py</a>
-<a class="reference external" href="http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py">http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py</a></p>
+<p><a class="reference external" href="http://pypi.python.org/pypi/selenium">http://pypi.python.org/pypi/selenium</a></p>
+<p><a class="reference external" href="http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py">http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py</a></p>
+<p><a class="reference external" href="http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py">http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py</a></p>
 </div>
 </div>
 </div>

@@ -534,6 +534,7 @@ lines::
 
 
 Let's try again...::
+
     ======================================================================
     FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
