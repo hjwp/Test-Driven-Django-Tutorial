@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.8.1: http://docutils.sourceforge.net/" />
 <title></title>
 <style type="text/css">
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 6253 2010-03-02 00:24:53Z milde $
+:Id: $Id: html4css1.css 7056 2011-06-17 10:50:48Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
@@ -46,6 +46,10 @@ blockquote.epigraph {
 
 dl.docutils dd {
   margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
 
 /* Uncomment (and remove this text!) to get bold-faced definition list terms
 dl.docutils dt {
@@ -185,7 +189,7 @@ img.align-center, .figure.align-center, object.align-center {
 
 /* reset inner alignment in figures */
 div.align-right {
-  text-align: left }
+  text-align: inherit }
 
 /* div.align-center * { */
 /*   text-align: left } */
@@ -245,7 +249,7 @@ pre.address {
   margin-top: 0 ;
   font: inherit }
 
-pre.literal-block, pre.doctest-block {
+pre.literal-block, pre.doctest-block, pre.math {
   margin-left: 2em ;
   margin-right: 2em }
 
@@ -791,9 +795,6 @@ AssertionError: '0 polls' not found in u&quot;DatabaseError at /admin/polls/poll
 </pre>
 <p>This traceback is a bit hard to read, so it may be worth going to take a look
 manually.  To run the django test server, type:</p>
-<div class="system-message">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">README.rst</tt>, line 548)</p>
-Unexpected indentation.</div>
 <pre class="literal-block">
 python manage.py runserver
 </pre>
@@ -1024,31 +1025,26 @@ class Poll(models.Model):
     def __unicode__(self):
         return self.question
 </pre>
-<dl class="docutils">
-<dt>And you should now find that the unit tests pass::</dt>
-<dd><blockquote class="first">
-<a class="reference external" href="mailto:harry&#64;harry-laptop">harry&#64;harry-laptop</a>:~/workspace/mysite:master$ ./manage.py test
+<p>And you should now find that the unit tests pass:</p>
+<pre class="literal-block">
+harry&#64;harry-laptop:~/workspace/mysite:master$ ./manage.py test
 Creating test database for alias 'default'...
 .....................................................................................................................................................................................................................................................................................................................................
 ----------------------------------------------------------------------
-Ran 325 tests in 2.526s</blockquote>
-<dl class="docutils">
-<dt>Let's do a quick cleanup of our database::</dt>
-<dd>python manage.py reset polls</dd>
-</dl>
-<div class="system-message">
-<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">README.rst</tt>, line 805)</p>
-Definition list ends without a blank line; unexpected unindent.</div>
+Ran 325 tests in 2.526s
+</pre>
+<p>Let's do a quick cleanup of our database:</p>
+<pre class="literal-block">
+python manage.py reset polls
+</pre>
 <p>&lt;note - fix this, get FTs to use separate DB&gt;</p>
 <p>And now, our functional tests should pass:</p>
-<pre class="last literal-block">
+<pre class="literal-block">
 ----------------------------------------------------------------------
 Ran 1 test in 7.065s
 
 OK
 </pre>
-</dd>
-</dl>
 <p>Hooray!  That's it, there's our first, well-tested, proper-TDD, Django model.</p>
 <p>Tune in next week for more!</p>
 <div class="section" id="links">

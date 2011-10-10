@@ -545,6 +545,7 @@ Let's try again...::
 
 This traceback is a bit hard to read, so it may be worth going to take a look
 manually.  To run the django test server, type::
+
     python manage.py runserver
 
 Then, open your web browser and go to ``http://localhost:8000/admin``.
@@ -793,6 +794,7 @@ in ``models.py``::
 
 
 And you should now find that the unit tests pass::
+
     harry@harry-laptop:~/workspace/mysite:master$ ./manage.py test
     Creating test database for alias 'default'...
     .....................................................................................................................................................................................................................................................................................................................................
@@ -800,11 +802,13 @@ And you should now find that the unit tests pass::
     Ran 325 tests in 2.526s
 
 
- Let's do a quick cleanup of our database::
-    python manage.py reset polls
- <note - fix this, get FTs to use separate DB>
+Let's do a quick cleanup of our database::
 
- And now, our functional tests should pass::
+    python manage.py reset polls
+
+<note - fix this, get FTs to use separate DB>
+
+And now, our functional tests should pass::
 
 
     ----------------------------------------------------------------------
