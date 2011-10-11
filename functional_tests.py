@@ -5,6 +5,7 @@ import sys
 import pexpect
 import subprocess
 from selenium import webdriver
+from settings_for_fts import INSTALLED_APPS
 
 
 def start_selenium_server():
@@ -25,9 +26,15 @@ def start_selenium_server():
 
 
 def start_django_server():
+    print 'running syncdb'
+    subprocess.Popen(
+            ['python', 'manage.py', 'syncdb', '--noinput', '--settings=settings_for_fts']
+    ).communicate()
+
     print 'starting django test server'
+    #noreload ensures single process
     django_server = subprocess.Popen(
-            ['python', 'manage.py', 'runserver', '--noreload']
+            ['python', 'manage.py', 'runserver', '--noreload', '--settings=settings_for_fts']
     )
     #dev server starts quickly, no need to check it's running
     print 'django test server started'
@@ -56,7 +63,17 @@ class FunctionalTest(unittest.TestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(5)
+        self._reset_database()
 
     def tearDown(self):
         self.browser.close()
+
+    def _reset_database(self):
+        my_apps = [app for app in INSTALLED_APPS if '.' not in app]
+        for app in my_apps:
+            subprocess.Popen(
+                ['python', 'manage.py', 'reset', app, '--noinput', '--settings=settings_for_fts']
+            ).communicate()
+
+
 

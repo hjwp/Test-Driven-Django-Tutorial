@@ -5,9 +5,9 @@ This project is still very much under construction.  Any feedback is welcome!
 
 Current progress
 
-    - started on django admin view (p. 2 of tutorial)
+    - most of Django admin view (p. 2 of tutorial)
 
-    - started on django models  (p. 1 of tutorial)
+    - first Django model  (p. 1 of tutorial)
 
     - todo: views, forms (pp 3, 4)
 
@@ -203,8 +203,50 @@ for you.::
     wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/functional_tests.py
     chmod +x functional_tests.py
 
+We also need to set up a custom set of settings for the FT - we want to make
+sure that our tests run against a different copy of the database from the
+production one, so that we're not afraid of blowing away real data.
 
-Our first test: The django admin
+We'll do this by providing an alternative settings file for Django.  Create a
+file called ``settings_for_fts.py`` next to settings.py, and give it the 
+following contents::
+
+    from settings import *
+    DATABASES['default']['NAME'] = 'ft_database.sqlite'
+
+That essentially sets up an exact duplicate of the normal ``settings.py``, 
+except we change the name of the database.
+
+
+Last bit of setup before we start:  syncdb
+------------------------------------------
+
+``syncdb`` is the command used to get Django to setup the database. It creates
+any new tables that are needed, whenever you've added new stuff to your
+project. In this case, it notices it's the first run, and proposes that
+you create a superuser.  Let's go ahead and do that::
+
+    python manage.py syncdb
+
+We also need to run syncdb for our functional test database. ``syncdb``, like
+most Django commands, takes an optional ``--settings`` parameter to tell it
+to use a different settings file.  Let's use that::
+
+    python manage.py syncdb --settings=settings_for_fts
+
+During this syncdb, Let's use the ultra-secure  ``admin`` and ``adm1n`` as
+our username and password for the superuser.::
+
+    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py createsuperuser --settings=settings_for_fts
+    Username (Leave blank to use 'harry'): admin
+    E-mail address: me@example.com
+    Password: 
+    Password (again): 
+    Superuser created successfully.
+     
+
+
+Our first test: The Django admin
 --------------------------------
 
 In the test-driven methodology, we tend to group functionality up into
@@ -214,20 +256,20 @@ and each user story tends to have a set of tests associated with it,
 and the tests track the potential behaviour of a user.
 
 
-We have to go all the way to the second page of the django tutorial to see an
-actual user-visible part of the application:  the `django admin site`.  The 
-django admin site is a really useful part of Django, which generates a UI
+We have to go all the way to the second page of the Django tutorial to see an
+actual user-visible part of the application:  the `Django admin site`.  The 
+Django admin site is a really useful part of Django, which generates a UI
 for site administrators to manage key bits of information in your database:
 user accounts, permissions groups, and, in our case, polls.  The admin site
 will let admin users create new polls, enter their descriptive text and start
 and end dates and so on, before they are published via the user-facing website.
 
-All this stuff comes 'for free' and automatically, just using the django admin
+All this stuff comes 'for free' and automatically, just using the Django admin
 site.  
 
 <link>
 
-So, our first user story is that the user should be able to log into the django
+So, our first user story is that the user should be able to log into the Django
 admin site using an admin username and password, and create a new poll.
 
 <pic>
@@ -320,21 +362,28 @@ First few steps...
 ------------------
 
 So, let's start trying to get our test to pass... or at least get a little
-further on.  We'll need to set up the django admin site.  This is on
-page two of the official django tutorial::
+further on.  We'll need to set up the Django admin site.  This is on
+page two of the official Django tutorial:
 
-    * Add "django.contrib.admin" to your INSTALLED_APPS setting.
+https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site
 
-    * Run python manage.py syncdb. Since you have added a new application to
-      INSTALLED_APPS, the database tables need to be updated.
+At this point we need to do two things: add "django.contrib.admin" to
+INSTALLED_APPS in ``settings.py``::
 
-    * Edit your mysite/urls.py file and uncomment the lines that reference the
-      admin
+    INSTALLED_APPS = (
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.messages',
+        # Uncomment the next line to enable the admin:
+        'django.contrib.admin',
+        # Uncomment the next line to enable admin documentation:
+        # 'django.contrib.admindocs',
+        'polls'
+    )
 
-When we run the syncdb, we'll need to enter a username and password. Let's use
-the ultra-secure  ``admin`` and ``adm1n``.
-
-In our ``urls.py``, we'll be looking to uncomment these two lines::
+And edit ``mysite/urls.py`` to uncomment the lines that reference the admin::
 
     from django.contrib import admin
     admin.autodiscover()
@@ -348,25 +397,17 @@ Let's re-run our tests.  We should find they get a little further::
 
     ./functional_tests.py
     ======================================================================
-    ERROR: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 24, in test_can_create_new_poll_via_admin_site
-        polls_link = self.browser.find_element_by_link_text('Polls')
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 208, in find_element_by_link_text
-        return self.find_element(by=By.LINK_TEXT, value=link_text)
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 525, in find_element
-        {'using': by, 'value': value})['value']
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 144, in execute
-        self.error_handler.check_response(response)
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 118, in check_response
-        raise exception_class(message, screen, stacktrace)
-    NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"Polls"}' 
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 25, in test_can_create_new_poll_via_admin_site
+        self.assertEquals(len(polls_links), 2)
+    AssertionError: 0 != 2
 
     ----------------------------------------------------------------------
     Ran 1 test in 10.203s
 
-Well, the test is happy that there's a django admin site, and it can log in fine,
+Well, the test is happy that there's a Django admin site, and it can log in fine,
 but it can't find a link to administer "Polls".  So next we need to create our
 Polls object.
 
@@ -374,10 +415,11 @@ Polls object.
 Our first unit tests: testing a new "Poll" model
 ------------------------------------------------
 
-The django unit test runner will automatically run any tests we put in
+The Django unit test runner will automatically run any tests we put in
 ``tests.py``.  Later on, we might decide we want to put our tests somewhere
 else, but for now, let's use that file::
 
+    import datetime
     from django.test import TestCase
     from polls.models import Poll
 
@@ -410,6 +452,8 @@ the way we want them too.  Aside from being useful as tests, they're useful
 to help us think about the way we design our code... It forces us to think 
 about how things are going to work, from a slightly external point of view.
 
+<go into more detail on how ORM works>
+
 Here we're creating a new Poll object, and checking that we can save it to 
 the database, as well as checking that we can set and store a Poll's main two
 attributes: the question and the publication date.::
@@ -418,7 +462,7 @@ attributes: the question and the publication date.::
 
 You should see an error like this::
 
-      File "/usr/local/lib/python2.7/dist-packages/django/test/simple.py", line 35, in get_tests
+      File "/usr/local/lib/python2.7/dist-packages/Django/test/simple.py", line 35, in get_tests
         test_module = __import__('.'.join(app_path + [TEST_MODULE]), {}, {}, TEST_MODULE)
       File "/home/harry/workspace/mysite/polls/tests.py", line 2, in <module>
         from polls.models import Poll
@@ -458,7 +502,7 @@ code to write next. Run the tests...::
 
 
 Right, the tests are telling us that we can't "save" our Poll.  That's because
-it's not a django model object.  Let's make the minimal change required to get 
+it's not a Django model object.  Let's make the minimal change required to get 
 our tests further on::
 
     class Poll(models.Model):
@@ -523,14 +567,23 @@ Back to the functional tests: registering the model with the admin site
 
 The unit tests all pass. Does this mean our functional test will pass?::
 
-    [...]
-    NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"Polls"}' 
+    ./functional_tests.py
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 25, in test_can_create_new_poll_via_admin_site
+        self.assertEquals(len(polls_links), 2)
+    AssertionError: 0 != 2
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 10.203s
 
 
 Ah, not quite.  The Django admin site doesn't automatically contain every model
 you define - you need to tell it which models you want to be able to administer.
-Let's "register" the "Poll" model. To do that, we just need to create a file
-called ``admin.py`` to the ``polls`` directory, with the following three
+Let's "register" the Poll model. To do that, we just need to create a file
+called ``admin.py`` in the ``polls`` directory, with the following three
 lines::
 
     from polls.models import Poll
@@ -538,29 +591,33 @@ lines::
 
     admin.site.register(Poll)
 
+Let's try the FT again...::
 
-Exploring the site manually & running syncdb
---------------------------------------------
-
-Let's try again...::
-
-    ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    ./functional_tests.py
+    .
     ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 33, in test_can_create_new_poll_via_admin_site
-        self.assertIn('0 polls', body.text)
-    AssertionError: '0 polls' not found in u"DatabaseError at /admin/polls/poll/\nno such table: polls_poll\nRequest Method: GET\nRequest URL: http://127.0.0.1:8000/admin/polls/poll/\nDjango Version: 1.3.1\nException Type: DatabaseError\nException Value:\nno such table: polls_poll\[...]
+    Ran 1 test in 6.164s
 
-This traceback is a bit hard to read, so it may be worth going to take a look
-manually.  To run the django test server, type::
+    OK
+
+Hooray! 
+
+
+Exploring the site manually using runserver 
+-------------------------------------------
+
+So far so good.  But, we still have a few items left as "TODO" in our tests.
+At this point we may not be quite sure what we want though.  This is a good
+time to fire up the Django dev server using ``runserver``, and have a look
+around manually, to look for some inspiration on the next steps to take for our
+site.::
 
     python manage.py runserver
 
 Then, open your web browser and go to ``http://localhost:8000/admin``.
-Follow the steps in the FT - click "Polls', and you should see an error
-message.  When Django encounters an error trying to render a page, it
-displays a page full of debugging information like this::
+Let's follow the steps in the FT - enter the admin username and password,
+find the link to "Polls', and you'll probably see an error page, in yellow,
+that contains something like this::
 
     DatabaseError at /admin/polls/poll/
 
@@ -580,20 +637,27 @@ displays a page full of debugging information like this::
     [etc]
 
 
+When Django encounters an error trying to render a page, it displays a page
+full of debugging information like this, to help you figure out what went
+wrong.
+
 When your application is ready to show to real users, you'll want to
 set ``DEBUG = False`` in your settings.py, because you don't want
-your users seeing that sort of information (django can email it to
+your users seeing that sort of information (Django can email it to
 you instead).  In the meantime, it's very useful!
 
 Django is telling us it can't find a database table called ``poll_poll``.
 
-Django names tables using the convention ``appname_lowercasemodelname``,
-So this is the table for our Poll object, and we haven't told Django to 
-create it for us yet.  "What about the unit tests", I hear you ask, "they
-seemed to run fine?!"  Well, the Django unit test runner uses a different
-database to the production one, and it does a syncdb automatically.
+Django names tables using the convention ``appname_lowercasemodelname``, so
+this is the table for our Poll object, and we haven't told Django to create it
+for us yet.  "What about the tests", I hear you ask, "they seemed to run
+fine?!".  Well, if you remember we set up a different database for our FTs, and
+the the Django unit test runner also uses its own database.
 
-So we need to do it manually, each time we create a new object in the database::
+
+So, as far as your production database is concerned, you'll need to run
+``syncdb`` manually, each time you create a new object in the database.  Press
+Ctrl+C to quit the test server, and then::
 
     python manage.py syncb
 
@@ -603,25 +667,13 @@ So we need to do it manually, each time we create a new object in the database::
     Installing indexes ...
     No fixtures found.
 
-Let's see if our tests now get a little further.::
-
-    ----------------------------------------------------------------------
-    Ran 1 test in 5.843s
-
-    OK
-
 
 Inspecting the admin site to decide what to test next
 -----------------------------------------------------
 
-They sure do!  Hooray.  But, we still have a few items left as "TODO" in our
-tests.  At this point we may not be quite sure what we want though.  This is a
-good time to fire up the django dev server, and have a look around manually,
-to look for some inspiration on the next steps to take for our site.
-
-
-If you run ``python manage.py runserver`` and go look at the admin pages, and
-try and create a new Poll, you should see a menu a bit like this.
+Let's run ``python manage.py runserver`` again, and go take another look at the
+admin pages. If you try and create a new Poll, you should see a menu a bit like
+this.
 
 <insert screenshot>
 
@@ -647,10 +699,12 @@ our FT::
 More ways of finding elements on the page using Selenium
 --------------------------------------------------------
 
-If you try filling in a new Poll (delete it when you're done), and you don't
-fill in the 'time' field, you'll see that it's required.  So, in our test,
-we need to fill in `question`, `date`, and `time`.  In order to get Selenium
-to retrieve those fields, there are several options::
+Try filling in a new Poll, and fill in the 'date' entry but not a 'time'.  You'll
+find django complains that the field is required. So, in our test, we need to
+fill in three fields: `question`, `date`, and `time`. 
+
+In order to get Selenium to find the text input boxes for those fields, there
+are several options::
 
     find_element_by_id 
     find_element_by_xpath
@@ -665,11 +719,28 @@ explanatory names...
 
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
 
-In our case "name" is a useful way of finding fields, because it's usually associated
-with input fields from forms.  If you take a look at the HTML source for the django
-admin page for entering a new poll (either the raw source, or using a tool like Firebug, or
-developer tools in google chrome), you can find out that the 'name' for our three fields are
-`question`, `pub_date_0` and `pub_date_1`.  Let's use them in our FT::
+In our case `by name` is a useful way of finding fields, because the name
+attribute is s usually associated with input fields from forms.  If you take a
+look at the HTML source code for the Django admin page for entering a new poll
+(either the raw source, or using a tool like Firebug, or developer tools in
+Google Chrome), you'll find out that the 'name' for our three fields are
+`question`, `pub_date_0` and `pub_date_1`.::
+
+    <label for="id_question" class="required">Question:</label>
+    <input id="id_question" type="text" class="vTextField" name="question" maxlength="200" />
+
+    <label for="id_pub_date_0" class="required">Date published:</label>
+    <p class="datetime">
+        Date: 
+        <input id="id_pub_date_0" type="text" class="vDateField" name="pub_date_0" size="10" />
+        <br />
+        Time:
+        <input id="id_pub_date_1" type="text" class="vTimeField" name="pub_date_1" size="8" />
+    </p>
+                        
+                    
+
+Let's use them in our FT:: 
 
         # She sees some input fields for "Question" and "Date published"
         body = self.browser.find_element_by_tag_name('body')
@@ -696,9 +767,12 @@ We can also use the CSS selector to pick up the "Save" button::
 
 Finally, we'll want to have our test check that the new Poll appears on the listings
 page.  If you've entered a Poll, you'll have noticed that the polls are just described
-as "Poll object".  Django lets you give them more descriptive names, including
-any attribute of the object.  So let's say we want our polls listed by their
-question::
+as "Poll object".  
+
+<insert screenshot(s)>
+
+Django lets you give them more descriptive names, including any attribute of
+the object.  So let's say we want our polls listed by their question::
 
         # She is returned to the "Polls" listing, where she can see her
         # new poll, listed as a clickable link
@@ -711,6 +785,9 @@ That's our FT finished.  If you've lost track in amongst all the copy & pasting,
 you can compare your version to mine, which is hosted here:
 https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_polls_admin.py
 
+
+Human-readable names for models and their attributes
+----------------------------------------------------
 
 Let's re-run our tests.  Here's our first expected failure, the fact that "Pub date"
 isn't the label we want for our field ("Date published")::
@@ -725,22 +802,6 @@ isn't the label we want for our field ("Date published")::
     AssertionError: 'Date published:' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls \u203a Add poll\nAdd poll\nQuestion:\nPub date:\nDate:  Today | \nTime:  Now | '
 
     ----------------------------------------------------------------------
-
-
-**NB** 
-    if you get a different error, which looks like this::
-
-        AssertionError: '0 polls' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls\nSelect poll to change\nAdd poll\nAction:\n---------\nDelete selected polls\nGo 0 of 1 selected\nPoll\nPoll object\n1 poll'
-
-    It's because you've forgotten to tidy up after yourself while playing around with
-    the admin site.  Go back in and delete all the polls objects.
-    Alternatively, you can run ``python manage.py reset polls`` which will clear
-    down the polls table.  We'll look into making our FTs use a different database
-    in future.
-
-
-Human-readable names for models and their attributes
-----------------------------------------------------
 
 Django stores human-readable names for model attributes in a special attribute
 called `verbose_name`.  Let's write a unit test that checks the verbose name
@@ -757,7 +818,6 @@ Poll class.  That's some Django-voodoo right there, and you may have to take my
 word for it, but it's a way to get at some of the information about the
 metadata on the model. There's more info here (James Bennet is one of the
 original Django developers, and wrote a book about it too)
-
 http://www.b-list.org/weblog/2007/nov/04/working-models/
 
 Anyway, running our tests with ``python manage.py test`` gives us our expected
@@ -824,12 +884,6 @@ And you should now find that the unit tests pass::
     ----------------------------------------------------------------------
     Ran 325 tests in 2.526s
 
-
-Let's do a quick cleanup of our database::
-
-    python manage.py reset polls
-
-<note - fix this, get FTs to use separate DB>
 
 And now, our functional tests should pass::
 

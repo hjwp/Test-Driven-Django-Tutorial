@@ -1,4 +1,5 @@
 *.pyc
 selenium-server-standalone-2.*.jar
 database.sqlite
+ft_database.sqlite
 django_server_logfile.txt
