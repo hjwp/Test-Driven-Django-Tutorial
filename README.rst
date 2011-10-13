@@ -145,12 +145,7 @@ and Django, and a couple of other Python modules we might need::
 
     easy_install django
     easy_install selenium
-    easy_install pexpect
     easy_install mock
-
-We also need the selenium java server::
-
-    wget -O selenium-server-standalone-2.8.0.jar http://selenium.googlecode.com/files/selenium-server-standalone-2.8.0.jar 
 
 
 
@@ -168,7 +163,6 @@ a simple application to handle online polls.
 Django has a couple of command line tools to set these up::
 
     django-admin startproject mysite
-    mv selenium-server-standalone-2.8.0.jar mysite/
     cd mysite
     ./manage.py startapp polls
 
