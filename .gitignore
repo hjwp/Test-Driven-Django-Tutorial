@@ -1,4 +1,5 @@
 *.pyc
+tags
 selenium-server-standalone-2.*.jar
 database.sqlite
 ft_database.sqlite
