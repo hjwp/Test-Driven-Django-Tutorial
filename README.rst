@@ -182,6 +182,11 @@ and change them, like so::
 
 <pic>
 
+Find out more about projects, apps and ``settings.py`` here:
+https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup
+
+
+
 Setting up the functional test runner
 -------------------------------------
 
@@ -222,18 +227,12 @@ you create a superuser.  Let's go ahead and do that::
 
     python manage.py syncdb
 
-We also need to run syncdb for our functional test database. ``syncdb``, like
-most Django commands, takes an optional ``--settings`` parameter to tell it
-to use a different settings file.  Let's use that::
+Let's use the ultra-secure  ``admin`` and ``adm1n`` as our username and
+password for the superuser.::
 
-    python manage.py syncdb --settings=settings_for_fts
-
-During this syncdb, Let's use the ultra-secure  ``admin`` and ``adm1n`` as
-our username and password for the superuser.::
-
-    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py createsuperuser --settings=settings_for_fts
+    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py syncdb
     Username (Leave blank to use 'harry'): admin
-    E-mail address: me@example.com
+    E-mail address: admin@example.com
     Password: 
     Password (again): 
     Superuser created successfully.
@@ -249,19 +248,20 @@ can describe the chunks of functionality as "user stories", if you like,
 and each user story tends to have a set of tests associated with it,
 and the tests track the potential behaviour of a user.
 
-
 We have to go all the way to the second page of the Django tutorial to see an
 actual user-visible part of the application:  the `Django admin site`.  The 
-Django admin site is a really useful part of Django, which generates a UI
-for site administrators to manage key bits of information in your database:
-user accounts, permissions groups, and, in our case, polls.  The admin site
-will let admin users create new polls, enter their descriptive text and start
-and end dates and so on, before they are published via the user-facing website.
-
+admin site is a really useful part of Django, which generates a UI for site
+administrators to manage key bits of information in your database: user
+accounts, permissions groups, and, in our case, polls.  The admin site will let
+admin users create new polls, enter their descriptive text and start and end
+dates and so on, before they are published via the user-facing website. 
 All this stuff comes 'for free' and automatically, just using the Django admin
 site.  
 
-<link>
+You can find out more about the philosophy behind the admin site, including Django's
+background in the newspaper industry, here:
+
+https://docs.djangoproject.com/en/1.3/intro/tutorial02/
 
 So, our first user story is that the user should be able to log into the Django
 admin site using an admin username and password, and create a new poll.
@@ -355,8 +355,8 @@ The test output will looks something like this::
 First few steps...
 ------------------
 
-So, let's start trying to get our test to pass... or at least get a little
-further on.  We'll need to set up the Django admin site.  This is on
+So, let's start trying to get our functional test to pass... or at least get a
+little further on.  We'll need to set up the Django admin site.  This is on
 page two of the official Django tutorial:
 
 https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site
@@ -402,8 +402,8 @@ Let's re-run our tests.  We should find they get a little further::
     Ran 1 test in 10.203s
 
 Well, the test is happy that there's a Django admin site, and it can log in fine,
-but it can't find a link to administer "Polls".  So next we need to create our
-Polls object.
+but it can't find a link to administer "Polls".  So next we need to create the
+representation of a Poll inside Django - a `model`, in Django terms.
 
 
 Our first unit tests: testing a new "Poll" model
@@ -576,9 +576,8 @@ The unit tests all pass. Does this mean our functional test will pass?::
 
 Ah, not quite.  The Django admin site doesn't automatically contain every model
 you define - you need to tell it which models you want to be able to administer.
-Let's "register" the Poll model. To do that, we just need to create a file
-called ``admin.py`` in the ``polls`` directory, with the following three
-lines::
+To do that, we just need to create a file called ``admin.py`` in the ``polls``
+directory, with the following three lines::
 
     from polls.models import Poll
     from django.contrib import admin
@@ -609,8 +608,8 @@ site.::
     python manage.py runserver
 
 Then, open your web browser and go to ``http://localhost:8000/admin``.
-Let's follow the steps in the FT - enter the admin username and password,
-find the link to "Polls', and you'll probably see an error page, in yellow,
+Let's follow the steps in the FT - enter the admin username and password (``adm1n``),
+find the link to "Polls' and you'll probably see an error page, in yellow,
 that contains something like this::
 
     DatabaseError at /admin/polls/poll/
@@ -635,12 +634,12 @@ When Django encounters an error trying to render a page, it displays a page
 full of debugging information like this, to help you figure out what went
 wrong.
 
-When your application is ready to show to real users, you'll want to
-set ``DEBUG = False`` in your settings.py, because you don't want
-your users seeing that sort of information (Django can email it to
-you instead).  In the meantime, it's very useful!
+When your application is ready to show to real users, you'll want to set
+``DEBUG = False`` in your ``settings.py``, because you don't want your users
+seeing that sort of information (Django can email it to you instead).  In the
+meantime, it's very useful! 
 
-Django is telling us it can't find a database table called ``poll_poll``.
+So, Django is telling us it can't find a database table called ``poll_poll``.
 
 Django names tables using the convention ``appname_lowercasemodelname``, so
 this is the table for our Poll object, and we haven't told Django to create it
@@ -648,9 +647,8 @@ for us yet.  "What about the tests", I hear you ask, "they seemed to run
 fine?!".  Well, if you remember we set up a different database for our FTs, and
 the the Django unit test runner also uses its own database.
 
-
 So, as far as your production database is concerned, you'll need to run
-``syncdb`` manually, each time you create a new object in the database.  Press
+``syncdb`` manually, each time you create a new class in ``models.py`` .  Press
 Ctrl+C to quit the test server, and then::
 
     python manage.py syncb
@@ -714,7 +712,7 @@ explanatory names...
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
 
 In our case `by name` is a useful way of finding fields, because the name
-attribute is s usually associated with input fields from forms.  If you take a
+attribute is usually associated with input fields from forms.  If you take a
 look at the HTML source code for the Django admin page for entering a new poll
 (either the raw source, or using a tool like Firebug, or developer tools in
 Google Chrome), you'll find out that the 'name' for our three fields are
