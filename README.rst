@@ -664,7 +664,7 @@ Let's run ``python manage.py runserver`` again, and go take another look at the
 admin pages. If you try and create a new Poll, you should see a menu a bit like
 this.
 
-<insert screenshot>
+.. image:: images/add_poll_need_verbose_name_for_pub_date.png
 
 Pretty neat, but `Pub date` isn't a very nice label for our publication date
 field.  Django normally generates labels for its admin fields automatically,
@@ -758,7 +758,7 @@ Finally, we'll want to have our test check that the new Poll appears on the list
 page.  If you've entered a Poll, you'll have noticed that the polls are just described
 as "Poll object".  
 
-<insert screenshot(s)>
+.. image:: images/django_admin_poll_object_needs_verbose_name.png
 
 Django lets you give them more descriptive names, including any attribute of
 the object.  So let's say we want our polls listed by their question::
