@@ -81,16 +81,23 @@ And add the new method::
             self.browser.find_element_by_link_text('Now').click()
 
             # She sees she can enter choices for the Poll.  She adds three
-            choice_1 = self.browser.find_element_by_name('choice_0')
+            choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
             choice_1.send_keys('Very awesome')
-            choice_2 = self.browser.find_element_by_name('choice_1')
+            choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
             choice_2.send_keys('Quite awesome')
-            choice_3 = self.browser.find_element_by_name('choice_2')
+            choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
             choice_3.send_keys('Moderately awesome')
 
             # She saves her new poll
-            self.browser.find_element_by_link_text('Save').click()
+            save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+            save_button.click()
 
+            # She is returned to the "Polls" listing, where she can see her
+            # new poll, listed as a clickable link
+            new_poll_links = self.browser.find_elements_by_link_text(
+                    "How awesome is Test-Driven Development?"
+            )
+            self.assertEquals(len(new_poll_links), 1)
 
 Looks like I was lying about not messing about with the admin site any more. Ah well. Let's try running our fts again::
 
@@ -110,7 +117,7 @@ Looks like I was lying about not messing about with the admin site any more. Ah 
         self.error_handler.check_response(response)
       File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 118, in check_response
         raise exception_class(message, screen, stacktrace)
-    NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_0"}' 
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' 
 
     ----------------------------------------------------------------------
     Ran 2 tests in 23.710s
@@ -275,7 +282,7 @@ So, what do the tests want?  Let's re-run the FTs::
         self.error_handler.check_response(response)
       File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 118, in check_response
         raise exception_class(message, screen, stacktrace)
-    NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_0"}' 
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' 
 
     ----------------------------------------------------------------------
 
@@ -296,9 +303,45 @@ admin page works::
         inlines = [ChoiceInline]
 
     admin.site.register(Poll, PollAdmin)
-            model = Choice
-            extra = 3
 
 Django has lots of ways of customising the admin site, and I don't want to
-dwell on them for too long 
+dwell on them for too long - check out the docs for more info:
 https://docs.djangoproject.com/en/1.3/intro/tutorial02/#adding-related-objects
+
+Let's run the FT again::
+
+    ======================================================================
+    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 48, in test_voting_on_a_new_poll
+        self._setup_polls_via_admin()
+      File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 42, in _setup_polls_via_admin
+        self.assertEquals(len(new_poll_links), 1)
+    AssertionError: 0 != 1
+
+    ----------------------------------------------------------------------
+
+You may have noticed, during the run, that the form got all grumpy about the
+'votes' field being required (if you don't believe me, why not spin up the
+test server using ``manage.py runserver`` and check for yourself?  Remember, you
+may need to ``syncdb``)
+
+Let's make 'votes' default to 0, by adding a new test in ``tests.py``::
+
+    def test_choice_defaults(self):
+        choice = Choice()
+        self.assertEquals(choice.votes, 0)
+
+And run it::
+
+    AssertionError: None != 0
+
+And set the default, in ``polls/models.py``::
+
+    class Choice(models.Model):
+        poll = models.ForeignKey(Poll)
+        choice = models.CharField(max_length=200)
+        votes = models.IntegerField(default=0)
+
+

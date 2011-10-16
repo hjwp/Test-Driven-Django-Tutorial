@@ -39,7 +39,7 @@ class TestPollsModel(TestCase):
 
 class TestPollChoicesModel(TestCase):
 
-    def test_creating_some_choices_for_a_poll(self):
+    def test_creating_a_choices_for_a_poll(self):
         # start by creating a new Poll object
         poll = Poll()
         poll.question="What's up?"
@@ -71,6 +71,10 @@ class TestPollChoicesModel(TestCase):
         self.assertEquals(choice_from_db, choice)
         self.assertEquals(choice_from_db.choice, "doin' fine...")
         self.assertEquals(choice_from_db.votes, 3)
+
+    def test_choice_defaults(self):
+        choice = Choice()
+        self.assertEquals(choice.votes, 0)
 
 
 

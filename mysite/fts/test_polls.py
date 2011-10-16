@@ -23,15 +23,23 @@ class TestPolls(FunctionalTest):
         self.browser.find_element_by_link_text('Now').click()
 
         # She sees she can enter choices for the Poll.  She adds three
-        choice_1 = self.browser.find_element_by_name('choice_0')
+        choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
         choice_1.send_keys('Very awesome')
-        choice_2 = self.browser.find_element_by_name('choice_1')
+        choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
         choice_2.send_keys('Quite awesome')
-        choice_3 = self.browser.find_element_by_name('choice_2')
+        choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
         choice_3.send_keys('Moderately awesome')
 
         # She saves her new poll
-        self.browser.find_element_by_link_text('Save').click()
+        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+        save_button.click()
+
+        # She is returned to the "Polls" listing, where she can see her
+        # new poll, listed as a clickable link
+        new_poll_links = self.browser.find_elements_by_link_text(
+                "How awesome is Test-Driven Development?"
+        )
+        self.assertEquals(len(new_poll_links), 1)
 
 
     def test_voting_on_a_new_poll(self):
