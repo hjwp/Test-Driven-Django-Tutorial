@@ -434,12 +434,7 @@ and Django, and a couple of other Python modules we might need:</p>
 <pre class="literal-block">
 easy_install django
 easy_install selenium
-easy_install pexpect
 easy_install mock
-</pre>
-<p>We also need the selenium java server:</p>
-<pre class="literal-block">
-wget -O selenium-server-standalone-2.8.0.jar http://selenium.googlecode.com/files/selenium-server-standalone-2.8.0.jar
 </pre>
 </div>
 <div class="section" id="setting-up-our-django-project-and-settings-py">
@@ -453,7 +448,6 @@ a simple application to handle online polls.</p>
 <p>Django has a couple of command line tools to set these up:</p>
 <pre class="literal-block">
 django-admin startproject mysite
-mv selenium-server-standalone-2.8.0.jar mysite/
 cd mysite
 ./manage.py startapp polls
 </pre>
@@ -468,7 +462,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'database.sqlite',                      # Or path to database file if using sqlite3.
 </pre>
-<p>&lt;pic&gt;</p>
+<p>Find out more about projects, apps and <tt class="docutils literal">settings.py</tt> here:
+<a class="reference external" href="https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup">https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup</a></p>
 </div>
 <div class="section" id="setting-up-the-functional-test-runner">
 <h1>Setting up the functional test runner</h1>
@@ -506,18 +501,12 @@ you create a superuser.  Let's go ahead and do that:</p>
 <pre class="literal-block">
 python manage.py syncdb
 </pre>
-<p>We also need to run syncdb for our functional test database. <tt class="docutils literal">syncdb</tt>, like
-most Django commands, takes an optional <tt class="docutils literal"><span class="pre">--settings</span></tt> parameter to tell it
-to use a different settings file.  Let's use that:</p>
+<p>Let's use the ultra-secure  <tt class="docutils literal">admin</tt> and <tt class="docutils literal">adm1n</tt> as our username and
+password for the superuser.:</p>
 <pre class="literal-block">
-python manage.py syncdb --settings=settings_for_fts
-</pre>
-<p>During this syncdb, Let's use the ultra-secure  <tt class="docutils literal">admin</tt> and <tt class="docutils literal">adm1n</tt> as
-our username and password for the superuser.:</p>
-<pre class="literal-block">
-harry&#64;harry-laptop:~/workspace/mysite:master$ ./manage.py createsuperuser --settings=settings_for_fts
+harry&#64;harry-laptop:~/workspace/mysite:master$ ./manage.py syncdb
 Username (Leave blank to use 'harry'): admin
-E-mail address: me&#64;example.com
+E-mail address: admin&#64;example.com
 Password:
 Password (again):
 Superuser created successfully.
@@ -532,17 +521,20 @@ and each user story tends to have a set of tests associated with it,
 and the tests track the potential behaviour of a user.</p>
 <p>We have to go all the way to the second page of the Django tutorial to see an
 actual user-visible part of the application:  the <cite>Django admin site</cite>.  The
-Django admin site is a really useful part of Django, which generates a UI
-for site administrators to manage key bits of information in your database:
-user accounts, permissions groups, and, in our case, polls.  The admin site
-will let admin users create new polls, enter their descriptive text and start
-and end dates and so on, before they are published via the user-facing website.</p>
-<p>All this stuff comes 'for free' and automatically, just using the Django admin
+admin site is a really useful part of Django, which generates a UI for site
+administrators to manage key bits of information in your database: user
+accounts, permissions groups, and, in our case, polls.  The admin site will let
+admin users create new polls, enter their descriptive text and start and end
+dates and so on, before they are published via the user-facing website.
+All this stuff comes 'for free' and automatically, just using the Django admin
 site.</p>
-<p>&lt;link&gt;</p>
+<p>You can find out more about the philosophy behind the admin site, including Django's
+background in the newspaper industry, here:</p>
+<p><a class="reference external" href="https://docs.djangoproject.com/en/1.3/intro/tutorial02/">https://docs.djangoproject.com/en/1.3/intro/tutorial02/</a></p>
 <p>So, our first user story is that the user should be able to log into the Django
 admin site using an admin username and password, and create a new poll.</p>
-<p>&lt;pic&gt;</p>
+<img alt="images/admin03t.png" src="images/admin03t.png" />
+<img alt="images/admin05t.png" src="images/admin05t.png" />
 <p>Let's open up a file inside the <tt class="docutils literal">fts</tt> directory called
 <tt class="docutils literal">test_polls_admin.py</tt> and enter the code below.</p>
 <p>Note the nice, descriptive names for the test functions, and the comments,
@@ -599,7 +591,6 @@ class TestPollsAdmin(FunctionalTest):
 <pre class="literal-block">
 ./functional_tests.py
 </pre>
-<p>&lt;pic&gt;</p>
 <p>The test output will looks something like this:</p>
 <pre class="literal-block">
 Starting Selenium
@@ -624,8 +615,8 @@ FAILED (failures=1)
 </div>
 <div class="section" id="first-few-steps">
 <h1>First few steps...</h1>
-<p>So, let's start trying to get our test to pass... or at least get a little
-further on.  We'll need to set up the Django admin site.  This is on
+<p>So, let's start trying to get our functional test to pass... or at least get a
+little further on.  We'll need to set up the Django admin site.  This is on
 page two of the official Django tutorial:</p>
 <p><a class="reference external" href="https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site">https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site</a></p>
 <p>At this point we need to do two things: add &quot;django.contrib.admin&quot; to
@@ -669,8 +660,8 @@ AssertionError: 0 != 2
 Ran 1 test in 10.203s
 </pre>
 <p>Well, the test is happy that there's a Django admin site, and it can log in fine,
-but it can't find a link to administer &quot;Polls&quot;.  So next we need to create our
-Polls object.</p>
+but it can't find a link to administer &quot;Polls&quot;.  So next we need to create the
+representation of a Poll inside Django - a <cite>model</cite>, in Django terms.</p>
 </div>
 <div class="section" id="our-first-unit-tests-testing-a-new-poll-model">
 <h1>Our first unit tests: testing a new &quot;Poll&quot; model</h1>
@@ -826,9 +817,8 @@ Ran 1 test in 10.203s
 </pre>
 <p>Ah, not quite.  The Django admin site doesn't automatically contain every model
 you define - you need to tell it which models you want to be able to administer.
-Let's &quot;register&quot; the Poll model. To do that, we just need to create a file
-called <tt class="docutils literal">admin.py</tt> in the <tt class="docutils literal">polls</tt> directory, with the following three
-lines:</p>
+To do that, we just need to create a file called <tt class="docutils literal">admin.py</tt> in the <tt class="docutils literal">polls</tt>
+directory, with the following three lines:</p>
 <pre class="literal-block">
 from polls.models import Poll
 from django.contrib import admin
@@ -857,8 +847,8 @@ site.:</p>
 python manage.py runserver
 </pre>
 <p>Then, open your web browser and go to <tt class="docutils literal"><span class="pre">http://localhost:8000/admin</span></tt>.
-Let's follow the steps in the FT - enter the admin username and password,
-find the link to &quot;Polls', and you'll probably see an error page, in yellow,
+Let's follow the steps in the FT - enter the admin username and password (<tt class="docutils literal">adm1n</tt>),
+find the link to &quot;Polls' and you'll probably see an error page, in yellow,
 that contains something like this:</p>
 <pre class="literal-block">
 DatabaseError at /admin/polls/poll/
@@ -881,18 +871,18 @@ Python Version:     2.7.1
 <p>When Django encounters an error trying to render a page, it displays a page
 full of debugging information like this, to help you figure out what went
 wrong.</p>
-<p>When your application is ready to show to real users, you'll want to
-set <tt class="docutils literal">DEBUG = False</tt> in your settings.py, because you don't want
-your users seeing that sort of information (Django can email it to
-you instead).  In the meantime, it's very useful!</p>
-<p>Django is telling us it can't find a database table called <tt class="docutils literal">poll_poll</tt>.</p>
+<p>When your application is ready to show to real users, you'll want to set
+<tt class="docutils literal">DEBUG = False</tt> in your <tt class="docutils literal">settings.py</tt>, because you don't want your users
+seeing that sort of information (Django can email it to you instead).  In the
+meantime, it's very useful!</p>
+<p>So, Django is telling us it can't find a database table called <tt class="docutils literal">poll_poll</tt>.</p>
 <p>Django names tables using the convention <tt class="docutils literal">appname_lowercasemodelname</tt>, so
 this is the table for our Poll object, and we haven't told Django to create it
 for us yet.  &quot;What about the tests&quot;, I hear you ask, &quot;they seemed to run
 fine?!&quot;.  Well, if you remember we set up a different database for our FTs, and
 the the Django unit test runner also uses its own database.</p>
 <p>So, as far as your production database is concerned, you'll need to run
-<tt class="docutils literal">syncdb</tt> manually, each time you create a new object in the database.  Press
+<tt class="docutils literal">syncdb</tt> manually, each time you create a new class in <tt class="docutils literal">models.py</tt> .  Press
 Ctrl+C to quit the test server, and then:</p>
 <pre class="literal-block">
 python manage.py syncb
@@ -947,7 +937,7 @@ but you can look at the source code, and most of the methods have fairly self-
 explanatory names...</p>
 <p><a class="reference external" href="http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py">http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py</a></p>
 <p>In our case <cite>by name</cite> is a useful way of finding fields, because the name
-attribute is s usually associated with input fields from forms.  If you take a
+attribute is usually associated with input fields from forms.  If you take a
 look at the HTML source code for the Django admin page for entering a new poll
 (either the raw source, or using a tool like Firebug, or developer tools in
 Google Chrome), you'll find out that the 'name' for our three fields are

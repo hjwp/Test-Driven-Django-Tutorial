@@ -41,6 +41,9 @@ class TestPolls(FunctionalTest):
         )
         self.assertEquals(len(new_poll_links), 1)
 
+        # She logs out of the admin site
+        self.browser.find_element_by_link_text('Log out').click()
+
 
     def test_voting_on_a_new_poll(self):
         # First, Gertrude the administrator logs into the admin site and
@@ -49,9 +52,13 @@ class TestPolls(FunctionalTest):
 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
+        self.browser.get(ROOT)
+        heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(heading.text, 'Polls')
 
         # He clicks on the link to the first Poll, which is called
         # 'How awesome is test-driven development?'
+
 
         # He is taken to a poll 'results' page, which says
         # "no-one has voted on this poll yet"

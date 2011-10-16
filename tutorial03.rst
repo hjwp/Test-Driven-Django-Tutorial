@@ -99,9 +99,6 @@ And add the new method::
             )
             self.assertEquals(len(new_poll_links), 1)
 
-            # She logs out of the admin site
-            self.browser.find_element_by_link_text('Log out').click()
-
 Looks like I was lying about not messing about with the admin site any more. Ah well. Let's try running our fts again::
 
     ======================================================================

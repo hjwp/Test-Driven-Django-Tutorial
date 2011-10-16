@@ -180,8 +180,6 @@ and change them, like so::
             'NAME': 'database.sqlite',                      # Or path to database file if using sqlite3.
 
 
-<pic>
-
 Find out more about projects, apps and ``settings.py`` here:
 https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup
 
@@ -266,7 +264,8 @@ https://docs.djangoproject.com/en/1.3/intro/tutorial02/
 So, our first user story is that the user should be able to log into the Django
 admin site using an admin username and password, and create a new poll.
 
-<pic>
+.. image:: images/admin03t.png
+.. image:: images/admin05t.png
 
 Let's open up a file inside the ``fts`` directory called
 ``test_polls_admin.py`` and enter the code below.
@@ -327,8 +326,6 @@ It's always nice to give the user a name... Mine is called Gertrude...::
 Let's try running our first test::
 
     ./functional_tests.py
-
-<pic>
 
 The test output will looks something like this::
 
