@@ -1,7 +1,7 @@
 Website:
 --------
 
-http://hjwp.pythonanywhere.com/
+http://harry.pythonanywhere.com/
 
 
 Project Status
@@ -122,7 +122,7 @@ Convinced?  Get on with part 1 of the tutorial then!
 LINKS
 =====
 
-http://hjwp.pythonanywhere.com/
+http://harry.pythonanywhere.com/
 
 https://docs.djangoproject.com/en/dev/intro/tutorial02/
 
