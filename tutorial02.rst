@@ -14,7 +14,9 @@ of the code from ``test_polls_admin.py``, so you might want to do a "save as"
 based on that file.
 
 Let's start by writing out our FT as human-readable comments, which describe
-the user's actions, and the expected behaviour of the site::
+the user's actions, and the expected behaviour of the site
+
+.. sourcecode:: python
 
     from functional_tests import FunctionalTest, ROOT
     from selenium.webdriver.common.keys import Keys
@@ -50,13 +52,17 @@ the user's actions, and the expected behaviour of the site::
 
 A nice little test, but that very first comment rather glosses over a lot.  We
 haven't created anything to do with choices yet!  Let's split out the Gertrude
-bit into its own method, for tidiness::
+bit into its own method, for tidiness
+
+.. sourcecode:: python
 
         # First, Gertrude the administrator logs into the admin site and
         # creates a couple of new Polls, and their response choices
         self._setup_polls_via_admin()
 
-And add the new method::
+And add the new method
+
+.. sourcecode:: python
 
     class TestPolls(FunctionalTest):
 
@@ -130,7 +136,9 @@ Looks like I was lying about not messing about with the admin site any more. Ah 
 
 Right, the FT can't find the "choice" elements to fill in on the admin page.
 Let's go ahead and create our "Choice" model then. As usual, we start with some
-unit tests - ``polls/tests.py``::
+unit tests - ``polls/tests.py``
+
+.. sourcecode:: python
 
     class TestPollChoicesModel(TestCase):
 
@@ -167,11 +175,15 @@ unit tests - ``polls/tests.py``::
             self.assertEquals(choice_from_db.choice, "doin' fine...")
             self.assertEquals(choice_from_db.votes, 3)
 
-Also remember to add the import to the top of the file::
+Also remember to add the import to the top of the file
+
+.. sourcecode:: python
 
     from polls.models import Choice, Poll
 
-And we may as well give it something to import too - in ``polls/models.py``::
+And we may as well give it something to import too - in ``polls/models.py``
+
+.. sourcecode:: python
 
     class Choice(object):
         pass
@@ -222,7 +234,9 @@ Our tests are complaining that the "poll" object has no attribute
 ``choice_set``. This is a special attribute that allows you to retrieve all the
 related Choice objects for a particular poll, and it gets added by Django whenever
 you define a relationship between two models - a foreign key relationship for 
-example. Let's add that now::
+example. Let's add that now
+
+.. sourcecode:: python
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)
@@ -239,7 +253,9 @@ Re-running the unit tests, we get::
 
     ----------------------------------------------------------------------
 
-Let's give Choice a choice...::
+Let's give Choice a choice...
+
+.. sourcecode:: python
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)
@@ -249,7 +265,9 @@ Tests again::
 
     AttributeError: 'Choice' object has no attribute 'votes'
 
-Let's add votes::
+Let's add votes
+
+.. sourcecode:: python
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)
@@ -293,7 +311,9 @@ Ah, the FTs want to be able to add "choices" to a poll from the admin view.
 Django has a way:
 
 Let's edit ``polls/admin.py``, and do some customising on the way the Poll
-admin page works::
+admin page works
+
+.. sourcecode:: python
 
     from django.contrib import admin
     from polls.models import Choice, Poll
@@ -330,7 +350,9 @@ You may have noticed, during the run, that the form got all grumpy about the
 test server using ``manage.py runserver`` and check for yourself?  Remember, you
 may need to ``syncdb``)
 
-Let's make 'votes' default to 0, by adding a new test in ``tests.py``::
+Let's make 'votes' default to 0, by adding a new test in ``tests.py``
+
+.. sourcecode:: python
 
     def test_choice_defaults(self):
         choice = Choice()
@@ -340,7 +362,9 @@ And run it::
 
     AssertionError: None != 0
 
-And set the default, in ``polls/models.py``::
+And set the default, in ``polls/models.py``
+
+.. sourcecode:: python
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)
