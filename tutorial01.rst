@@ -58,7 +58,9 @@ settings is what kind of database to use.  We'll use the easiest possible, sqlit
 
 Find settings ``settings.py`` in the root of the new ``mysite`` folder, and
 open it up in your favourite text editor. Find the lines that mention ``DATABASES``,
-and change them, like so::
+and change them, like so
+
+.. sourcecode:: python
 
     DATABASES = {
         'default': {
@@ -160,7 +162,9 @@ Note the nice, descriptive names for the test functions, and the comments,
 which describe in human-readable text the actions that our user will take.
 Mhhhh, descriptive names.....
 
-It's always nice to give the user a name... Mine is called Gertrude...::
+It's always nice to give the user a name... Mine is called Gertrude...
+
+.. sourcecode:: python
 
     from functional_tests import FunctionalTest, ROOT
 
@@ -227,7 +231,12 @@ The test output will looks something like this::
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 12, in test_can_create_new_poll_via_admin_site
         self.assertIn('Django administration', body.text)
-    AssertionError: 'Django administration' not found in u"It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\nStart your first app by running python mysite/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!"
+    AssertionError: 'Django administration' not found in u"It worked!\n
+    Congratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet.
+    Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\n
+    Start your first app by running python mysite/manage.py startapp [appname].\n
+    You're seeing this message because you have DEBUG = True in your Django settings file 
+    and you haven't configured any URLs. Get to work!"
 
     ----------------------------------------------------------------------
     Ran 1 test in 4.754s
@@ -245,7 +254,9 @@ page two of the official Django tutorial:
 https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site
 
 At this point we need to do two things: add "django.contrib.admin" to
-INSTALLED_APPS in ``settings.py``::
+INSTALLED_APPS in ``settings.py``
+
+.. sourcecode:: python
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -260,7 +271,9 @@ INSTALLED_APPS in ``settings.py``::
         'polls'
     )
 
-And edit ``mysite/urls.py`` to uncomment the lines that reference the admin::
+And edit ``mysite/urls.py`` to uncomment the lines that reference the admin
+
+.. sourcecode:: python
 
     from django.contrib import admin
     admin.autodiscover()
@@ -294,7 +307,9 @@ Our first unit tests: testing a new "Poll" model
 
 The Django unit test runner will automatically run any tests we put in
 ``tests.py``.  Later on, we might decide we want to put our tests somewhere
-else, but for now, let's use that file::
+else, but for now, let's use that file
+
+.. sourcecode:: python
 
     import datetime
     from django.test import TestCase
@@ -350,7 +365,9 @@ test to import.  In TDD, once we've got a test that fails, we're finally allowed
 to write some "real" code.  But only the minimum required to get the tests to get 
 a tiny bit further on!
 
-So let's create a minimal Poll class, in ``polls/models.py``::
+So let's create a minimal Poll class, in ``polls/models.py``
+
+.. sourcecode:: python
 
     from django.db import models
 
@@ -362,7 +379,11 @@ tests, change a tiny bit of code, check the tests again, see what tiny bit of
 code to write next. Run the tests...::
 
     Creating test database for alias 'default'...
-    ........................................................................................................................................................................................................................................................................E..........................................................
+    ............................................................................
+    ............................................................................
+    ............................................................................
+    ....................................E.......................................
+    ...................
     ======================================================================
     ERROR: test_creating_a_poll (polls.tests.TestPollsModel)
     ----------------------------------------------------------------------
@@ -380,7 +401,9 @@ code to write next. Run the tests...::
 
 Right, the tests are telling us that we can't "save" our Poll.  That's because
 it's not a Django model object.  Let's make the minimal change required to get 
-our tests further on::
+our tests further on
+
+.. sourcecode:: python
 
     class Poll(models.Model):
         pass
@@ -396,12 +419,14 @@ Running the tests again, we should see a slight change to the error message::
         self.assertEquals(only_poll_in_database.question, "What's up?")
     AttributeError: 'Poll' object has no attribute 'question'
 
-----------------------------------------------------------------------
+    ----------------------------------------------------------------------
 
 
 Notice that the tests have got all the way through to line 26, where we retrieve
 the object back out of the database, and it's telling us that we haven't saved the
-question attribute.  Let's fix that::
+question attribute.  Let's fix that
+
+.. sourcecode:: python
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -419,7 +444,9 @@ Now our tests get slightly further - they tell us we need to add a pub_date::
     AttributeError: 'Poll' object has no attribute 'pub_date'
     ----------------------------------------------------------------------
 
-Let's add that too::
+Let's add that too
+
+.. sourcecode:: python
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -428,7 +455,11 @@ Let's add that too::
 
 And run the tests again::
 
-    ...................................................................................................................................................................................................................................................................................................................................
+    ............................................................................
+    ............................................................................
+    ............................................................................
+    ............................................................................
+    ...................
     ----------------------------------------------------------------------
     Ran 323 tests in 2.402s
 
@@ -460,7 +491,9 @@ The unit tests all pass. Does this mean our functional test will pass?::
 Ah, not quite.  The Django admin site doesn't automatically contain every model
 you define - you need to tell it which models you want to be able to administer.
 To do that, we just need to create a file called ``admin.py`` in the ``polls``
-directory, with the following three lines::
+directory, with the following three lines
+
+.. sourcecode:: python
 
     from polls.models import Poll
     from django.contrib import admin
@@ -507,7 +540,8 @@ that contains something like this::
 
     no such table: polls_poll
 
-    Exception Location: 	/usr/local/lib/python2.7/dist-packages/django/db/backends/sqlite3/base.py in execute, line 234
+    Exception Location: 	/usr/local/lib/python2.7/dist-packages/django/db/backends/sqlite3/base.py 
+        in execute, line 234
     Python Executable: 	/usr/bin/python
     Python Version: 	2.7.1
     [etc]
@@ -558,7 +592,9 @@ by just taking the field name and capitalising it, converting underscores
 to spaces.  So that works well for ``question``, but not so well for ``pub_date``.
 
 So that's one thing we'll want to change.  Let's add a test for that to the end of
-our FT::
+our FT
+
+.. sourcecode:: python
 
         # She sees a link to 'add' a new poll, so she clicks it
         new_poll_link = self.browser.find_element_by_link_text('Add poll')
@@ -615,7 +651,9 @@ Google Chrome), you'll find out that the 'name' for our three fields are
                         
                     
 
-Let's use them in our FT:: 
+Let's use them in our FT
+
+.. sourcecode:: python
 
         # She sees some input fields for "Question" and "Date published"
         body = self.browser.find_element_by_tag_name('body')
@@ -634,7 +672,9 @@ Let's use them in our FT::
         time_field.send_keys('00:00')
 
 
-We can also use the CSS selector to pick up the "Save" button::
+We can also use the CSS selector to pick up the "Save" button
+
+.. sourcecode:: python
 
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         save_button.click()
@@ -647,7 +687,9 @@ as "Poll object".
 .. image:: images/django_admin_poll_object_needs_verbose_name.png
 
 Django lets you give them more descriptive names, including any attribute of
-the object.  So let's say we want our polls listed by their question::
+the object.  So let's say we want our polls listed by their question
+
+.. sourcecode:: python
 
         # She is returned to the "Polls" listing, where she can see her
         # new poll, listed as a clickable link
@@ -671,16 +713,22 @@ isn't the label we want for our field ("Date published")::
     FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 43, in test_can_create_new_poll_via_admin_site
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 43, in 
+      test_can_create_new_poll_via_admin_site
         self.assertIn('Date published:', body.text)
         django.kill() #TODO: doesn't kill child processes, fix
-    AssertionError: 'Date published:' not found in u'Django administration\nWelcome, admin. Change password / Log out\nHome \u203a Polls \u203a Polls \u203a Add poll\nAdd poll\nQuestion:\nPub date:\nDate:  Today | \nTime:  Now | '
+    AssertionError: 'Date published:' not found in u'Django administration\n
+    Welcome, admin. Change password / Log out\n
+    Home \u203a Polls \u203a Polls \u203a Add poll\nAdd poll\nQuestion:\n
+    Pub date:\nDate:  Today | \nTime:  Now | '
 
     ----------------------------------------------------------------------
 
 Django stores human-readable names for model attributes in a special attribute
 called `verbose_name`.  Let's write a unit test that checks the verbose name
-for our ``pub_date`` field.  Add the following method to ``polls\tests.py``::
+for our ``pub_date`` field.  Add the following method to ``polls\tests.py``
+
+.. sourcecode:: python
 
     def test_verbose_name_for_pub_date(self):
         for field in Poll._meta.fields:
@@ -700,7 +748,9 @@ fail::
 
     AssertionError: 'pub date' != 'Date published'
 
-And we can make the change in ``models.py``::
+And we can make the change in ``models.py``
+
+.. sourcecode:: python
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -712,7 +762,8 @@ Re-running our functional tests, things have moved on::
     FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 63, in test_can_create_new_poll_via_admin_site
+      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 63, in 
+      test_can_create_new_poll_via_admin_site
         self.assertEquals(len(new_poll_links), 1)
     AssertionError: 0 != 1
 
@@ -721,7 +772,9 @@ Re-running our functional tests, things have moved on::
 We're almost there - the FT is complaining it can't find a link to a Poll
 which has the text of our question.  To make this work, we need to tell
 Django how to print out a Poll object.  this happens in the ``__unicode__``
-method.  As usual, we unit test first, in this case it's a very simple one::
+method.  As usual, we unit test first, in this case it's a very simple one
+
+.. sourcecode:: python
 
     def test_poll_objects_are_named_after_their_question(self):
         p = Poll()
@@ -734,14 +787,17 @@ Running the unit tests shows the following error::
     FAIL: test_poll_objects_are_named_after_their_question (polls.tests.TestPollsModel)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/polls/tests.py", line 37, in test_poll_objects_are_named_after_their_question
+      File "/home/harry/workspace/mysite/polls/tests.py", line 37, in 
+      test_poll_objects_are_named_after_their_question
         self.assertEquals(unicode(p), 'How is babby formed?')
     AssertionError: u'Poll object' != 'How is babby formed?'
 
     ----------------------------------------------------------------------
 
 And the fix is simple too - we define a ``__unicode__`` method on our Poll class,
-in ``models.py``::
+in ``models.py``
+
+.. sourcecode:: python
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -755,7 +811,11 @@ And you should now find that the unit tests pass::
 
     harry@harry-laptop:~/workspace/mysite:master$ ./manage.py test
     Creating test database for alias 'default'...
-    .....................................................................................................................................................................................................................................................................................................................................
+    ............................................................................
+    ............................................................................
+    ............................................................................
+    ............................................................................
+    .....................
     ----------------------------------------------------------------------
     Ran 325 tests in 2.526s
 
