@@ -152,8 +152,8 @@ https://docs.djangoproject.com/en/1.3/intro/tutorial02/
 So, our first user story is that the user should be able to log into the Django
 admin site using an admin username and password, and create a new poll.
 
-.. image:: images/admin03t.png
-.. image:: images/admin05t.png
+.. image:: /static/images/admin03t.png
+.. image:: /static/images/admin05t.png
 
 Let's open up a file inside the ``fts`` directory called
 ``test_polls_admin.py`` and enter the code below.
@@ -584,7 +584,7 @@ Let's run ``python manage.py runserver`` again, and go take another look at the
 admin pages. If you try and create a new Poll, you should see a menu a bit like
 this.
 
-.. image:: images/add_poll_need_verbose_name_for_pub_date.png
+.. image:: /static/images/add_poll_need_verbose_name_for_pub_date.png
 
 Pretty neat, but `Pub date` isn't a very nice label for our publication date
 field.  Django normally generates labels for its admin fields automatically,
@@ -684,7 +684,7 @@ Finally, we'll want to have our test check that the new Poll appears on the list
 page.  If you've entered a Poll, you'll have noticed that the polls are just described
 as "Poll object".  
 
-.. image:: images/django_admin_poll_object_needs_verbose_name.png
+.. image:: /static/images/django_admin_poll_object_needs_verbose_name.png
 
 Django lets you give them more descriptive names, including any attribute of
 the object.  So let's say we want our polls listed by their question
