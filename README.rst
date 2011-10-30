@@ -1,7 +1,12 @@
-Website:
---------
+The Concept
+-----------
 
-http://harry.pythonanywhere.com/
+This idea is to provide an introduction to Test-Driven web development using
+Django (and Python).  Essentially, we run through the same material as the
+official Django tutorial, but instead of 'just' writing code, we write tests
+first at each stage - both "functional tests", in which we actually pretend to
+be a user, and drive a real web browser, as well as "unit tests", which help us
+to design and piece together the individual working parts of the code.
 
 
 Project Status
@@ -18,20 +23,15 @@ Current progress
     - todo: views, forms (pp 3, 4)
 
 
-So it's not *really* ready for someone to use as a proper tutorial yet.  If
+So it's not *completely* ready for someone to use as a comprehensive tutorial yet.  If
 you're impatient and you want to give it a go anyway, feel free!  The selenium
 test runner should be of some use at least...
 
 
-The Concept
------------
+Website:
+--------
 
-This idea is to provide an introduction to Test-Driven web development using
-Django (and Python).  Essentially, we run through the same material as the
-official Django tutorial, but instead of 'just' writing code, we write tests
-first at each stage - both "functional tests", in which we actually pretend to
-be a user, and drive a real web browser, as well as "unit tests", which help us
-to design and piece together the individual working parts of the code.
+http://harry.pythonanywhere.com/
 
 
 
