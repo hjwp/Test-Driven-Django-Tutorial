@@ -64,8 +64,8 @@ and change them, like so
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': 'database.sqlite',                      # Or path to database file if using sqlite3.
+            'ENGINE': 'django.db.backends.sqlite3', 
+            'NAME': 'database.sqlite',
 
 
 Find out more about projects, apps and ``settings.py`` here:
@@ -93,7 +93,7 @@ sure that our tests run against a different copy of the database from the
 production one, so that we're not afraid of blowing away real data.
 
 We'll do this by providing an alternative settings file for Django.  Create a
-file called ``settings_for_fts.py`` next to settings.py, and give it the 
+new file called ``settings_for_fts.py`` next to settings.py, and give it the 
 following contents::
 
     from settings import *

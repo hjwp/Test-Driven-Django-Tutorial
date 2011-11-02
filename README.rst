@@ -18,7 +18,7 @@ Current progress
 
     - most of Django admin view (p. 2 of tutorial)
 
-    - first Django model  (p. 1 of tutorial)
+    - first Django models  (p. 1 of tutorial)
 
     - todo: views, forms (pp 3, 4)
 
@@ -118,9 +118,11 @@ someone else with experience.  They know.  Now, onto the practicals.
 
 Convinced?  Get on with part 1 of the tutorial then!
 
+http://harry.pythonanywere.com/tutorial/1/
 
-LINKS
-=====
+
+USEFUL LINKS
+------------
 
 http://harry.pythonanywhere.com/
 
