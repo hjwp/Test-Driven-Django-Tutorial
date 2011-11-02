@@ -167,6 +167,7 @@ It's always nice to give the user a name... Mine is called Gertrude...
 .. sourcecode:: python
 
     from functional_tests import FunctionalTest, ROOT
+    from selenium.webdriver.common.keys import Keys
 
     class TestPollsAdmin(FunctionalTest):
 
@@ -320,12 +321,9 @@ else, but for now, let's use that file
             # start by creating a new Poll object with its "question" set
             poll = Poll()
             poll.question = "What's up?"
+            poll.pub_date = datetime.datetime(2012, 12, 25)
 
             # check we can save it to the database
-            poll.save()
-
-            # check we can adjust its publication date
-            poll.pub_date = datetime.datetime(2012, 12, 25)
             poll.save()
 
             # now check we can find it in the database again
