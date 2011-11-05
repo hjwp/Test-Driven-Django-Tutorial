@@ -58,7 +58,7 @@ settings is what kind of database to use.  We'll use the easiest possible, sqlit
 
 Find settings ``settings.py`` in the root of the new ``mysite`` folder, and
 open it up in your favourite text editor. Find the lines that mention ``DATABASES``,
-and change them, like so
+and change the setting for ``ENGINE`` and ``NAME``, like so
 
 .. sourcecode:: python
 
@@ -212,9 +212,18 @@ It's always nice to give the user a name... Mine is called Gertrude...
             # She is returned to the "Polls" listing, where she can see her
             # new poll
 
+If you've never seen the django-admin site before, some of that stuff may seem
+a bit like magic - I've written it because I already know what the admin site
+looks like. Later in the tutorial, I'll show you how to fire up a test server 
+and explore the django admin site manually, in order to decide how to write
+these sorts of tests. Also, most of the FT's you write in a Django project
+don't concern the admin site, they concern new pages you've written entirely
+yourself - in which case the FT is a lot less like magic, and a lot more like
+spec'ing out how you want your site to look and how it should work.  Stick
+around, and I promise you'll find out all about it!
 
 
-Let's try running our first test::
+For now, let's try running our first test::
 
     ./functional_tests.py
 
@@ -342,11 +351,22 @@ the way we want them too.  Aside from being useful as tests, they're useful
 to help us think about the way we design our code... It forces us to think 
 about how things are going to work, from a slightly external point of view.
 
-<go into more detail on how ORM works>
+If you've never worked with Django, this test will also be your first introduction
+to the Django `ORM` - the API for working with database objects in Django.
+Here we're creating a new "Poll" object, and setting some of its attributes;
+(``question`` and ``pub_date``) these correspond to a row in the database, and
+the values for the table's columns. We can then ``save`` the object to the
+database.
 
-Here we're creating a new Poll object, and checking that we can save it to 
-the database, as well as checking that we can set and store a Poll's main two
-attributes: the question and the publication date.::
+Later on, you can also see how we look up existing objects from the database
+using ``Poll.objects``, which lets us run queries against the database.  We've
+used the simplest possible query, ``all()``, but all sorts of other options are
+available, and Django's API is very helpful and intuitive.  You can find out more
+at:
+
+https://docs.djangoproject.com/en/1.3/intro/tutorial01/#playing-with-the-api
+
+Let's run the unit tests.::
 
     ./manage.py test
 
@@ -429,7 +449,7 @@ question attribute.  Let's fix that
     class Poll(models.Model):
         question = models.CharField(max_length=200)
 
-<(note on max_length=200)?>
+<TODO: decide how/whether to test max_length - too complex for an intro?>
 
 Now our tests get slightly further - they tell us we need to add a pub_date::
 
