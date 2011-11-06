@@ -2,6 +2,7 @@ from functional_tests import FunctionalTest, ROOT
 from selenium.webdriver.common.keys import Keys
 
 class TestPolls(FunctionalTest):
+
     def _setup_polls_via_admin(self):
         # Gertrude logs into the admin site
         self.browser.get(ROOT + '/admin/')
@@ -58,10 +59,14 @@ class TestPolls(FunctionalTest):
 
         # He clicks on the link to the first Poll, which is called
         # 'How awesome is test-driven development?'
-
+        self.browser.find_element_by_link_text('How awesome is Test-Driven Development?').click()
 
         # He is taken to a poll 'results' page, which says
         # "no-one has voted on this poll yet"
+        heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(heading.text, 'Poll Results')
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('No-one has voted on this poll yet', body.text)
 
         # He also sees a form, which offers him several choices.
         # He decided to select "very awesome"
