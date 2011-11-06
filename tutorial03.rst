@@ -227,6 +227,8 @@ So let's now create our template::
     touch mysite/polls/templates/polls.html
 
 Edit it with your favourite editor, 
+
     
+.. sourcecode:: html+django
     
 
