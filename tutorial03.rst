@@ -199,6 +199,34 @@ into view (maybe starting with ``content = <h1>Polls</h1>`` before the ``for`` l
 but at this point it seems sensible to start to use Django's template system.
 
 The Django Test Client lets us check whether a response was rendered using a template,
-so let's use that:
+so let's use that.  In ``tests.py``:
 
+.. sourcecode:: python
+
+        self.assertIn(poll1.question, response.content)
+        self.assertIn(poll2.question, response.content)
+
+        self.assertIn('polls.html', response.templates)
+
+Testing ``./manage.py test polls``::
+ 
+    ======================================================================
+    FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
+        self.assertIn('polls.html', response.templates)
+    AssertionError: 'polls.html' not found in []
+
+    ----------------------------------------------------------------------
+    Ran 6 tests in 0.009s
+
+So let's now create our template::
+
+    mkdir mysite/polls/templates
+    touch mysite/polls/templates/polls.html
+
+Edit it with your favourite editor, 
+    
+    
 

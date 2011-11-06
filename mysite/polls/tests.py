@@ -93,3 +93,5 @@ class TestAllPollsView(TestCase):
 
         self.assertIn(poll1.question, response.content)
         self.assertIn(poll2.question, response.content)
+
+        self.assertIn('polls.html', response.templates)
