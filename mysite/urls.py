@@ -5,7 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
+    (r'^$', 'mysite.polls.views.polls'),
     # (r'^mysite/', include('mysite.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

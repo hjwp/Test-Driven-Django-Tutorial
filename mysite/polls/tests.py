@@ -1,5 +1,6 @@
 import datetime
 from django.test import TestCase
+from django.test.client import Client
 from polls.models import Choice, Poll
 
 class TestPollsModel(TestCase):
@@ -78,3 +79,17 @@ class TestPollChoicesModel(TestCase):
 
 
 
+class TestAllPollsView(TestCase):
+
+    def test_root_url_shows_all_polls(self):
+        # set up some polls
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+        poll2.save()
+
+        client = Client()
+        response = client.get('/')
+
+        self.assertIn(poll1.question, response.content)
+        self.assertIn(poll2.question, response.content)
