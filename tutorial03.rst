@@ -198,15 +198,18 @@ The FT wants an ``h1`` heading tag on the page.  Now, again, we could hard-code 
 into view (maybe starting with ``content = <h1>Polls</h1>`` before the ``for`` loop),
 but at this point it seems sensible to start to use Django's template system.
 
-The Django Test Client lets us check whether a response was rendered using a template,
+The Django Test Client lets us check whether a response was rendered using a
+template, by using a special attribute of the response called ``templates``,
 so let's use that.  In ``tests.py``:
 
 .. sourcecode:: python
 
+        template_names_used = [t.name for t in response.templates]
+        self.assertIn('polls.html', template_names_used)
+
         self.assertIn(poll1.question, response.content)
         self.assertIn(poll2.question, response.content)
 
-        self.assertIn('polls.html', response.templates)
 
 Testing ``./manage.py test polls``::
  
@@ -214,7 +217,7 @@ Testing ``./manage.py test polls``::
     FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
+      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 94, in test_root_url_shows_all_polls
         self.assertIn('polls.html', response.templates)
     AssertionError: 'polls.html' not found in []
 
@@ -227,8 +230,148 @@ So let's now create our template::
     touch mysite/polls/templates/polls.html
 
 Edit it with your favourite editor, 
-
     
 .. sourcecode:: html+django
-    
+
+    <html>
+      <body>
+        <h1>Polls</h1>
+        {% for poll in polls %}
+          {{ poll.question }}
+        {% endfor %}
+      </body>
+    </hml>
+
+You'll probably recognise this as being essentially standard HTML, intermixed with
+some special django control codes.  These are either surrounded with
+``{%`` - ``%}``, for flow control - like a `for` loop in this case, and ``{{``
+- ``}}`` for printing variables.  You can find out more about the Django template
+  language here:
+
+ https://docs.djangoproject.com/en/1.3/topics/templates/ 
+
+ Let's rewrite our code to use this template.  For this we can use the Django
+ ``render`` function, which takes the request and the name of the template:
+
+.. sourcecode:: python
+
+    from django.shortcuts import render
+    from polls.models import Poll
+
+    def polls(request):
+        content = ''
+        for poll in Poll.objects.all():
+            content += poll.question
+
+        return render(request, 'polls.html')
+
+Our last unit test error was that we weren't using a template - let's see if this
+fixes it::
+
+    ======================================================================
+    FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
+        self.assertIn(poll1.question, response.content)
+    AssertionError: '6 times 7' not found in '<html>\n  <body>\n    <h1>Polls</h1>\n    \n  </body>\n</hml>\n'
+
+    ----------------------------------------------------------------------
+
+Sure does!  Unfortunately, we've lost our Poll questions from the response
+content...
+
+Looking at the template code, you can see that we want to iterate through a
+variable called ``polls``.  The way we pass this into a template is via a
+special kind of dictionary called a `context`.  The Django test client also
+lets us check on what context objects were used in rendering a response, so
+we can write a test for that too:
+
+.. sourcecode:: python
+
+        client = Client()
+        response = client.get('/')
+
+        template_names_used = [t.name for t in response.templates]
+        self.assertIn('polls.html', template_names_used)
+
+        polls_in_context = response.context['polls']
+        self.assertEquals(list(polls_in_context), [poll1, poll2])
+
+        self.assertIn(poll1.question, response.content)
+        self.assertIn(poll2.question, response.content)
+
+
+Now, re-running the tests gives us::
+
+    ======================================================================
+    ERROR: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
+        polls_in_context = response.context['polls']
+      File "/usr/lib/pymodules/python2.7/django/template/context.py", line 60, in __getitem__
+        raise KeyError(key)
+    KeyError: 'polls'
+
+    ----------------------------------------------------------------------
+    Ran 6
+
+Essentially, we never passed any 'polls' to our template.  Let's add them,
+but make them empty - again, the idea is to make the minimal change to move
+the test forwards:
+
+.. sourcecode:: python
+
+    def polls(request):
+        content = ''
+        for poll in Poll.objects.all():
+            content += poll.question
+
+        context = {'polls': []}
+        return render(request, 'polls.html', context)
+
+Now the unit tests say::
+
+    ======================================================================
+    FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 98, in test_root_url_shows_all_polls
+        self.assertEquals(list(polls_in_context), [poll1, poll2])
+    AssertionError: Lists differ: [] != [<Poll: 6 times 7>, <Poll: lif...
+
+    Second list contains 2 additional elements.
+    First extra element 0:
+    6 times 7
+
+    - []
+    + [<Poll: 6 times 7>, <Poll: life, the universe and everything>]
+
+    ----------------------------------------------------------------------
+
+
+
+Notice the way we've had to call ``list`` on ``polls_in_context`` - that's
+because Django queries return special ``QuerySet`` objects, which, although
+they behave like lists, don't quite compare equal like them.
+
+Let's fix our code so the tests pass:
+
+.. sourcecode:: python
+
+    from django.shortcuts import render
+    from polls.models import Poll
+
+    def polls(request):
+        context = {'polls': Poll.objects.all()}
+        return render(request, 'polls.html', context)
+
+Ta-da!::
+
+    ......
+    ----------------------------------------------------------------------
+    Ran 6 tests in 0.011s
+
+    OK
 

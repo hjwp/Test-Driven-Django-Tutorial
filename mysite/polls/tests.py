@@ -91,7 +91,12 @@ class TestAllPollsView(TestCase):
         client = Client()
         response = client.get('/')
 
+        template_names_used = [t.name for t in response.templates]
+        self.assertIn('polls.html', template_names_used)
+
+        polls_in_context = response.context['polls']
+        self.assertEquals(list(polls_in_context), [poll1, poll2])
+
         self.assertIn(poll1.question, response.content)
         self.assertIn(poll2.question, response.content)
 
-        self.assertIn('polls.html', response.templates)
