@@ -14,18 +14,20 @@ Project Status
 
 This project is still very much under construction.  Any feedback is welcome!
 
-Current progress
+Current progress - 75% of Django tutorial covered
 
     - most of Django admin view (p. 2 of tutorial)
 
     - first Django models  (p. 1 of tutorial)
 
-    - todo: views, forms (pp 3, 4)
+    - first Django views (p. 3 of tutorial)
+
+    - todo: forms (p. 4)
 
 
-So it's not *completely* ready for someone to use as a comprehensive tutorial yet.  If
-you're impatient and you want to give it a go anyway, feel free!  The selenium
-test runner should be of some use at least...
+So it's *almost* ready for someone to use as a proper tutorial yet, but it's not
+quite complete..  If you're impatient and you want to give it a go anyway, feel
+free - and I'd love to hear feedback and suggestions :-)
 
 
 Website:
