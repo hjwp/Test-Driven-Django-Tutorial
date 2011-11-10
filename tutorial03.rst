@@ -41,7 +41,6 @@ Let's run that, and see where we get::
       File "/home/harry/workspace/Test-Driven-Django-Tutorial/mysite/fts/test_polls.py", line 57, in test_voting_on_a_new_poll
         self.assertEquals(heading.text, 'Polls')
     AssertionError: u'Page not found (404)' != 'Polls'
-
     ----------------------------------------------------------------------
     Ran 2 tests in 19.772s
 
@@ -93,10 +92,23 @@ Now let's hook up this view inside ``urls.py``:
 
 .. sourcecode:: python
 
+    from mysite.polls import views as polls_views
+
     urlpatterns = patterns('',
-        (r'^$', 'mysite.polls.views.polls'),
+        (r'^$', polls_views.polls),
         (r'^admin/', include(admin.site.urls)),
     )
+
+You may notice the slightly unorthodox import of ``polls.views``  - the alternative is you
+can feed in views as strings to lines in ``urlpatterns``, without importing anything, like
+this:
+
+.. sourcecode:: python
+
+        (r'^$', 'mysite.polls_views.polls'),
+
+I like my way because it uses the 'real' view - it requires that we actually have a view
+defined in views.py, and that it imports properly... But it's a personal preference!
 
 Re-running our tests should show us a different error::
 
@@ -105,7 +117,7 @@ Re-running our tests should show us a different error::
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 92, in test_root_url_shows_all_polls
-        response = client.get('/')
+        respoviense = client.get('/')
       File "/usr/lib/pymodules/python2.7/django/test/client.py", line 445, in get
         response = super(Client, self).get(path, data=data, **extra)
       File "/usr/lib/pymodules/python2.7/django/test/client.py", line 229, in get
@@ -113,7 +125,6 @@ Re-running our tests should show us a different error::
       File "/usr/lib/pymodules/python2.7/django/core/handlers/base.py", line 129, in get_response
         raise ValueError("The view %s.%s didn't return an HttpResponse object." % (callback.__module__, view_name))
     ValueError: The view mysite.polls.views.polls didn't return an HttpResponse object.
-
     ----------------------------------------------------------------------
 
 Let's get the view to return an HttpResponse:
@@ -134,7 +145,6 @@ The tests are now more instructive::
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 96, in test_root_url_shows_all_polls
         self.assertIn(poll1.question, response.content)
     AssertionError: '6 times 7' not found in ''
-
     ----------------------------------------------------------------------
 
 So far, we're returning a blank page.  Now, to get the tests to pass, it would
@@ -189,7 +199,6 @@ So, rather than anticipate what we might want to put in our HttpResponse, let's 
       File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 123, in check_response
         raise exception_class(message, screen, stacktrace)
     NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
-
     ----------------------------------------------------------------------
     Ran 2 tests in 29.119s
 
@@ -220,7 +229,6 @@ Testing ``./manage.py test polls``::
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 94, in test_root_url_shows_all_polls
         self.assertIn('polls.html', response.templates)
     AssertionError: 'polls.html' not found in []
-
     ----------------------------------------------------------------------
     Ran 6 tests in 0.009s
 
@@ -240,7 +248,7 @@ Edit it with your favourite editor,
           {{ poll.question }}
         {% endfor %}
       </body>
-    </hml>
+    </html>
 
 You'll probably recognise this as being essentially standard HTML, intermixed with
 some special django control codes.  These are either surrounded with
@@ -274,8 +282,7 @@ fixes it::
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
         self.assertIn(poll1.question, response.content)
-    AssertionError: '6 times 7' not found in '<html>\n  <body>\n    <h1>Polls</h1>\n    \n  </body>\n</hml>\n'
-
+    AssertionError: '6 times 7' not found in '<html>\n  <body>\n    <h1>Polls</h1>\n    \n  </body>\n</html>\n'
     ----------------------------------------------------------------------
 
 Sure does!  Unfortunately, we've lost our Poll questions from the response
@@ -313,7 +320,6 @@ Now, re-running the tests gives us::
       File "/usr/lib/pymodules/python2.7/django/template/context.py", line 60, in __getitem__
         raise KeyError(key)
     KeyError: 'polls'
-
     ----------------------------------------------------------------------
     Ran 6
 
@@ -351,7 +357,6 @@ Now the unit tests say::
 
     - []
     + [<Poll: 6 times 7>, <Poll: life, the universe and everything>]
-
     ----------------------------------------------------------------------
 
 
@@ -392,7 +397,6 @@ What do the FTs say now?::
       File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 123, in check_response
         raise exception_class(message, screen, stacktrace)
     NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"How awesome is Test-Driven Development?"}' 
-
     ----------------------------------------------------------------------
 
 Ah - although our page may contain the name of our Poll, it's not yet a link we
@@ -475,5 +479,127 @@ of the view that handles the url, and we can also specify some arguments.  We'll
 be making a view for seeing an individual `Poll` object, so we'll probably find
 the poll using its ``id``.  Here's what that translates to in ``tests.py``:
 
+.. sourcecode:: python
 
+    from django.core.urlresolvers import reverse
 
+    class TestAllPollsView(TestCase):
+
+        def test_root_url_shows_links_to_all_polls(self):
+            # set up some polls
+            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1.save()
+            poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+            poll2.save()
+
+            client = Client()
+            response = client.get('/')
+
+            template_names_used = [t.name for t in response.templates]
+            self.assertIn('polls.html', template_names_used)
+
+            # check we've passed the polls to the template
+            polls_in_context = response.context['polls']
+            self.assertEquals(list(polls_in_context), [poll1, poll2])
+
+            # check the poll names appear on the page
+            self.assertIn(poll1.question, response.content)
+            self.assertIn(poll2.question, response.content)
+
+            # check the page also contains the urls to individual polls pages
+            poll1_url = reverse('mysite.polls.views.poll', args=[poll1.id,])
+            self.assertIn(poll1_url, response.content)
+            poll2_url = reverse('mysite.polls.views.poll', args=[poll2.id,])
+            self.assertIn(poll2_url, response.content)
+
+Running this (``./manage.py test polls``) gives::
+
+    ======================================================================
+    ERROR: test_root_url_shows_links_to_all_polls (polls.tests.TestAllPollsView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 107, in test_root_url_shows_links_to_all_polls
+        poll1_url = reverse('mysite.polls.views.poll', kwargs=dict(poll_id=poll1.id))
+      File "/usr/lib/pymodules/python2.7/django/core/urlresolvers.py", line 391, in reverse
+        *args, **kwargs)))
+      File "/usr/lib/pymodules/python2.7/django/core/urlresolvers.py", line 337, in reverse
+        "arguments '%s' not found." % (lookup_view_s, args, kwargs))
+    NoReverseMatch: Reverse for 'mysite.polls.views.poll' with arguments '()' and keyword arguments '{'poll_id': 1}' not found.
+    ----------------------------------------------------------------------
+
+So, the ``reverse`` function can't find a url or a view to match our request - let's add one!
+
+In ``urls.py``:
+
+.. sourcecode:: python
+
+    urlpatterns = patterns('',
+        (r'^$', polls_views.polls),
+        (r'^poll/(\d+)/$', polls_views.poll),
+        (r'^admin/', include(admin.site.urls)),
+    )
+
+The new line will match any url which starts with `poll/`, then a number made up of one or
+more digits - the matching group ``(\d+)``, which will be captured and passed as the first
+argument to our view - which is reflected in the reverse function's ``args`` parameter.
+
+Now our unit tests give a different error::
+
+    ======================================================================
+    FAIL: test_root_url_shows_links_to_all_polls (polls.tests.TestAllPollsView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 108, in test_root_url_shows_links_to_all_polls
+        self.assertIn(poll1_url, response.content)
+    AssertionError: '/poll/1/' not found in '<html>\n  <body>\n    <h1>Polls</h1>\n    \n      6 times 7\n    \n      life, the universe and everything\n    \n  </body>\n</html>\n'
+    ----------------------------------------------------------------------
+
+We'll also need to add at least a dummy view in ``views.py``
+
+.. sourcecode:: python
+
+    def polls(request):
+        context = {'polls': Poll.objects.all()}
+        return render(request, 'polls.html', context)
+
+    def poll():
+        pass
+
+The templates don't include the urls yet. Let's add them:
+
+.. sourcecode:: html+django
+
+    <html>
+      <body>
+        <h1>Polls</h1>
+        {% for poll in polls %}
+          <a href="{% url mysite.polls.views.poll poll.id %}">{{ poll.question }}</a>
+        {% endfor %}
+      </body>
+    </html>
+
+Notice the call to ``{% url %}``, whose signature is very similar to the call
+to ``reverse``.  Now our unit tests are a lot happier!::
+
+    21:08 ~/workspace/tddjango_site/source/mysite (master)$ ./manage.py test polls 
+    Creating test database for alias 'default'...
+    ......
+    ----------------------------------------------------------------------
+    Ran 6 tests in 0.012s
+    OK
+
+What about the functional tests?::
+
+    ======================================================================
+    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 67, in test_voting_on_a_new_poll
+        self.assertEquals(heading.text, 'Poll Results')
+    AssertionError: u'TypeError at /poll/1/' != 'Poll Results'
+    ----------------------------------------------------------------------
+    Ran 2 tests in 25.927s
+
+Looks like it's time to start implementing our `poll` view, which aims to show
+information about an individual poll...  But for this, you'll have to tune in next
+week!
