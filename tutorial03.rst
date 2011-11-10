@@ -331,6 +331,10 @@ the test forwards:
         context = {'polls': []}
         return render(request, 'polls.html', context)
 
+Notice the way we've had to call ``list`` on ``polls_in_context`` - that's
+because Django queries return special ``QuerySet`` objects, which, although
+they behave like lists, don't quite compare equal like them.
+
 Now the unit tests say::
 
     ======================================================================
@@ -351,11 +355,6 @@ Now the unit tests say::
     ----------------------------------------------------------------------
 
 
-
-Notice the way we've had to call ``list`` on ``polls_in_context`` - that's
-because Django queries return special ``QuerySet`` objects, which, although
-they behave like lists, don't quite compare equal like them.
-
 Let's fix our code so the tests pass:
 
 .. sourcecode:: python
@@ -374,4 +373,107 @@ Ta-da!::
     Ran 6 tests in 0.011s
 
     OK
+
+What do the FTs say now?::
+
+    ./functional_tests.py
+    ======================================================================
+    ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 62, in test_voting_on_a_new_poll
+        self.browser.find_element_by_link_text('How awesome is Test-Driven Development?').click()
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 234, in find_element_by_link_text
+        return self.find_element(by=By.LINK_TEXT, value=link_text)
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 637, in find_element
+        {'using': by, 'value': value})['value']
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 153, in execute
+        self.error_handler.check_response(response)
+      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 123, in check_response
+        raise exception_class(message, screen, stacktrace)
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"How awesome is Test-Driven Development?"}' 
+
+    ----------------------------------------------------------------------
+
+Ah - although our page may contain the name of our Poll, it's not yet a link we
+can click.
+
+The way we'd fix this is in the ``polls.html`` template, by adding an ``<a href=``.
+
+So is this something we write a unit test for as well?  Some people would tend to
+say that this is one unit test too many...  Since this is a guide to `rigorous`
+TDD, I'm going to say we probably should in this case.
+
+On the other hand, if we write a unit test for every single last bit of html
+that we want to write, every last presentational detail, then making tiny
+tweaks to the UI is going to be really burdensome.
+
+At this point, a couple of rules of thumb are useful:
+
+    * In unit tests, **Don't test constants**
+
+    * In functional tests, **Test functionality, not presentation**
+
+The first rule works out like this - if we have some code that says::
+
+    wibble = 3
+
+There's no point in writing a test that says::
+
+    self.assertEquals(wibble, 3)
+
+Tests are meant to check how our code behaves, not just to repeat every line of it.
+
+The second rule is a related rule, but it's more about how users interact with
+your software.  We want our functional tests to check that the software allows
+the user to accomplish certain tasks.  So, we need to check that each screen 
+contains elements that can guide the user towards the choices they need to make
+(the link text), and also that they function in a way that moves the user towards
+their goal (our link, when clicked, will take the user to the right page).
+
+What we definitely don't need to test in our FTs are things like - what specific
+colour are the links (although the fact that they are a different colour to 
+something else may be relevant).  We don't need to check the particular font
+they use.  We don't need to check whether they are displayed in a ``ul`` or in
+a ``table`` - although we may want to check that they are displayed in the
+correct order.
+
+So, where does that leave us?  The FT currently checks the functionality of the 
+site - it checks the link has the correct text, and later it checks that clicking
+the link takes us to the right place.  
+
+So, what about unit testing the templates?  Well, most of what's in a template is 
+just a constant - we don't want to have to rewrite our unit tests just because we
+want to correct a typo in a bit of blurb... The parts of a template that aren't 
+"just a constant" are the bits inside ``{{ }}`` or ``{%  %}`` - bits that
+manipulate some of the ``context`` variables we pass into the ``render`` call.
+
+So, in our unit tests, we need to check that the variables we pass in end up being
+used - that's why we have the ``assertIn`` checks on the ``response.content`` as 
+well as the ``assertEqual`` test on the ``response.context``.
+
+So, what about checking that our template contains the correct hyperlinks, 
+``<a href="/poll/01/``, or whatever they may be?  Well, if we were to hard-code
+them into the template, then that would be a bit like testing a constant.  But
+we're not going to hard-code them, because that would violate the programming
+`DRY` principle - "Don't Repeat Yourself".
+
+If we were to hard-code the URLs for links to individual polls, it would be
+really tedious if we wanted to come back and change them later - say from
+``/poll/1/`` to ``/poll_detail/01/`` or whatever it may be.  Django provides
+a single place to define urls, in ``urls.py``, and it then provides helper 
+tools for retrieving them in other places - a function called ``reverse``, and
+a template tag called ``{% url %}``.  So we'll use the template tag, which
+avoids hard-coding the URL in the template, but it also means that the 
+hyperlink is no longer a constant, so we need to test it.
+
+Phew, that was long winded!  Anyway, the upshot is, more tests - but also, we
+get to learn about Django url helper functions, so it's win-win-win :-)
+
+Let's use the ``reverse`` function in our tests.  Its first argument is the name
+of the view that handles the url, and we can also specify some arguments.  We'll
+be making a view for seeing an individual `Poll` object, so we'll probably find
+the poll using its ``id``.  Here's what that translates to in ``tests.py``:
+
+
 
