@@ -59,19 +59,38 @@ class TestPolls(FunctionalTest):
 
         # He clicks on the link to the first Poll, which is called
         # 'How awesome is test-driven development?'
-        self.browser.find_element_by_link_text('How awesome is Test-Driven Development?').click()
+        first_poll_title = 'How awesome is Test-Driven Development?'
+        self.browser.find_element_by_link_text(first_poll_title).click()
 
         # He is taken to a poll 'results' page, which says
         # "no-one has voted on this poll yet"
-        heading = self.browser.find_element_by_tag_name('h1')
-        self.assertEquals(heading.text, 'Poll Results')
+        main_heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(main_heading.text, 'Poll Results')
+        sub_heading = self.browser.find_element_by_tag_name('h2')
+        self.assertEquals(sub_heading.text, first_poll_title)
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('No-one has voted on this poll yet', body.text)
 
         # He also sees a form, which offers him several choices.
+        choices = self.browser.find_elements_by_css_selector(
+                "input[type='radio']"
+        )
+        choices_text = [c.text for c in choices]
+        self.assertEquals(choices_text, [
+            'Very awesome',
+            'Quite awesome',
+            'Moderately awesome',
+        ])
         # He decided to select "very awesome"
+        chosen = self.browser.find_element_by_css_selector(
+                "input[type='radio', value='Very awesome']"
+        )
+        chosen.click()
 
         # Herbert clicks 'submit'
+        self.browser.find_element_by_css_selector(
+                "input[type='submit']"
+            ).click()
 
         # The page refreshes, and he sees that his choice
         # has updated the results.  they now say
