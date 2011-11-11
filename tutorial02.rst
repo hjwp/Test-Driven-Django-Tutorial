@@ -13,6 +13,9 @@ create a new file for it called ``fts/test_polls.py``.  We'll be re-using some
 of the code from ``test_polls_admin.py``, so you might want to do a "save as"
 based on that file.
 
+Writing the FT as comments
+--------------------------
+
 Let's start by writing out our FT as human-readable comments, which describe
 the user's actions, and the expected behaviour of the site
 
@@ -49,6 +52,9 @@ the user's actions, and the expected behaviour of the site
 
             # Satisfied, he goes back to sleep
 
+
+Setting up data for the test via the admin site
+-----------------------------------------------
 
 A nice little test, but that very first comment rather glosses over a lot.  We
 haven't created anything to do with choices yet!  Let's split out the Gertrude
@@ -133,6 +139,9 @@ Looks like I was lying about not messing about with the admin site any more. Ah 
 
     FAILED (errors=1)
 
+
+Relations between models: Polls and Choices
+-------------------------------------------
 
 Right, the FT can't find the "choice" elements to fill in on the admin page.
 Let's go ahead and create our "Choice" model then. As usual, we start with some
@@ -281,6 +290,9 @@ Another test run?::
     Ran 4 tests in 0.003s
 
     OK
+
+Further customisations of the admin view: related objects inline
+----------------------------------------------------------------
 
 Hooray! What's next?  Well, one of the great things about TDD is that, once
 you've written your tests, you don't really have to keep track of what's next

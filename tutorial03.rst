@@ -4,6 +4,9 @@ our own web pages, rather than using the Django Admin site.
 Let's pick up our FT where we left off - we now have the admin site set up to
 add Polls, including Choices.  We now want to flesh out what the user sees.
 
+At last! An FT for a normal page
+--------------------------------
+
 Last time we wrote the code to get Gertrude the admin to log in and create a 
 poll.  Let's write the next bit, where Herbert the normal user opens up our
 website, sees some polls and votes on them.
@@ -44,6 +47,9 @@ Let's run that, and see where we get::
     ----------------------------------------------------------------------
     Ran 2 tests in 19.772s
 
+
+URLS and view functions, and the Django Test Client
+---------------------------------------------------
 
 The FT is telling us that going to the `ROOT` url (/) produces a 404. We need to tell
 Django what kind of web page to return for the root of our site - the home page if 
@@ -147,6 +153,9 @@ The tests are now more instructive::
     AssertionError: '6 times 7' not found in ''
     ----------------------------------------------------------------------
 
+The Django Template system
+--------------------------
+
 So far, we're returning a blank page.  Now, to get the tests to pass, it would
 be simple enough to just return a response that contained the questions of our two
 polls as `raw` text - like this:
@@ -181,7 +190,8 @@ return. We can't possibly leave the situation like this.  But the point of TDD i
 be driven by the tests.  At each stage, we only write the code that our tests require,
 because that makes absolutely sure that we have tests for all of our code.
 
-So, rather than anticipate what we might want to put in our HttpResponse, let's go to the FT now to see what to do next.::
+So, rather than anticipate what we might want to put in our HttpResponse, let's
+go to the FT now to see what to do next.::
 
     ./functional_tests.py
     ======================================================================
@@ -237,7 +247,7 @@ So let's now create our template::
     mkdir mysite/polls/templates
     touch mysite/polls/templates/polls.html
 
-Edit it with your favourite editor, 
+Edit ``polls.html`` with your favourite editor, 
     
 .. sourcecode:: html+django
 
@@ -399,6 +409,10 @@ What do the FTs say now?::
     NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"How awesome is Test-Driven Development?"}' 
     ----------------------------------------------------------------------
 
+
+Testing philosophy: what to test in templates
+---------------------------------------------
+
 Ah - although our page may contain the name of our Poll, it's not yet a link we
 can click.
 
@@ -528,6 +542,9 @@ Running this (``./manage.py test polls``) gives::
     ----------------------------------------------------------------------
 
 So, the ``reverse`` function can't find a url or a view to match our request - let's add one!
+
+Capturing parameters from URLs 
+------------------------------
 
 In ``urls.py``:
 
