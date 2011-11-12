@@ -109,3 +109,21 @@ class TestAllPollsView(TestCase):
         poll2_url = reverse('mysite.polls.views.poll', args=[poll2.id,])
         self.assertIn(poll2_url, response.content)
 
+
+class TestSinglePollView(TestCase):
+
+    def test_page_shows_poll_title_and_no_votes_message(self):
+        # set up two polls, to check the right one is displayed
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+        poll2.save()
+
+        client = Client()
+        response = client.get('/poll/%d/' % (poll2.id, ))
+
+        self.assertEquals(response.templates[0].name, 'poll.html')
+        self.assertEquals(response.context['poll'], poll2)
+        self.assertIn(poll2.name, response.content)
+        self.assertIn('No-one has voted on this poll yet', response.content)
+
