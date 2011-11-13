@@ -7,4 +7,5 @@ def polls(request):
     return render(request, 'polls.html', context)
 
 def poll(request, poll_id):
-    return render(request, 'poll.html')
+    poll = Poll.objects.get(pk=poll_id)
+    return render(request, 'poll.html', {'poll': poll})

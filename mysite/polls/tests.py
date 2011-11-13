@@ -2,6 +2,7 @@ import datetime
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from polls.forms import PollVoteForm
 from polls.models import Choice, Poll
 
 class TestPollsModel(TestCase):
@@ -124,6 +125,29 @@ class TestSinglePollView(TestCase):
 
         self.assertEquals(response.templates[0].name, 'poll.html')
         self.assertEquals(response.context['poll'], poll2)
-        self.assertIn(poll2.name, response.content)
+        self.assertIn(poll2.question, response.content)
         self.assertIn('No-one has voted on this poll yet', response.content)
+
+
+class TestPollsVoteForm(TestCase):
+
+    def test_form_renders_poll_choices_as_radio_inputs(self):
+        # set up a poll with a couple of choices
+        poll = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll.save()
+        choice1 = Choice(poll=poll, choice='42', votes=0)
+        choice1.save()
+        choice2 = Choice(poll=poll, choice='The Ultimate Answer', votes=0)
+        choice2.save()
+
+        # build a related form:
+        form = PollVoteForm(poll=poll)
+
+        # check it has a single field called 'vote', which has right choices:
+        self.assertEquals(form.fields.keys(), ['vote'])
+        vote_field = form.fields['vote']
+        self.assertEqual(vote_field.choices, [choice1.choice, choice2.choice])
+
+        # check it uses radio inputs to render
+        self.assertIn('input type="radio"', form.as_p())
 
