@@ -3,6 +3,7 @@ try: import unittest2 as unittest #for Python <= 2.6
 except: import unittest
 from selenium import webdriver
 import subprocess
+import sys
 import settings_for_fts
 from django.core.management import call_command, setup_environ
 setup_environ(settings_for_fts)
@@ -48,9 +49,14 @@ def reset_database():
     admin.save()
 
 
-def run_all_functional_tests():
+def run_functional_tests(pattern=None):
     print 'running tests'
-    tests = unittest.defaultTestLoader.discover('fts')
+    if pattern is None:
+        tests = unittest.defaultTestLoader.discover('fts')
+    else:
+        pattern_with_globs = '*%s*' % (pattern,)
+        tests = unittest.defaultTestLoader.discover('fts', pattern=pattern_with_globs)
+
     runner = unittest.TextTestRunner()
     runner.run(tests)
 
@@ -60,4 +66,7 @@ def run_all_functional_tests():
 
 if __name__ == '__main__':
     run_syncdb()
-    run_all_functional_tests()
+    if len(sys.argv) == 1:
+        run_functional_tests()
+    else:
+        run_functional_tests(pattern=sys.argv[1])
