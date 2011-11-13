@@ -277,27 +277,38 @@ incantations.  Let's create a new test in ``tests.py``:
     class TestPollsVoteForm(TestCase):
 
         def test_form_renders_poll_choices_as_radio_inputs(self):
-            # set up a poll with a coup`le of choices
-            poll = Poll(question='6 times 7', pub_date='2001-01-01')
-            poll.save()
-            choice1 = Choice(poll=poll, choice='42', votes=0)
+            # set up a poll with a couple of choices
+            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1.save()
+            choice1 = Choice(poll=poll1, choice='42', votes=0)
             choice1.save()
-            choice2 = Choice(poll=poll, choice='The Ultimate Answer', votes=0)
+            choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
             choice2.save()
 
-            # build a related form:
-            form = PollVoteForm(poll=poll)
+            # set up another poll to make sure we only see the right choices
+            poll2 = Poll(question='time', pub_date='2001-01-01')
+            poll2.save()
+            choice3 = Choice(poll=poll2, choice='PM', votes=0)
+            choice3.save()
+
+            # build a voting form for poll1
+            form = PollVoteForm(poll=poll1)
 
             # check it has a single field called 'vote', which has right choices:
             self.assertEquals(form.fields.keys(), ['vote'])
-            vote_field = form.fields['vote']
-            self.assertEqual(vote_field.choices, [choice1.choice, choice2.choice])
+
+            # choices are tuples in the format (choice_number, choice_text):
+            self.assertEquals(form.fields['vote'].choices, [
+                (choice1.id, choice1.choice),
+                (choice2.id, choice2.choice),
+            ])
 
             # check it uses radio inputs to render
             self.assertIn('input type="radio"', form.as_p())
 
-You might prefer to put the input at the top of the file.  And, for it to work, we
-may as well create a dummy class for it.  Create a file called ``polls/forms.py``.
+You might prefer to put the import at the top of the file.  And, for it to work, we
+may as well create something minimal for it to import! Create a file called
+``polls/forms.py``.
 
 .. sourcecode:: python
 
@@ -355,15 +366,47 @@ https://docs.djangoproject.com/en/1.3/ref/forms/fields/
 
 Now we get::
 
-    self.assertEqual(vote_field.choices, [choice1.choice, choice2.choice])
-    AssertionError: Lists differ: [] != ['42', 'The Ultimate Answer']
+    AssertionError: Lists differ: [] != [(1, '42'), (2, 'The Ultimate ...
 
 So now let's set the choices from the ``poll`` we passed into the 
-constructor:
+constructor (you can read up on choices in Django here)
+
+https://docs.djangoproject.com/en/1.3/ref/models/fields/#field-choices
 
 .. sourcecode:: python
 
     def __init__(self, poll):
         super(self.__class__, self).__init__()
-        self.fields['vote'].choices = [c.choice for c in poll.choice_set.all()]
+        self.fields['vote'].choices = [(c.id, c.choice) for c in poll.choice_set.all()]
+
+Mmmmmh, list comprehensions... 
+
+The final test is to make sure we have radio boxes as the HTML input type.
+We're using ``as_p()``, a method provided on all Django forms which renders
+the form to HTML for us - we can see exactly what the HTML looks like in the
+next test output::
+
+    self.assertIn('input type="radio"', form.as_p())
+    AssertionError: 'input type="radio"' not found in u'<p><label for="id_vote">Vote:</label> <select name="vote" id="id_vote">\n<option value="1">42</option>\n<option value="2">The Ultimate Answer</option>\n</select></p>'
+
+Django has defaulted to using a ``select/option`` input form.  We can change 
+this using a `widget`, in this case a ``RadioSelect``
+
+.. sourcecode:: python
+
+    class PollVoteForm(forms.Form):
+        vote = forms.ChoiceField(widget=forms.RadioSelect())
+
+        def __init__(self, poll):
+            super(self.__class__, self).__init__()
+            self.fields['vote'].choices = [(c.id, c.choice) for c in poll.choice_set.all()]
+
+And that should get the tests passing!  If you're curious to see what the form
+HTML actually looks like, why not temporarily put a ``print form.as_p()`` at
+the end of the test?   Print statements in tests can be very useful for
+exploratory programming... You could try ``form.as_table()`` too if you like...
+
+
+<notes for later:>
+https://docs.djangoproject.com/en/1.3/ref/forms/fields/#modelchoicefield
 
