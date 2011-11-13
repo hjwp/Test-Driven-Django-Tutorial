@@ -72,10 +72,12 @@ class TestPolls(FunctionalTest):
         self.assertIn('No-one has voted on this poll yet', body.text)
 
         # He also sees a form, which offers him several choices.
-        choices = self.browser.find_elements_by_css_selector(
+        choice_inputs = self.browser.find_elements_by_css_selector(
                 "input[type='radio']"
         )
-        choices_text = [c.text for c in choices]
+        self.assertEquals(len(choice_inputs), 3)
+        choice_labels = choice_inputs = self.browser.find_elements_by_tag_name('label')
+        choices_text = [c.text for c in choice_labels]
         self.assertEquals(choices_text, [
             'Very awesome',
             'Quite awesome',

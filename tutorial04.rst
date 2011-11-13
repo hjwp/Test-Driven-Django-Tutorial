@@ -84,10 +84,18 @@ Let's work on the unit tests for the ``poll`` view then:
             client = Client()
             response = client.get('/poll/%d/' % (poll2.id, ))
 
-            self.assertEquals(response.templates[0].name, 'poll.html')
+            # check we've passed the right poll into the context
             self.assertEquals(response.context['poll'], poll2)
+
+            # check the poll's question appears on the page
             self.assertIn(poll2.question, response.content)
+
+            # check our 'no votes yet' message appears
             self.assertIn('No-one has voted on this poll yet', response.content)
+
+            # check we've passed in a form of the right type
+            self.assertTrue(isinstance(response.context['form'], PollVoteForm))
+
 
 Running the tests gives::
 
@@ -406,7 +414,130 @@ HTML actually looks like, why not temporarily put a ``print form.as_p()`` at
 the end of the test?   Print statements in tests can be very useful for
 exploratory programming... You could try ``form.as_table()`` too if you like...
 
+Right, where where we?  Let's do a quick check of the functional tests
+(incidentally, are you rather bored of watching the FT run through the
+admin test each time?  I was, so I've built in a second argument to the FT
+runner that lets you filter by name of test - just pass in ``polls`` and
+it will only run FTs in files whose names contain the world ``polls``.)::
 
-<notes for later:>
-https://docs.djangoproject.com/en/1.3/ref/forms/fields/#modelchoicefield
+    ./functional_tests.py polls
+    [...]
+    AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...
 
+Ah yes, we still haven't actually used the form yet!  Let's go back to
+our ``TestSinglePollView``, and add some extra code (you can copy and
+paste some of it from the form test)
+
+.. sourcecode:: python
+
+    def test_page_shows_poll_title_and_no_votes_message(self):
+        # set up two polls, to check the right one gets used
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=0)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
+        choice2.save()
+        poll2 = Poll(question='time', pub_date='2001-01-01')
+        poll2.save()
+        choice3 = Choice(poll=poll2, choice='PM', votes=0)
+        choice3.save()
+        choice4 = Choice(poll=poll2, choice="Gardener's", votes=0)
+        choice4.save()
+
+        client = Client()
+        response = client.get('/poll/%d/' % (poll2.id, ))
+
+        # check we use the right template
+        self.assertEquals(response.templates[0].name, 'poll.html')
+
+        # check we've passed the right poll into the context
+        self.assertEquals(response.context['poll'], poll2)
+
+        # check the poll's question appears on the page
+        self.assertIn(poll2.question, response.content)
+
+        # check our 'no votes yet' message appears
+        self.assertIn('No-one has voted on this poll yet', response.content)
+
+        # check we've passed in a form of the right type
+        self.assertTrue(isinstance(response.context['form'], PollVoteForm))
+
+        # and check the check the form is being used in the template,
+        # by checking for the choice text
+        self.assertIn(choice3.choice, response.content)
+        self.assertIn(choice4.choice, response.content)
+
+Now the unit tests give us::
+
+    KeyError: 'form'
+
+So back in ``views.py``:
+
+.. sourcecode:: python
+
+    def poll(request, poll_id):
+        poll = Poll.objects.get(pk=poll_id)
+        return render(request, 'poll.html', {'poll': poll, 'form': None})
+
+Now::
+
+    self.assertTrue(isinstance(response.context['form'], PollVoteForm))
+    AssertionError: False is not true
+
+So:
+
+.. sourcecode:: python
+
+    def poll(request, poll_id):
+        poll = Poll.objects.get(pk=poll_id)
+        form = PollVoteForm(poll=poll)
+        return render(request, 'poll.html', {'poll': poll, 'form': form})
+
+And::
+
+    self.assertIn(choice3.choice, response.content)
+    AssertionError: 'PM' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>time</h2>\n\n    <p>No-one has voted on this poll yet</p>\n    \n  </body>\n</html>\n'
+
+So, in ``polls/templates/poll.html``:
+
+.. sourcecode:: html+django
+
+    <html>
+      <body>
+        <h1>Poll Results</h1>
+        
+        <h2>{{poll.question}}</h2>
+
+        <p>No-one has voted on this poll yet</p>
+
+        <h3>Add your vote</h3>
+        {{form.as_p}}
+
+        
+      </body>
+    </html>
+
+And re-running the tests - oh, a surprise!::
+
+    self.assertIn(choice4.choice, response.content)
+    AssertionError: "Gardener's" not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>time</h2>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="3" name="vote" /> PM</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="4" name="vote" /> Gardener&#39;s</label></li>\n</ul></p>\n\n    \n  </body>\n</html>\n'
+
+Django has converted an apostrophe (``'``) into an html-compliant ``&#39;`` for
+us. I suppose that's my come-uppance for trying to include British in-jokes in
+my tutorial.  Let's implement a minor hack in our test:
+
+
+.. sourcecode:: html+django
+
+        self.assertIn(choice4.choice, response.content.replace('&#39;', "'"))
+
+And now we have passination::
+
+    ........
+    ----------------------------------------------------------------------
+    Ran 8 tests in 0.016s
+
+    OK
+
+So let's ask the FTs again!
