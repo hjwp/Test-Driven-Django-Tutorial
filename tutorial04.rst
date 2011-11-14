@@ -26,18 +26,23 @@ Let's start by extending our FT, to show Herbert voting on a poll:
         self.assertIn('No-one has voted on this poll yet', body.text)
 
         # He also sees a form, which offers him several choices.
+        # There are three options with radio buttons
         choices = self.browser.find_elements_by_css_selector(
                 "input[type='radio']"
         )
-        choices_text = [c.text for c in choices]
+        self.assertEquals(len(choice_inputs), 3)
+
+        # The buttons have labels to explain them
+        choice_labels = choice_inputs = self.browser.find_elements_by_tag_name('label')
+        choices_text = [c.text for c in choice_labels]
         self.assertEquals(choices_text, [
             'Very awesome',
             'Quite awesome',
             'Moderately awesome',
         ])
-        # He decided to select "very awesome"
+        # He decided to select "very awesome", which is answer #1
         chosen = self.browser.find_element_by_css_selector(
-                "input[type='radio', value='Very awesome']"
+                "input[value='1']"
         )
         chosen.click()
 
@@ -540,4 +545,93 @@ And now we have passination::
 
     OK
 
-So let's ask the FTs again!
+So let's ask the FTs again!::
+
+    ======================================================================
+    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 84, in test_voting_on_a_new_poll
+        'Moderately awesome',
+    AssertionError: Lists differ: [u'Vote:', u'Very awesome', u'... != ['Very awesome', 'Quite awesom...
+
+    First differing element 0:
+    Vote:
+    Very awesome
+
+    First list contains 1 additional elements.
+    First extra element 3:
+    Moderately awesome
+
+    - [u'Vote:', u'Very awesome', u'Quite awesome', u'Moderately awesome']
+    ?  -----------                -                 -
+
+    + ['Very awesome', 'Quite awesome', 'Moderately awesome']
+
+    ----------------------------------------------------------------------
+
+Hm, not quite according to the original plan - our form has auto-generated an
+extra label which says "Vote:" above the radio buttons - well, since it doesn't
+do any harm, for now maybe it's easiest to just change the FT:
+
+.. sourcecode:: html+django
+
+        # He also sees a form, which offers him several choices.
+        # There are three options with radio buttons
+        choice_inputs = self.browser.find_elements_by_css_selector(
+                "input[type='radio']"
+        )
+        self.assertEquals(len(choice_inputs), 3)
+
+        # The buttons have labels to explain them
+        choice_labels = choice_inputs = self.browser.find_elements_by_tag_name('label')
+        choices_text = [c.text for c in choice_labels]
+        self.assertEquals(choices_text, [
+            'Vote:', # this label is auto-generated for the whole form
+            'Very awesome',
+            'Quite awesome',
+            'Moderately awesome',
+        ])
+
+
+The FT should now get a little further::
+
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"css selector","selector":"input[type=\'submit\']"}' 
+
+There's no submit button on our form! When Django generates a form, it only
+gives you the inputs for the fields you've defined, so no submit button (and no
+``<form>`` tag either for that matter).
+
+Well, a button is easy enough to add, although it may not do much... In the 
+template:
+
+.. sourcecode:: html+django
+
+    <html>
+      <body>
+        <h1>Poll Results</h1>
+        
+        <h2>{{poll.question}}</h2>
+
+        <p>No-one has voted on this poll yet</p>
+
+        <h3>Add your vote</h3>
+        {{form.as_p}}
+        <input type="submit" />
+
+        
+      </body>
+    </html>
+
+
+And now... our tests pass!::
+    .
+    ----------------------------------------------------------------------
+    Ran 1 test in 16.946s
+
+    OK
+
+Well, that's only because we haven't finished writing them really. Tune in
+next week for when we finish our tests, handle POST requests, and do super-fun
+form validation too...
+
