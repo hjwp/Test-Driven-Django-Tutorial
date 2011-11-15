@@ -50,7 +50,8 @@ Django has a couple of command line tools to set these up::
 
     django-admin startproject mysite
     cd mysite
-    ./manage.py startapp polls
+    chmod +x manage.py
+    python manage.py startapp polls
 
 
 Django stores project-wide settings in a file called ``settings.py``. One of the key
@@ -156,7 +157,7 @@ admin site using an admin username and password, and create a new poll.
 .. image:: /static/images/admin05t.png
 
 Let's open up a file inside the ``fts`` directory called
-``test_polls_admin.py`` and enter the code below.
+``test_admin.py`` and enter the code below.
 
 Note the nice, descriptive names for the test functions, and the comments,
 which describe in human-readable text the actions that our user will take.
@@ -236,10 +237,10 @@ The test output will looks something like this::
     running tests
     F
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 12, in test_can_create_new_poll_via_admin_site
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 12, in test_can_create_new_poll_via_admin_site
         self.assertIn('Django administration', body.text)
     AssertionError: 'Django administration' not found in u"It worked!\n
     Congratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet.
@@ -263,7 +264,7 @@ page two of the official Django tutorial:
 
 https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site
 
-At this point we need to do two things: add "django.contrib.admin" to
+At this point we need to do two things: add ``django.contrib.admin`` to
 INSTALLED_APPS in ``settings.py``
 
 .. sourcecode:: python
@@ -281,6 +282,9 @@ INSTALLED_APPS in ``settings.py``
         'polls'
     )
 
+(I've also thrown ``'polls'`` in there, since settings.py needs to
+know about your own apps too)
+
 And edit ``mysite/urls.py`` to uncomment the lines that reference the admin
 
 .. sourcecode:: python
@@ -297,10 +301,10 @@ Let's re-run our tests.  We should find they get a little further::
 
     ./functional_tests.py
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 25, in test_can_create_new_poll_via_admin_site
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 25, in test_can_create_new_poll_via_admin_site
         self.assertEquals(len(polls_links), 2)
     AssertionError: 0 != 2
 
@@ -495,10 +499,10 @@ The unit tests all pass. Does this mean our functional test will pass?::
 
     ./functional_tests.py
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 25, in test_can_create_new_poll_via_admin_site
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 25, in test_can_create_new_poll_via_admin_site
         self.assertEquals(len(polls_links), 2)
     AssertionError: 0 != 2
 
@@ -718,7 +722,7 @@ the object.  So let's say we want our polls listed by their question
 
 That's our FT finished.  If you've lost track in amongst all the copy & pasting,
 you can compare your version to mine, which is hosted here:
-https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_polls_admin.py
+https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_admin.py
 
 
 Human-readable names for models and their attributes
@@ -728,10 +732,10 @@ Let's re-run our tests.  Here's our first expected failure, the fact that "Pub d
 isn't the label we want for our field ("Date published")::
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 43, in 
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 43, in 
       test_can_create_new_poll_via_admin_site
         self.assertIn('Date published:', body.text)
         django.kill() #TODO: doesn't kill child processes, fix
@@ -777,10 +781,10 @@ And we can make the change in ``models.py``
 Re-running our functional tests, things have moved on::
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_polls_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls_admin.py", line 63, in 
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 63, in 
       test_can_create_new_poll_via_admin_site
         self.assertEquals(len(new_poll_links), 1)
     AssertionError: 0 != 1
