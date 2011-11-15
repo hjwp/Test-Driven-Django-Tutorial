@@ -8,6 +8,8 @@ from polls.models import Choice, Poll
 class TestAllPollsView(TestCase):
 
     def test_root_url_shows_links_to_all_polls(self):
+        self.fail("todo: delete this line and proceed with the test") #hint: urls.py
+
         # set up some polls
         poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
         poll1.save()
@@ -40,6 +42,8 @@ class TestAllPollsView(TestCase):
 class TestSinglePollView(TestCase):
 
     def test_page_shows_poll_title_and_no_votes_message(self):
+        self.fail("todo: delete this line and proceed with the test") #hint: urls.py
+
         # set up two polls, to check the right one gets used
         poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
         poll1.save()
