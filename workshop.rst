@@ -78,8 +78,17 @@ checkout the base repo::
 
 Now we follow ``tutorial01.rst``
 
-(although in the bit where I suggest a ``wget``, you can just ``mv`` the
-``functional_test.py`` from where I've put it in the root of the repo...
+Some notes:
+
+    - in the bit where I suggest a ``wget``, you can just ``mv`` the
+      ``functional_test.py`` from where I've put it in the root of the repo...
+
+    - we'll stop at the first assert in ``test_admin.py`` and try running it
+
+    - possible discussion over ``max_length`` and ``verbose_name`` - is this 
+      like testing constants?
+
+    - time scheduled: 1 hour
 
 
 

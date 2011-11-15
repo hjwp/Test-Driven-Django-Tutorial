@@ -264,7 +264,7 @@ page two of the official Django tutorial:
 
 https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site
 
-At this point we need to do two things: add "django.contrib.admin" to
+At this point we need to do two things: add ``django.contrib.admin`` to
 INSTALLED_APPS in ``settings.py``
 
 .. sourcecode:: python
@@ -281,6 +281,9 @@ INSTALLED_APPS in ``settings.py``
         # 'django.contrib.admindocs',
         'polls'
     )
+
+(I've also thrown ``'polls'`` in there, since settings.py needs to
+know about your own apps too)
 
 And edit ``mysite/urls.py`` to uncomment the lines that reference the admin
 
