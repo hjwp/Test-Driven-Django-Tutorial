@@ -10,7 +10,7 @@ polls by submitting a choice, and viewing poll results.
 
 So, let's write a functional test that does all three of those things. We'll
 create a new file for it called ``fts/test_polls.py``.  We'll be re-using some
-of the code from ``test_polls_admin.py``, so you might want to do a "save as"
+of the code from ``test_admin.py``, so you might want to do a "save as"
 based on that file.
 
 Writing the FT as comments
