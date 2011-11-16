@@ -72,7 +72,7 @@ CHECKOUT
 
 checkout the base repo::
 
-   git clone --branch workshop git@github.com:hjwp/Test-Driven-Django-Tutorial.git 
+   git clone --branch workshop https://github.com/hjwp/Test-Driven-Django-Tutorial.git
    git fetch --tags
    git checkout PART1
 

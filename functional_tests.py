@@ -10,7 +10,7 @@ setup_environ(settings_for_fts)
 from django.contrib.auth.models import User
 
 
-ROOT = 'http://127.0.0.1:8000'
+ROOT = 'http://127.0.0.1:8001'
 
 
 class FunctionalTest(unittest.TestCase):
@@ -37,7 +37,7 @@ def run_syncdb():
 def start_django_server():
     #noreload ensures single process
     return subprocess.Popen(
-            ['python', 'manage.py', 'runserver', '--noreload', '--settings=settings_for_fts']
+            ['python', 'manage.py', 'runserver', '8001', '--noreload', '--settings=settings_for_fts']
     )
 
 
