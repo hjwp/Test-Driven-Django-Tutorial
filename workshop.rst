@@ -90,6 +90,12 @@ Some notes:
 
     - time scheduled: 1 hour
 
+    - notes for windows users:  
+      - ``https`` checkout for github
+      - ``move`` not ``mv``.
+      - ``django-admin.py startproject mysite`` (note extra .py)
+      - ``python manage.py runserver 8001``
+
 
 
 
