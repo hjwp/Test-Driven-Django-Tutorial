@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 try: import unittest2 as unittest #for Python <= 2.6
 except: import unittest
 from selenium import webdriver
