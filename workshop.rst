@@ -1,3 +1,30 @@
+WELCOME TO THE TEST-DRIVEN-DJANGO WORKSHOP
+==========================================
+
+Required installations
+----------------------
+
+ - python (2.7 if poss, 2.6 otherwise)
+ - git
+ - firefox
+ - django (can easy_install)
+ - easy_install selenium
+
+Checkout
+--------
+
+checkout the base repo::
+
+   git clone --branch workshop https://github.com/hjwp/Test-Driven-Django-Tutorial.git
+   git fetch --tags
+   git checkout PART1
+
+
+
+
+
+
+
 Introduction
 ============
 
@@ -23,7 +50,6 @@ The Plan
 --------
 
     - to run through contents of Django tutorial
-
     - ie, a polls/voting app
 
     - I will provide various materials
@@ -44,6 +70,9 @@ The Plan
         - forms
 
     - PART 4: (if time) - form processing
+
+
+
 
 
 How we will work
@@ -72,7 +101,7 @@ CHECKOUT
 
 checkout the base repo::
 
-   git clone --branch workshop git@github.com:hjwp/Test-Driven-Django-Tutorial.git 
+   git clone --branch workshop https://github.com/hjwp/Test-Driven-Django-Tutorial.git
    git fetch --tags
    git checkout PART1
 
@@ -89,6 +118,12 @@ Some notes:
       like testing constants?
 
     - time scheduled: 1 hour
+
+    - notes for windows users:  
+      - ``https`` checkout for github
+      - ``move`` not ``mv``.
+      - ``django-admin.py startproject mysite`` (note extra .py)
+      - ``python manage.py runserver 8001``
 
 
 
