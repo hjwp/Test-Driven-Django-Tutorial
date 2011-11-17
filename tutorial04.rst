@@ -76,7 +76,6 @@ Let's work on the unit tests for the ``poll`` view then:
 
 .. sourcecode:: python
 
-
     class TestSinglePollView(TestCase):
 
         def test_page_shows_poll_title_and_no_votes_message(self):
@@ -343,7 +342,7 @@ We override __init__.py to change the constructor:
         def __init__(self, poll):
             pass
 
-::
+...::
     self.assertEquals(form.fields.keys(), ['vote'])
     AttributeError: 'PollVoteForm' object has no attribute 'fields'
 
@@ -574,7 +573,7 @@ Hm, not quite according to the original plan - our form has auto-generated an
 extra label which says "Vote:" above the radio buttons - well, since it doesn't
 do any harm, for now maybe it's easiest to just change the FT:
 
-.. sourcecode:: html+django
+.. sourcecode:: python
 
         # He also sees a form, which offers him several choices.
         # There are three options with radio buttons
@@ -625,6 +624,7 @@ template:
 
 
 And now... our tests pass!::
+
     .
     ----------------------------------------------------------------------
     Ran 1 test in 16.946s
