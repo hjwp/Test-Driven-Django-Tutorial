@@ -10,7 +10,7 @@ screen.  These are the tests that will tell us whether or not our application
 behaves the way we want it to, from the user's point of view.
 
 Once we've written our functional tests (which, incidentally, have forced us
-to thing through the way our application will work, from the point of view
+to think through the way our application will work, from the point of view
 of the user - never a bad thing...) we can start to think about how we want
 to implement that functionality from a technical point of view.
 

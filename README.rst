@@ -25,7 +25,7 @@ Current progress - 75% of Django tutorial covered
     - todo: forms (p. 4)
 
 
-So it's *almost* ready for someone to use as a proper tutorial yet, but it's not
+So it's *almost* ready for someone to use as a proper tutorial already, but it's not
 quite complete..  If you're impatient and you want to give it a go anyway, feel
 free - and I'd love to hear feedback and suggestions :-)
 
