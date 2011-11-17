@@ -120,7 +120,7 @@ someone else with experience.  They know.  Now, onto the practicals.
 
 Convinced?  Get on with part 1 of the tutorial then!
 
-http://harry.pythonanywere.com/tutorial/1/
+http://harry.pythonanywhere.com/tutorial/1/
 
 
 USEFUL LINKS
