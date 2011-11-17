@@ -578,7 +578,7 @@ When your application is ready to show to real users, you'll want to set
 seeing that sort of information (Django can email it to you instead).  In the
 meantime, it's very useful! 
 
-So, Django is telling us it can't find a database table called ``poll_poll``.
+So, Django is telling us it can't find a database table called ``polls_poll``.
 
 Django names tables using the convention ``appname_lowercasemodelname``, so
 this is the table for our Poll object, and we haven't told Django to create it
