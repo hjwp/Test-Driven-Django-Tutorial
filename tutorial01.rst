@@ -86,7 +86,7 @@ as a folder to keep them all in::
 Here's one I made earlier... A little Python script that'll run all your tests
 for you.::
 
-    wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/functional_tests.py
+    wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/mysite/functional_tests.py 
     chmod +x functional_tests.py
 
 We also need to set up a custom set of settings for the FT - we want to make
