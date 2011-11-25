@@ -29,9 +29,13 @@ Some setup before we start
 For functional testing, we'll be using the excellent Selenium.  Let's install that,
 and Django, and a couple of other Python modules we might need::
 
-    easy_install django
-    easy_install selenium
-    easy_install mock
+    pip install django
+    pip install selenium
+    pip install mock
+    pip install unittest2 # (only if using Python 2.6)
+
+If you don't know what ``pip`` is, you'll need to find out, and install it.
+It's a must-have for working with Python.
 
 
 
