@@ -174,7 +174,7 @@ polls as `raw` text - like this:
 
 Sure enough, that gets our limited unit tests passing::
 
-    23:06 ~/workspace/tddjango_site/source/mysite (master)$ ./manage.py test polls
+    23:06 ~/workspace/tddjango_site/source/mysite (master)$ python manage.py test polls
     Creating test database for alias 'default'...
     ......
     ----------------------------------------------------------------------
@@ -193,7 +193,7 @@ because that makes absolutely sure that we have tests for all of our code.
 So, rather than anticipate what we might want to put in our HttpResponse, let's
 go to the FT now to see what to do next.::
 
-    ./functional_tests.py
+    python functional_tests.py
     ======================================================================
     ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
     ----------------------------------------------------------------------
@@ -230,7 +230,7 @@ so let's use that.  In ``tests.py``:
         self.assertIn(poll2.question, response.content)
 
 
-Testing ``./manage.py test polls``::
+Testing ``python manage.py test polls``::
  
     ======================================================================
     FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
@@ -391,7 +391,7 @@ Ta-da!::
 
 What do the FTs say now?::
 
-    ./functional_tests.py
+    python functional_tests.py
     ======================================================================
     ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
     ----------------------------------------------------------------------
@@ -526,7 +526,7 @@ the poll using its ``id``.  Here's what that translates to in ``tests.py``:
             poll2_url = reverse('mysite.polls.views.poll', args=[poll2.id,])
             self.assertIn(poll2_url, response.content)
 
-Running this (``./manage.py test polls``) gives::
+Running this (``python manage.py test polls``) gives::
 
     ======================================================================
     ERROR: test_root_url_shows_links_to_all_polls (polls.tests.TestAllPollsView)
@@ -598,7 +598,7 @@ The templates don't include the urls yet. Let's add them:
 Notice the call to ``{% url %}``, whose signature is very similar to the call
 to ``reverse``.  Now our unit tests are a lot happier!::
 
-    21:08 ~/workspace/tddjango_site/source/mysite (master)$ ./manage.py test polls 
+    21:08 ~/workspace/tddjango_site/source/mysite (master)$ python manage.py test polls 
     Creating test database for alias 'default'...
     ......
     ----------------------------------------------------------------------

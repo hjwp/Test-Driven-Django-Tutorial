@@ -222,7 +222,7 @@ That's because ``manage.py test`` runs all the tests for all the Django stuff,
 as well as your own tests.  If you want to, you can tell Django to just run the
 tests for your own app, like this::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     Creating test database for alias 'default'...
     E...
     ======================================================================

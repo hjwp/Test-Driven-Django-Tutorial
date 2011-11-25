@@ -329,7 +329,7 @@ may as well create something minimal for it to import! Create a file called
  
 And let's start another test/code cycle, woo -::
 
-    ./manage.py test polls
+    python manage.py test polls
     [...]
         form = PollVoteForm(poll=poll)
     TypeError: object.__new__() takes no parameters
@@ -424,7 +424,7 @@ admin test each time?  I was, so I've built in a second argument to the FT
 runner that lets you filter by name of test - just pass in ``polls`` and
 it will only run FTs in files whose names contain the world ``polls``.)::
 
-    ./functional_tests.py polls
+    python functional_tests.py polls
     [...]
     AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...
 

@@ -23,6 +23,30 @@ we can write a unit test for it.  Again, it forces us to think about how it will
 work from the outside, before we write it.
 
 
+What do we want to achieve in part 1?
+-------------------------------------
+
+In general with TDD, whenever we want to do something, we also ask ourselves "how
+will I know when I've succeeded" - and the answer is usually - a test!
+
+So here are our objectives for this first tutorial:
+
+=========================================    ==================================
+Objective                                    How will we know we've succeeded?
+=========================================    ==================================
+Set up Django                                Run the *Django test server* and
+                                             manually browse the default
+                                             "Hello World" page
+-----------------------------------------    ----------------------------------
+Set up the Django admin site                 Write our first *functional test*,
+                                             which logs into the admin site
+-----------------------------------------    ----------------------------------
+Create our first model for "Poll" objects    Extend our functional test to
+                                             create a new Poll via the
+                                             admin site. Write *unit tests*
+=========================================    ==================================
+
+
 Some setup before we start
 --------------------------
 
@@ -37,29 +61,155 @@ and Django, and a couple of other Python modules we might need::
 If you don't know what ``pip`` is, you'll need to find out, and install it.
 It's a must-have for working with Python.
 
+At this point, you should be able to open up a command line, and type ``python`` to
+get the Python interpreter running, and from in there you should be able to 
+``import django`` and ``import selenium`` without any errors.  If any of that
+gives you problems, take a look at:
+https://docs.djangoproject.com/en/1.3/intro/install/
 
 
-Setting up our Django project, and settings.py
-----------------------------------------------
+Setting up our Django project
+-----------------------------
 
-Django structures websites as "projects", each of which can have several
+Django structures websites as "projects", each of which can onon have several
 constituent "apps"... Ostensibly, the idea is that apps can be self-contained,
-so that you could use one app in several projects... Well, I've never actually
+so that you could use one app in several projects... Well, enI've never actually
 seen that done, but it remains a nice way of splitting up your code.
 
-As per the official Django tutorial, we'll set up our project, and its first app,
-a simple application to handle online polls.
-
-Django has a couple of command line tools to set these up::
+So let's start by creating our `project`, which we'll call "mysite". Django has
+a command-line tool for this::
 
     django-admin startproject mysite
+
+If you're on windows, you may need to type ``django-admin.py startproject mysite``. 
+If you have any problems, you can take a look at the tips on 
+https://docs.djangoproject.com/en/1.3/intro/tutorial01/#creating-a-project
+
+
+Checking we've succeeded: running the test server
+-------------------------------------------------
+
+Django comes with a built-in test server which you can fire up during
+development to take a peek at how things are looking. You can start it up 
+by typing::
+
+    python manage.py runserver
+
+If you then fire up your web browser and go to http://127.0.0.1:8000, you
+should see something a bit like this:
+
+.. image:: /static/images/django_it_worked_default_page.png
+
+There's more information about the test server here:
+https://docs.djangoproject.com/en/1.3/intro/tutorial01/#the-development-server
+
+More setup: settings.py, databases, syncdb, the admin site
+----------------------------------------------------------
+
+There's just a little bit more housekeeping we need to do
+
+Now, manual tests like the one we've just done are all very well, but in TDD
+they're exactly what we're tring to avoid!  Our next objective is to set
+up an automated test.
+
+I did want to introduce ``runserver`` at the outset though - that way, at 
+any point during this tutorial, if you want to check what the site actually
+looks like, you can always fire up the test server and have a look around
+
+
+Our first functional test: The Django admin
+-------------------------------------------
+
+In the test-driven methodology, we tend to group functionality up into
+bite-size chunks, and write functional tests for each one of them. You
+can describe the chunks of functionality as "user stories", if you like,
+and each user story tends to have a set of tests associated with it,
+and the tests track the potential behaviour of a user.
+
+We have to go all the way to the second page of the Django tutorial to see an
+actual user-visible part of the application:  the `Django admin site`.  The 
+admin site is a really useful part of Django, which generates a UI for site
+administrators to manage key bits of information in your database: user
+accounts, permissions groups, and, in our case, polls.  The admin site will let
+admin users create new polls, enter their descriptive text and start and end
+dates and so on, before they are published via the user-facing websiteke. 
+All this stuff comes 'for free' and automatically, just using the Django admin
+site.  
+ ne
+You can find out more about the philosophy behind the admin site, including Django's
+background in the newspaper industry, here:
+
+https://docs.djangoproject.com/en/1.3/intro/tutorial02/
+
+So, our first user story is that the user should be able to log into the Django
+admin site using an admin username and password, and create a new poll.  Here's 
+a couple of screenshots of what the admin site looks like:
+
+.. image:: /static/images/admin03t.png
+.. image:: /static/images/admin05t.png
+
+
+We'll add more to this test later, but for now let's just get it to do the
+absolute minimum:  open up the admin site (which we want to be available via
+the url ``/admin/``), and see that it "looks OK" - for this, we'll check
+that the page contains the words "Django administration"
+
+Let's create a directory to keep our FTs in called, um, ``fts``::
+
     cd mysite
-    chmod +x manage.py
-    python manage.py startapp polls
+    mkdir fts
+    touch fts/__init__.py
+
+The ``__init__.py`` is an empty file which marks the fts folder out as being
+a Python module. *(If you're on windows, you may not have the ``touch`` command - if so, just
+create an empty file called ``__init__.py``)*
+
+Now, let's create a new file inside the ``fts`` folder called
+``test_admin.py``, which will be our first Functional test:
+
+.. sourcecode:: python
+
+    from functional_tests import FunctionalTest, ROOT
+
+    class TestPollsAdmin(FunctionalTest):
+
+        def test_can_create_new_poll_via_admin_site(self):
+
+            # Gertrude opens her web browser, and goes to the admin page
+            self.browser.get(ROOT + '/admin/')
+
+            # She sees the familiar 'Django administration' heading
+            body = self.browser.find_element_by_tag_name('body') 
+            self.assertIn('Django administration', body.text)
+
+Functional tests are grouped into classes, and each test is a method
+inside the class.  The special rule is that test methods must begin witha
+``test_``.
+
+Note the nice, descriptive names for the test function, and the comments,
+which describe in human-readable text the actions that our user will take.
+Mhhhh, descriptive names.....
+
+It's always nice to give the user a name... Mine is called Gertrude...
+
+
+Setting up the functional test runner
+-------------------------------------
+
+You'll have noticed that, at the top of ``test_admin.py``, we import from
+a module called ``functional_test`` - that's a small module I've written,
+which will take care of running functional tests.  You'll need to download
+it, and put it in the root of your project (in the ``mysite`` folder::
+
+    wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/mysite/functional_tests.py 
+
+*(Again, if you're on windows, you may not have ``wget``.  Just go ahead and download the file
+manually from the project on github, by going to the link above and doing a "Save As")*
+
 
 
 Django stores project-wide settings in a file called ``settings.py``. One of the key
-settings is what kind of database to use.  We'll use the easiest possible, sqlite.
+settings is what kind of database to use.  We'll use the easiest possible, *sqlite*.
 
 Find settings ``settings.py`` in the root of the new ``mysite`` folder, and
 open it up in your favourite text editor. Find the lines that mention ``DATABASES``,
@@ -77,6 +227,33 @@ Find out more about projects, apps and ``settings.py`` here:
 https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup
 
 
+Setting up the database with ``syncdb``
+---------------------------------------
+
+``syncdb`` is the command used to get Django to setup the database. It creates
+any new tables that are needed, whenever you've added new models to your
+project. In this case, it notices it's the first run, and proposes that
+you create a superuser.  Let's go ahead and do that::
+
+    python manage.py syncdb
+
+Let's use the ultra-secure  ``admin`` and ``adm1n`` as our username and
+password for the superuser.:::
+
+    harry@harry-laptop:~/workspace/mysite:master$ python manage.py syncdb
+    Username (Leave blank to use 'harry'): admin
+    E-mail address: admin@example.com
+    Password: 
+    Password (again): 
+    Superuser created successfully.
+     
+
+
+At this point we may not be quite sure what we want though.  This is a good
+time to fire up the Django dev server using ``runserver``, and have a look
+around manually, to look for some inspiration on the next steps to take for our
+site.::
+
 
 Setting up the functional test runner
 -------------------------------------
@@ -84,14 +261,9 @@ Setting up the functional test runner
 The next thing we need is a single command that will run all our FT's, as well
 as a folder to keep them all in::
 
-    mkdir fts
-    touch fts/__init__.py
-
 Here's one I made earlier... A little Python script that'll run all your tests
 for you.::
 
-    wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/mysite/functional_tests.py 
-    chmod +x functional_tests.py
 
 We also need to set up a custom set of settings for the FT - we want to make
 sure that our tests run against a different copy of the database from the
@@ -107,83 +279,6 @@ following contents::
 That essentially sets up an exact duplicate of the normal ``settings.py``, 
 except we change the name of the database.
 
-
-Last bit of setup before we start:  syncdb
-------------------------------------------
-
-``syncdb`` is the command used to get Django to setup the database. It creates
-any new tables that are needed, whenever you've added new stuff to your
-project. In this case, it notices it's the first run, and proposes that
-you create a superuser.  Let's go ahead and do that::
-
-    python manage.py syncdb
-
-Let's use the ultra-secure  ``admin`` and ``adm1n`` as our username and
-password for the superuser.::
-
-    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py syncdb
-    Username (Leave blank to use 'harry'): admin
-    E-mail address: admin@example.com
-    Password: 
-    Password (again): 
-    Superuser created successfully.
-     
-
-
-Our first test: The Django admin
---------------------------------
-
-In the test-driven methodology, we tend to group functionality up into
-bite-size chunks, and write functional tests for each one of them. You
-can describe the chunks of functionality as "user stories", if you like,
-and each user story tends to have a set of tests associated with it,
-and the tests track the potential behaviour of a user.
-
-We have to go all the way to the second page of the Django tutorial to see an
-actual user-visible part of the application:  the `Django admin site`.  The 
-admin site is a really useful part of Django, which generates a UI for site
-administrators to manage key bits of information in your database: user
-accounts, permissions groups, and, in our case, polls.  The admin site will let
-admin users create new polls, enter their descriptive text and start and end
-dates and so on, before they are published via the user-facing website. 
-All this stuff comes 'for free' and automatically, just using the Django admin
-site.  
-
-You can find out more about the philosophy behind the admin site, including Django's
-background in the newspaper industry, here:
-
-https://docs.djangoproject.com/en/1.3/intro/tutorial02/
-
-So, our first user story is that the user should be able to log into the Django
-admin site using an admin username and password, and create a new poll.
-
-.. image:: /static/images/admin03t.png
-.. image:: /static/images/admin05t.png
-
-Let's open up a file inside the ``fts`` directory called
-``test_admin.py`` and enter the code below.
-
-Note the nice, descriptive names for the test functions, and the comments,
-which describe in human-readable text the actions that our user will take.
-Mhhhh, descriptive names.....
-
-It's always nice to give the user a name... Mine is called Gertrude...
-
-.. sourcecode:: python
-
-    from functional_tests import FunctionalTest, ROOT
-    from selenium.webdriver.common.keys import Keys
-
-    class TestPollsAdmin(FunctionalTest):
-
-        def test_can_create_new_poll_via_admin_site(self):
-
-            # Gertrude opens her web browser, and goes to the admin page
-            self.browser.get(ROOT + '/admin/')
-
-            # She sees the familiar 'Django administration' heading
-            body = self.browser.find_element_by_tag_name('body')
-            self.assertIn('Django administration', body.text)
 
             # She types in her username and passwords and hits return
             username_field = self.browser.find_element_by_name('username')
@@ -230,7 +325,7 @@ around, and I promise you'll find out all about it!
 
 For now, let's try running our first test::
 
-    ./functional_tests.py
+    python functional_tests.py
 
 The test output will looks something like this::
 
@@ -303,7 +398,7 @@ And edit ``mysite/urls.py`` to uncomment the lines that reference the admin
 
 Let's re-run our tests.  We should find they get a little further::
 
-    ./functional_tests.py
+    python functional_tests.py
     ======================================================================
     FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
@@ -376,7 +471,7 @@ https://docs.djangoproject.com/en/1.3/intro/tutorial01/#playing-with-the-api
 
 Let's run the unit tests.::
 
-    ./manage.py test
+    python manage.py test
 
 You should see an error like this::
 
@@ -501,7 +596,7 @@ Back to the functional tests: registering the model with the admin site
 
 The unit tests all pass. Does this mean our functional test will pass?::
 
-    ./functional_tests.py
+    python functional_tests.py
     ======================================================================
     FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
     ----------------------------------------------------------------------
@@ -528,7 +623,7 @@ directory, with the following three lines
 
 Let's try the FT again...::
 
-    ./functional_tests.py
+    python functional_tests.py
     .
     ----------------------------------------------------------------------
     Ran 1 test in 6.164s
@@ -543,7 +638,7 @@ Exploring the site manually using runserver
 
 So far so good.  But, we still have a few items left as "TODO" in our tests.
 At this point we may not be quite sure what we want though.  This is a good
-time to fire up the Django dev server using ``runserver``, and have a look
+time to fire up the Django dev server again using ``runserver``, and have a look
 around manually, to look for some inspiration on the next steps to take for our
 site.::
 
@@ -835,7 +930,7 @@ in ``models.py``
 
 And you should now find that the unit tests pass::
 
-    harry@harry-laptop:~/workspace/mysite:master$ ./manage.py test
+    harry@harry-laptop:~/workspace/mysite:master$ python manage.py test
     Creating test database for alias 'default'...
     ............................................................................
     ............................................................................
