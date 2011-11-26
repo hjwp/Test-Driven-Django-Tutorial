@@ -103,11 +103,6 @@ should see something a bit like this:
 There's more information about the test server here:
 https://docs.djangoproject.com/en/1.3/intro/tutorial01/#the-development-server
 
-More setup: settings.py, databases, syncdb, the admin site
-----------------------------------------------------------
-
-There's just a little bit more housekeeping we need to do
-
 Now, manual tests like the one we've just done are all very well, but in TDD
 they're exactly what we're tring to avoid!  Our next objective is to set
 up an automated test.
@@ -206,7 +201,18 @@ it, and put it in the root of your project (in the ``mysite`` folder::
 *(Again, if you're on windows, you may not have ``wget``.  Just go ahead and download the file
 manually from the project on github, by going to the link above and doing a "Save As")*
 
+You can try running it now::
 
+    python functional_tests.py
+
+And you should see something like this::
+
+    ImportError: No module named settings_for_fts
+
+At this point, we'll need to do a bit more Django housekeeping.
+
+settings.py and database configuration
+--------------------------------------
 
 Django stores project-wide settings in a file called ``settings.py``. One of the key
 settings is what kind of database to use.  We'll use the easiest possible, *sqlite*.
@@ -225,6 +231,18 @@ and change the setting for ``ENGINE`` and ``NAME``, like so
 
 Find out more about projects, apps and ``settings.py`` here:
 https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup
+
+Now, because we don't want our functional tests interfering with our normal database,
+we need to create an alternative set of settings for our fts. Create a
+new file called ``settings_for_fts.py`` next to settings.py, and give it the 
+following contents::
+
+    from settings import *
+    DATABASES['default']['NAME'] = 'ft_database.sqlite'
+
+That essentially sets up an exact duplicate of the normal ``settings.py``, 
+except we change the name of the database.
+
 
 
 Setting up the database with ``syncdb``
@@ -255,29 +273,6 @@ around manually, to look for some inspiration on the next steps to take for our
 site.::
 
 
-Setting up the functional test runner
--------------------------------------
-
-The next thing we need is a single command that will run all our FT's, as well
-as a folder to keep them all in::
-
-Here's one I made earlier... A little Python script that'll run all your tests
-for you.::
-
-
-We also need to set up a custom set of settings for the FT - we want to make
-sure that our tests run against a different copy of the database from the
-production one, so that we're not afraid of blowing away real data.
-
-We'll do this by providing an alternative settings file for Django.  Create a
-new file called ``settings_for_fts.py`` next to settings.py, and give it the 
-following contents::
-
-    from settings import *
-    DATABASES['default']['NAME'] = 'ft_database.sqlite'
-
-That essentially sets up an exact duplicate of the normal ``settings.py``, 
-except we change the name of the database.
 
 
             # She types in her username and passwords and hits return

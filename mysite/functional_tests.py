@@ -4,6 +4,7 @@ except: import unittest
 from selenium import webdriver
 import subprocess
 import sys
+
 import settings_for_fts
 from django.core.management import call_command, setup_environ
 setup_environ(settings_for_fts)
