@@ -196,7 +196,59 @@ Note the nice, descriptive names for the test function, and the comments,
 which describe in human-readable text the actions that our user will take.
 Mhhhh, descriptive names.....
 
-It's always nice to give the user a name... Mine is called Gertrude...
+Aside from that, there are 3 lines of test code here:
+
+.. sourcecode:: python
+
+    self.browser.get(ROOT + '/admin/')
+
+``self.browser`` is the selenium object which represents the web browser, aka
+the ``WebDriver``. 
+
+``.get`` is tells the browser to go to a new page, and we pass it the url, which
+is made up of ``ROOT``, which we import from ``functional_tests.py`` (basically it's
+``http://localhost:8001``, and then we tack on the ``/admin/`` url to get to the
+admin site.
+
+
+Next we use
+
+.. sourcecode:: python
+
+    body = self.browser.find_element_by_tag_name('body') 
+
+``find_element_by_tag_name`` tells selenium to look through the page and find
+the HTML element for a particular tag - in this case, ``body``, which means
+the whole of the visible part of the page.  The method returns an ``WebElement``
+object, which represents the HTML element.
+
+Finally, we get to an assertion - where we say what we expect, and the test
+should pass or fail at this point:
+
+.. sourcecode:: python
+
+    self.assertIn('Django administration', body.text)
+
+This is equivalent to doing
+
+.. sourcecode:: python
+
+    assert 'Django administration' in body.text
+
+but we use the ``unittest`` method on ``self.`` because it will give us
+a more helpful error message.
+
+The ``body`` WebElement object's ``.text`` attribute essentially gives us 
+all of the visible text on the rendered page - stripping out all the 
+HTML markup.
+
+At the time of writing, the documentation for ``WebDriver`` and ``WebElement``
+was sparse, but the source code is very readable, so it's well worth looking
+through it to see what other methods and attributes are avaiable:
+http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
+http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py
+
+Finally, it's always nice to give the user a name... Mine is called Gertrude...
 
 
 Setting up the functional test runner
