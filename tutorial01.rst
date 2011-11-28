@@ -322,6 +322,7 @@ two near the top, and one near the bottom
 Let's see if it worked!  Try running the functional tests again::
 
     $ python functional_tests.py
+
     Creating tables ...
     Installing custom SQL ...
     Installing indexes ...
@@ -342,20 +343,58 @@ Let's see if it worked!  Try running the functional tests again::
     OK
 
 
+Hooray!  Pretty soon you'll develop a strong emotional reaction for that rather
+understated "OK".  For now, I imagine it maybe doesn't feel quite real.  Just
+to reassure ourselves then, maybe it would be nice to take a look around manually.
+
+Taking another look around
+--------------------------
+
+Let's fire up the Django dev server using ``runserver``, and have a look
+around manually, to look for some inspiration on the next steps to take for our
+site.::
+
+    python manage.py runserver
+
+If you take another look at ``http://localhost/``, you will probably see an
+error message like this::
+
+<TODO screenshot>
+
+Now that we've switched on the admin site, Django no longer serves its default
+"it worked" page.  It will give us helpful error messages (while we leave 
+``DEBUG = True`` in settings.py), and this one is telling us that the only
+active url on the site is ``/admin/``.
+
+So let's go there instead - point your browser towards ``http://localhost/admin/``,
+and you should see a slightly different error message
+
+<TODO screenshot>
+
+
+Django is telling us that there's a missing table in the database.  The solution
+to this sort of error is usually a ``syncdb``.
+
+
 Setting up the database with ``syncdb``
 ---------------------------------------
 
-``syncdb`` is the command used to get Django to setup the database. It creates
-any new tables that are needed, whenever you've added new models to your
-project. In this case, it notices it's the first run, and proposes that
-you create a superuser.  Let's go ahead and do that::
+If you remember we used the ``settings_for_fts.py`` file to make the FT runner
+use a different database file to the normal one?  Well, our normal database 
+needs a bit more settting up -- so far we gave it a name in ``settings.py``, but
+we also need to tell Django to create all the tables it needs. For this we use 
+a command named ``syncdb``.
+
+In this case, syncdb will notice it's the first run, and proposes that
+you create a superuser.  Let's go ahead and do that (you may have to hit
+Ctrl-C to quit the test server first)::
 
     python manage.py syncdb
 
 Let's use the ultra-secure  ``admin`` and ``adm1n`` as our username and
 password for the superuser.:::
 
-    harry@harry-laptop:~/workspace/mysite:master$ python manage.py syncdb
+    $ python manage.py syncdb
     Username (Leave blank to use 'harry'): admin
     E-mail address: admin@example.com
     Password: 
@@ -363,14 +402,40 @@ password for the superuser.:::
     Superuser created successfully.
      
 
+Let's see if that worked - try firing up the test server again::
 
-At this point we may not be quite sure what we want though.  This is a good
-time to fire up the Django dev server using ``runserver``, and have a look
-around manually, to look for some inspiration on the next steps to take for our
-site.::
+    python manage.py runserver
 
+And if you go back to ``http://localhost/admin/``, you should see the
+Django login screen::
 
+<TODO screenshot>
 
+And if you try logging in with the username and password we set up earlier
+(``admin`` and ``adm1n``), you should be taken to the main Django admin page
+
+<TODO screenshot>
+
+By default, the admin site lets you manage users (like the ``admin`` user we
+set up just now), as well as Groups and Sites (no need to worry about those 
+for now).
+
+Having a look around manually is useful, because it helps us decide what we
+want next in our FT.
+
+We want to use the django admin site to manage the polls in our polls app.
+Basically, "Polls" should be one of the options, maybe just below Users, Groups,
+and Sites.
+
+If you hover over the blue headers, you'll see that "Auth" and "Sites" are both 
+hyperlinks.  "Groups", "Users" and the second "Sites" are also hyperlinks.  So,
+we'll want to add a section for "Polls", and within that there should be another
+link to "Polls".  Let's add that to our FT.
+
+Extending the FT to login and look for Polls
+--------------------------------------------
+
+...
 
             # She types in her username and passwords and hits return
             username_field = self.browser.find_element_by_name('username')
@@ -403,47 +468,6 @@ site.::
 
             # She is returned to the "Polls" listing, where she can see her
             # new poll
-
-If you've never seen the django-admin site before, some of that stuff may seem
-a bit like magic - I've written it because I already know what the admin site
-looks like. Later in the tutorial, I'll show you how to fire up a test server 
-and explore the django admin site manually, in order to decide how to write
-these sorts of tests. Also, most of the FT's you write in a Django project
-don't concern the admin site, they concern new pages you've written entirely
-yourself - in which case the FT is a lot less like magic, and a lot more like
-spec'ing out how you want your site to look and how it should work.  Stick
-around, and I promise you'll find out all about it!
-
-
-For now, let's try running our first test::
-
-    python functional_tests.py
-
-The test output will looks something like this::
-
-    Starting Selenium
-    selenium started
-    starting django test server
-    django test server running
-    running tests
-    F
-    ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_admin.py", line 12, in test_can_create_new_poll_via_admin_site
-        self.assertIn('Django administration', body.text)
-    AssertionError: 'Django administration' not found in u"It worked!\n
-    Congratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet.
-    Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in mysite/settings.py.\n
-    Start your first app by running python mysite/manage.py startapp [appname].\n
-    You're seeing this message because you have DEBUG = True in your Django settings file 
-    and you haven't configured any URLs. Get to work!"
-
-    ----------------------------------------------------------------------
-    Ran 1 test in 4.754s
-
-    FAILED (failures=1)
 
 
 
