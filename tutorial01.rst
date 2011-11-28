@@ -306,7 +306,21 @@ following contents::
 That essentially sets up an exact duplicate of the normal ``settings.py``, 
 except we change the name of the database.
 
-Let's see if it worked by trying to run the functional tests again::
+By this point your disk tree should look like this::
+
+    mysite/
+      functional_tests.py
+      manage.py
+      settings_for_fts.py
+      settings.py
+      urls.py
+      fts/
+        __init__.py
+        test_admin.py
+            
+If there's anything missing, figure out why!
+
+Otherwise, let's see if it worked by trying to run the functional tests again::
 
     python functional_tests.py
 
@@ -473,7 +487,9 @@ set up just now), as well as Groups and Sites (no need to worry about those
 for now).
 
 Having a look around manually is useful, because it helps us decide what we
-want next in our FT.
+want next in our FT.  This is particularly true when you're working with 
+external tools, rather than with parts of the website you've written entirely
+yourself.
 
 We want to use the django admin site to manage the polls in our polls app.
 Basically, "Polls" should be one of the options, maybe just below Users, Groups,
@@ -487,7 +503,24 @@ link to "Polls".  Let's add that to our FT.
 Extending the FT to login and look for Polls
 --------------------------------------------
 
-...
+So, we now want our FT to cover logging into the admin site,
+and checking that "Polls" is an option on the main page:
+
+.. sourcecode:: python
+    from functional_tests import FunctionalTest, ROOT
+    from selenium.webdriver.common.keys import Keys
+
+    class TestPollsAdmin(FunctionalTest):
+
+        def test_can_create_new_poll_via_admin_site(self):
+
+            # Gertrude opens her web browser, and goes to the admin page
+            self.browser.get(ROOT + '/admin/')
+
+            # She sees the familiar 'Django administration' heading
+            body = self.browser.find_element_by_tag_name('body') 
+            self.assertIn('Django administration', body.text)
+
 
             # She types in her username and passwords and hits return
             username_field = self.browser.find_element_by_name('username')
@@ -501,26 +534,14 @@ Extending the FT to login and look for Polls
             polls_links = self.browser.find_elements_by_link_text('Polls')
             self.assertEquals(len(polls_links), 2)
 
-            # The second one looks more exciting, so she clicks it
-            polls_links[1].click()
 
-            # She is taken to the polls listing page, which shows she has
-            # no polls yet
-            body = self.browser.find_element_by_tag_name('body')
-            self.assertIn('0 polls', body.text)
+We're using a couple of new test methods here...
 
-            # She sees a link to 'add' a new poll, so she clicks it
-            new_poll_link = self.browser.find_element_by_link_text('Add poll')
-            new_poll_link.click()
 
-            #TODO: (we'll write the rest of the test code later)
-            # She sees some input fields for "Question" and "Publication date"
 
-            # She fills these in and clicks "Save" to create the new poll
 
-            # She is returned to the "Polls" listing, where she can see her
-            # new poll
 
+Let's try running the FT again and seeing how far it gets -
 
 
 .. sourcecode:: python
@@ -779,8 +800,30 @@ Let's try the FT again...::
 Hooray! 
 
 
-Exploring the site manually using runserver 
--------------------------------------------
+
+
+
+
+            # The second one looks more exciting, so she clicks it
+            polls_links[1].click()
+
+            # She is taken to the polls listing page, which shows she has
+            # no polls yet
+            body = self.browser.find_element_by_tag_name('body')
+            self.assertIn('0 polls', body.text)
+
+            # She sees a link to 'add' a new poll, so she clicks it
+            new_poll_link = self.browser.find_element_by_link_text('Add poll')
+            new_poll_link.click()
+
+            #TODO: (we'll write the rest of the test code later)
+            # She sees some input fields for "Question" and "Publication date"
+
+            # She fills these in and clicks "Save" to create the new poll
+
+            # She is returned to the "Polls" listing, where she can see her
+            # new poll
+
 
 So far so good.  But, we still have a few items left as "TODO" in our tests.
 At this point we may not be quite sure what we want though.  This is a good
