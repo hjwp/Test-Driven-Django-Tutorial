@@ -112,13 +112,24 @@ any point during this tutorial, if you want to check what the site actually
 looks like, you can always fire up the test server and have a look around
 
 
-Our first functional test: The Django admin
--------------------------------------------
+Starting our first functional test: The Django admin site
+=========================================================
 
-In the test-driven methodology, we tend to group functionality up into
-bite-size chunks, and write functional tests for each one of them. You
-can describe the chunks of functionality as "user stories", if you like,
-and each user story tends to have a set of tests associated with it,
+In this section, we're going to do several things:
+
+    * create our first FT
+
+    * install the FT runner
+
+    * setup our database using ``settings.py``
+
+    * setup django admin 
+
+
+Let's start with the FT. In the test-driven methodology, we tend to group
+functionality up into bite-size chunks, and write functional tests for each one
+of them. You can describe the chunks of functionality as "user stories", if you
+like, and each user story tends to have a set of tests associated with it,
 and the tests track the potential behaviour of a user.
 
 We have to go all the way to the second page of the Django tutorial to see an
@@ -145,9 +156,9 @@ a couple of screenshots of what the admin site looks like:
 
 
 We'll add more to this test later, but for now let's just get it to do the
-absolute minimum:  open up the admin site (which we want to be available via
-the url ``/admin/``), and see that it "looks OK" - for this, we'll check
-that the page contains the words "Django administration"
+absolute minimum:  we want the test to open up the admin site (which we want to
+be available via the url ``/admin/``), and see that it "looks OK" - for this,
+we'll check that the page contains the words *Django administration*
 
 Let's create a directory to keep our FTs in called, um, ``fts``::
 
@@ -233,7 +244,7 @@ Find out more about projects, apps and ``settings.py`` here:
 https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup
 
 Now, because we don't want our functional tests interfering with our normal database,
-we need to create an alternative set of settings for our fts. Create a
+we need to create an *alternative* set of settings for our fts. Create a
 new file called ``settings_for_fts.py`` next to settings.py, and give it the 
 following contents::
 
@@ -243,6 +254,92 @@ following contents::
 That essentially sets up an exact duplicate of the normal ``settings.py``, 
 except we change the name of the database.
 
+Let's see if it worked by trying to run the functional tests again::
+
+    python functional_tests.py
+
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/tmp/mysite/fts/test_admin.py", line 12, in test_can_create_new_poll_via_admin_site
+        self.assertIn('Django administration', body.text)
+    AssertionError: 'Django administration' not found in u"It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in settings_for_fts/settings.py.\nStart your first app by running python settings_for_fts/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!"
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 2.532s
+
+
+Hooray - I know it says "Fail", but that's still better than the last test
+runner, which just had an error.  In fact, this is what you'd call an 
+"expected failure" - our FT is checking that the url ``/admin/`` produces
+the django admin page (by looking for the words "Django Administration",
+but instead it's only finding the default "It worked" Django welcome message,
+which we saw earlier when we used ``runserver``.
+
+So now we can get on with doing what we need to do to get the test to pass!
+
+Switching on the admin site
+---------------------------
+
+This is described on page two of the official Django tutorial:
+
+https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site
+
+We need to edit two files: ``settings.py`` and ``urls.py``.  In both cases,
+Django has some helpful comments in those files by default, and all we need to
+do is uncoment a couple of lines.
+
+First, in ``settings.py`` we add ``django.contrib.admin`` to ``INSTALLED_APPS``:
+
+.. sourcecode:: python
+
+    INSTALLED_APPS = (
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.messages',
+        # Uncomment the next line to enable the admin:
+        'django.contrib.admin',
+        # Uncomment the next line to enable admin documentation:
+        # 'django.contrib.admindocs',
+    )
+
+And in ``urls.py``, we uncomment three lines that mention the admin site -
+two near the top, and one near the bottom
+
+.. sourcecode:: python
+
+    from django.contrib import admin
+    admin.autodiscover()
+    urlpatterns = patterns('',
+        # [...]
+        # Uncomment the next line to enable the admin:
+        url(r'^admin/', include(admin.site.urls)),
+    )
+
+Let's see if it worked!  Try running the functional tests again::
+
+    $ python functional_tests.py
+    Creating tables ...
+    Installing custom SQL ...
+    Installing indexes ...
+    No fixtures found.
+    running tests
+    No fixtures found.
+    Validating models...
+
+    0 errors found
+    Django version 1.3, using settings 'settings_for_fts'
+    Development server is running at http://localhost:8001/
+    Quit the server with CONTROL-C.
+    [28/Nov/2011 04:00:28] "GET /admin/ HTTP/1.1" 200 2028
+    .
+    ----------------------------------------------------------------------
+    Ran 1 test in 2.724s
+
+    OK
 
 
 Setting up the database with ``syncdb``
@@ -349,17 +446,6 @@ The test output will looks something like this::
     FAILED (failures=1)
 
 
-First few steps...
-------------------
-
-So, let's start trying to get our functional test to pass... or at least get a
-little further on.  We'll need to set up the Django admin site.  This is on
-page two of the official Django tutorial:
-
-https://docs.djangoproject.com/en/1.3/intro/tutorial02/#activate-the-admin-site
-
-At this point we need to do two things: add ``django.contrib.admin`` to
-INSTALLED_APPS in ``settings.py``
 
 .. sourcecode:: python
 
@@ -379,17 +465,6 @@ INSTALLED_APPS in ``settings.py``
 (I've also thrown ``'polls'`` in there, since settings.py needs to
 know about your own apps too)
 
-And edit ``mysite/urls.py`` to uncomment the lines that reference the admin
-
-.. sourcecode:: python
-
-    from django.contrib import admin
-    admin.autodiscover()
-    urlpatterns = patterns('',
-        # [...]
-        # Uncomment the next line to enable the admin:
-        url(r'^admin/', include(admin.site.urls)),
-    )
 
 Let's re-run our tests.  We should find they get a little further::
 
