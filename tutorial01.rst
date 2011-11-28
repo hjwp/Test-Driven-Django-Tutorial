@@ -73,7 +73,7 @@ Setting up our Django project
 
 Django structures websites as "projects", each of which can onon have several
 constituent "apps"... Ostensibly, the idea is that apps can be self-contained,
-so that you could use one app in several projects... Well, enI've never actually
+so that you could use one app in several projects... Well, I've never actually
 seen that done, but it remains a nice way of splitting up your code.
 
 So let's start by creating our `project`, which we'll call "mysite". Django has
@@ -521,7 +521,6 @@ and checking that "Polls" is an option on the main page:
             body = self.browser.find_element_by_tag_name('body') 
             self.assertIn('Django administration', body.text)
 
-
             # She types in her username and passwords and hits return
             username_field = self.browser.find_element_by_name('username')
             username_field.send_keys('admin')
@@ -537,12 +536,62 @@ and checking that "Polls" is an option on the main page:
 
 We're using a couple of new test methods here...
 
+    * ``find_elements_by_name`` which is most useful for form input fields,
+      which it locates by using the ``name="xyz"`` HTML attribute
+
+    * ``send_keys`` - which sends keystrokes, as if the user was typing
+      something (notice also the ``Keys.RETURN``, which sends an enter key
+      - there are lots of other options inside ``Keys``, like tabs, modifier
+        keys etc
+
+    * ``find_elements_by_link_text`` - notice the **s** on ``elements``; this
+      method returns a *list* of WebElements.
 
 
+Let's try running the FT again and seeing how far it gets::
 
+    python functional_tests.py
 
-Let's try running the FT again and seeing how far it gets -
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 25, in test_can_create_new_poll_via_admin_site
+        self.assertEquals(len(polls_links), 2)
+    AssertionError: 0 != 2
 
+    ----------------------------------------------------------------------
+    Ran 1 test in 10.203s
+
+Well, the test is happy that there's a Django admin site, and it can log in fine,
+but it can't find a link to administer "Polls".  
+
+The polls application, our first Django model and unit tests
+============================================================
+
+In this next section, we're going to create a new Django *"app"* for our Polls,
+as well as a new ``Poll`` class to represent our poll objects in the database.
+We'll also be writing our first unit tests.
+
+If you remember form back when we created the ``mysite`` project, I mentioned
+that Django encourages us to build up our projects out of constituent ``apps``
+- pieces of self-contained functionality.
+
+So let's create a new app for our polls.  There's a management command for this::
+
+    python manage.py startapp polls
+
+When that commmand completes, you should see that Django will create a new folder
+inside ``mysite`` called ``polls``, and in that, several new files::
+
+    mysite/polls/__init__.py
+    mysite/polls/models.py
+    mysite/polls/tests.py
+    mysite/polls/views.py
+
+The next thing we need to do is tell Django that, yes, we really meant it,
+and would it please take notice of this new polls app and assume we want to
+use it - we do this by adding it to ``INSTALLED_APPS`` in ``settings.py``:
 
 .. sourcecode:: python
 
@@ -556,38 +605,20 @@ Let's try running the FT again and seeing how far it gets -
         'django.contrib.admin',
         # Uncomment the next line to enable admin documentation:
         # 'django.contrib.admindocs',
-        'polls'
+        'mysite.polls',
     )
 
-(I've also thrown ``'polls'`` in there, since settings.py needs to
-know about your own apps too)
 
-
-Let's re-run our tests.  We should find they get a little further::
-
-    python functional_tests.py
-    ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_admin.py", line 25, in test_can_create_new_poll_via_admin_site
-        self.assertEquals(len(polls_links), 2)
-    AssertionError: 0 != 2
-
-    ----------------------------------------------------------------------
-    Ran 1 test in 10.203s
-
-Well, the test is happy that there's a Django admin site, and it can log in fine,
-but it can't find a link to administer "Polls".  So next we need to create the
-representation of a Poll inside Django - a `model`, in Django terms.
+So next we need to create the representation of a Poll inside Django - a
+`model`, in Django terms.
 
 
 Our first unit tests: testing a new "Poll" model
-------------------------------------------------
+================================================
 
 The Django unit test runner will automatically run any tests we put in
-``tests.py``.  Later on, we might decide we want to put our tests somewhere
-else, but for now, let's use that file
+``polls/tests.py``.  Later on, we might decide we want to put our tests somewhere
+else, but for now, let's use that file:
 
 .. sourcecode:: python
 
@@ -616,29 +647,53 @@ else, but for now, let's use that file
             self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
 
 
-Unit tests are designed to check that the individual parts of our code work
-the way we want them too.  Aside from being useful as tests, they're useful
-to help us think about the way we design our code... It forces us to think 
-about how things are going to work, from a slightly external point of view.
+Whereas functional tests are meant to test how the whole system behaves, from
+the point of view of a user, unit test are meant to check that the individual
+parts of our code work the way we want them to.  Unit tests work at a much lower
+level, and they typically test individual functions or classes.
+
+Aside from being useful as tests, in the TDD philosophy writing unit tests also
+helps us because it forces us to do some design before we start to code.
+That's because when we write test, we have to think about the function or class
+we're about to write *from the outside* - in terms of its API, and its desired
+behaviour.  Often when you find yourself struggling to write tests, finding things
+long winded, it's an indication that the design of your code isn't quite right...
+
+The django ORM - model classes
+------------------------------
 
 If you've never worked with Django, this test will also be your first introduction
-to the Django `ORM` - the API for working with database objects in Django.
-Here we're creating a new "Poll" object, and setting some of its attributes;
-(``question`` and ``pub_date``) these correspond to a row in the database, and
-the values for the table's columns. We can then ``save`` the object to the
+to the Django `ORM` - the API for working with database objects in Django. 
+
+You can see that everything revolves around ``Poll``, which is a class that
+represents our polls, which we import from ``models.py``.  Usually a model
+class corresponds to a single table in the database.
+
+In the test we creating a new "Poll" object, and then we set some of its
+attributes: ``question`` and ``pub_date``. The object corresponds to a row in
+the database, and the attributes are the values for the table's columns.
+
+Finally, we call ``save()``, which actually INSERTs the object into the
 database.
 
 Later on, you can also see how we look up existing objects from the database
-using ``Poll.objects``, which lets us run queries against the database.  We've
-used the simplest possible query, ``all()``, but all sorts of other options are
-available, and Django's API is very helpful and intuitive.  You can find out more
-at:
+using a special classmethod, ``Poll.objects``, which lets us run queries
+against the database.  We've used the simplest possible query, ``.all()``, but
+all sorts of other options are available, and Django's API is very helpful and
+intuitive.  You can find out more at:
 
 https://docs.djangoproject.com/en/1.3/intro/tutorial01/#playing-with-the-api
+
+The unit-test / code cycle
+--------------------------
 
 Let's run the unit tests.::
 
     python manage.py test
+
+(when you call ``manage.py test``, Django looks through all the apps in 
+``INSTALLED_APPS``, finds tests inside them (by looking for a file called
+``tests.py``, for example), and runs them.
 
 You should see an error like this::
 
@@ -696,7 +751,7 @@ our tests further on
     class Poll(models.Model):
         pass
 
-
+Inheriting from Django's ``Model`` class will give us the ``save()`` method.
 Running the tests again, we should see a slight change to the error message::
 
     ======================================================================
@@ -708,7 +763,6 @@ Running the tests again, we should see a slight change to the error message::
     AttributeError: 'Poll' object has no attribute 'question'
 
     ----------------------------------------------------------------------
-
 
 Notice that the tests have got all the way through to line 26, where we retrieve
 the object back out of the database, and it's telling us that we haven't saved the
@@ -756,12 +810,14 @@ And run the tests again::
 
 Hooray!  The joy of that unbroken string of dots!  That lovely, understated "OK".
 
+So, we've now created a new model (table) for our database, the Poll, which has
+two attributes (columns).
+
 
 Back to the functional tests: registering the model with the admin site
 -----------------------------------------------------------------------
 
-
-The unit tests all pass. Does this mean our functional test will pass?::
+So the unit tests all pass. Does this mean our functional test will pass?::
 
     python functional_tests.py
     ======================================================================
@@ -778,8 +834,8 @@ The unit tests all pass. Does this mean our functional test will pass?::
 
 Ah, not quite.  The Django admin site doesn't automatically contain every model
 you define - you need to tell it which models you want to be able to administer.
-To do that, we just need to create a file called ``admin.py`` in the ``polls``
-directory, with the following three lines
+To do that, we just need to create a new file with the following three lines
+inside the polls app called, ``polls/admin.py``:
 
 .. sourcecode:: python
 
@@ -788,7 +844,26 @@ directory, with the following three lines
 
     admin.site.register(Poll)
 
-Let's try the FT again...::
+If you've done everythin right, the directory tree should now look like this::
+
+    mysite/
+      functional_tests.py
+      manage.py
+      settings_for_fts.py
+      settings.py
+      urls.py
+      fts/
+        __init__.py
+        test_admin.py
+      polls/
+        __init__.py
+        models.py
+        tests.py
+        views.py
+                
+If there's anything missing, figure out why!
+
+    Let's try the FT again...::
 
     python functional_tests.py
     .
@@ -799,30 +874,6 @@ Let's try the FT again...::
 
 Hooray! 
 
-
-
-
-
-
-            # The second one looks more exciting, so she clicks it
-            polls_links[1].click()
-
-            # She is taken to the polls listing page, which shows she has
-            # no polls yet
-            body = self.browser.find_element_by_tag_name('body')
-            self.assertIn('0 polls', body.text)
-
-            # She sees a link to 'add' a new poll, so she clicks it
-            new_poll_link = self.browser.find_element_by_link_text('Add poll')
-            new_poll_link.click()
-
-            #TODO: (we'll write the rest of the test code later)
-            # She sees some input fields for "Question" and "Publication date"
-
-            # She fills these in and clicks "Save" to create the new poll
-
-            # She is returned to the "Polls" listing, where she can see her
-            # new poll
 
 
 So far so good.  But, we still have a few items left as "TODO" in our tests.
