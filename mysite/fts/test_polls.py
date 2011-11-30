@@ -1,8 +1,20 @@
 from functional_tests import FunctionalTest, ROOT
 from selenium.webdriver.common.keys import Keys
+from collections import namedtuple
+
+PollInfo = namedtuple('PollInfo', ['question', 'choices'])
+POLL1 = PollInfo("How awesome is Test-Driven Development?", [
+    'Very awesome',
+    'Quite awesome',
+    'Moderately awesome',
+])
+POLL2 = PollInfo("Which workshop treat do you prefer?", [
+    'Beer',
+    'Pizza',
+    'The Acquisition of Knowledge',
+])
 
 class TestPolls(FunctionalTest):
-
     def _setup_polls_via_admin(self):
         # Gertrude logs into the admin site
         self.browser.get(ROOT + '/admin/')
@@ -12,35 +24,39 @@ class TestPolls(FunctionalTest):
         password_field.send_keys('adm1n')
         password_field.send_keys(Keys.RETURN)
 
-        # She follows the link to the Polls app, and adds a new Poll
-        self.browser.find_elements_by_link_text('Polls')[1].click()
-        self.browser.find_element_by_link_text('Add poll').click()
+        # She has a number of polls to enter.  For each one, she:
 
-        # She enters its name, and uses the 'today' and 'now' buttons to set
-        # the publish date
-        question_field = self.browser.find_element_by_name('question')
-        question_field.send_keys("How awesome is Test-Driven Development?")
-        self.browser.find_element_by_link_text('Today').click()
-        self.browser.find_element_by_link_text('Now').click()
+        for poll_info in [POLL1, POLL2]:
+            # Follows the link to the Polls app, and adds a new Poll
+            self.browser.find_elements_by_link_text('Polls')[1].click()
+            self.browser.find_element_by_link_text('Add poll').click()
 
-        # She sees she can enter choices for the Poll.  She adds three
-        choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
-        choice_1.send_keys('Very awesome')
-        choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
-        choice_2.send_keys('Quite awesome')
-        choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
-        choice_3.send_keys('Moderately awesome')
+            # Enters its name, and uses the 'today' and 'now' buttons to set
+            # the publish date
+            question_field = self.browser.find_element_by_name('question')
+            question_field.send_keys(poll_info.question)
+            self.browser.find_element_by_link_text('Today').click()
+            self.browser.find_element_by_link_text('Now').click()
 
-        # She saves her new poll
-        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
-        save_button.click()
+            # Sees she can enter choices for the Poll on this same page,
+            # so she does
+            for i, choice_text in enumerate(poll_info.choices):
+                choice_field = self.browser.find_element_by_name('choice_set-%d-choice' % i)
+                choice_field.send_keys(choice_text)
 
-        # She is returned to the "Polls" listing, where she can see her
-        # new poll, listed as a clickable link
-        new_poll_links = self.browser.find_elements_by_link_text(
-                "How awesome is Test-Driven Development?"
-        )
-        self.assertEquals(len(new_poll_links), 1)
+            # Saves her new poll
+            save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+            save_button.click()
+
+            # Is returned to the "Polls" listing, where she can see her
+            # new poll, listed as a clickable link by its name
+            new_poll_links = self.browser.find_elements_by_link_text(
+                    poll_info.question
+            )
+            self.assertEquals(len(new_poll_links), 1)
+
+            # She goes back to the root of the admin site
+            self.browser.get(ROOT + '/admin/')
 
         # She logs out of the admin site
         self.browser.find_element_by_link_text('Log out').click()
