@@ -8,6 +8,18 @@ Last time we managed to get the admin site up and running, this time it's
 time to actualy get it working the way we want it to, so that we can
 use it to create new polls for our site.
 
+Here's an outline of what we're going to do:
+
+    * Create an FT that can create a new poll via the admin site
+
+    * Customise the human-readable display for polls
+
+    * Create "Choice" model objects to go with polls
+
+    * Add choices to the admin site
+
+
+
 Inspecting the admin site to decide what to test next
 -----------------------------------------------------
 
@@ -31,8 +43,8 @@ to click on a link that says "Add Poll" - let's add that to our FT, in
 
 ``find_element_by_link_text`` is a very useful Selenium function - it's a 
 good combination of the presentation layer (what the user sees when they 
-click a link) and the functionality of the site (we click a hyperlink,
-which will take us to a different page, or at least "do" something!)
+click a link) and the functionality of the site (hyperlink one of the major
+ways that users actually interact with a website)
 
 Now, when you click the link you should see a menu a bit like this.
 
@@ -54,13 +66,15 @@ our FT
         self.assertIn('Date published:', body.text)
 
 
+Mmmh, "Date Published", much nicer.
+
 
 More ways of finding elements on the page using Selenium
 --------------------------------------------------------
 
-Try filling in a new Poll, and fill in the 'date' entry but not a 'time'.  You'll
-find django complains that the field is required. So, in our test, we need to
-fill in three fields: `question`, `date`, and `time`. 
+If you try filling in a new Poll, and fill in the 'date' entry but not a
+'time'.  You'll find django complains that the field is required. So, in our
+test, we need to fill in three fields: `question`, `date`, and `time`. 
 
 In order to get Selenium to find the text input boxes for those fields, there
 are several options::
@@ -83,7 +97,10 @@ attribute is usually associated with input fields from forms.  If you take a
 look at the HTML source code for the Django admin page for entering a new poll
 (either the raw source, or using a tool like Firebug, or developer tools in
 Google Chrome), you'll find out that the 'name' for our three fields are
-`question`, `pub_date_0` and `pub_date_1`.::
+`question`, `pub_date_0` and `pub_date_1`.:
+
+
+.. sourcecode:: html
 
     <label for="id_question" class="required">Question:</label>
     <input id="id_question" type="text" class="vTextField" name="question" maxlength="200" />
@@ -128,9 +145,9 @@ We can also use the CSS selector to pick up the "Save" button
         save_button.click()
 
 
-Finally, we'll want to have our test check that the new Poll appears on the
-listings page.  If you've entered a Poll, you'll have noticed that the polls
-are just described as "Poll object".  
+Then, when you hit 'Save', you'll see that we get taken back to the Polls
+listings page.  You'll notice that the new poll is just described as "Poll
+object".  
 
 .. image:: /static/images/django_admin_poll_object_needs_verbose_name.png
 
@@ -146,7 +163,7 @@ the object.  So let's say we want our polls listed by their question
         )
         self.assertEquals(len(new_poll_links), 1)
 
-If you've lost track in amongst all the copy & pasting,
+That's it for now - if you've lost track in amongst all the copy & pasting,
 you can compare your version to mine, which is hosted here:
 https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_admin.py
 
@@ -172,6 +189,10 @@ date" isn't the label we want for our field ("Date published")::
 
     ----------------------------------------------------------------------
 
+
+Unit testing the verbose name for pub_date
+------------------------------------------
+
 Django stores human-readable names for model attributes in a special attribute
 called `verbose_name`.  Let's write a unit test that checks the verbose name
 for our ``pub_date`` field.  Add the following method to ``polls\tests.py``
@@ -196,7 +217,9 @@ fail::
 
     AssertionError: 'pub date' != 'Date published'
 
-And we can make the change in ``models.py``
+
+Now that we have a unit test, we can implement! Let's make a change in
+``models.py``
 
 .. sourcecode:: python
 
@@ -217,10 +240,14 @@ Re-running our functional tests, things have moved on::
 
     ----------------------------------------------------------------------
 
-We're almost there - the FT is complaining it can't find a link to a Poll
-which has the text of our question.  To make this work, we need to tell
-Django how to print out a Poll object.  this happens in the ``__unicode__``
-method.  As usual, we unit test first, in this case it's a very simple one
+We're almost there - the FT has managed to create and save the new poll,
+but when it gets back to the listings page, it can't find a hyperlink
+whose text is the new question - it's still listed as an unhelpful "Poll object"
+
+
+To make this work, we need to tell Django how to print out a Poll object.  This
+happens in the ``__unicode__`` method.  As usual, we unit test first, in this
+case it's a very simple one -
 
 .. sourcecode:: python
 
@@ -278,8 +305,8 @@ And now, our functional tests should get to the end::
 Hooray!  Sadly that "OK" won't last for long - we want to add more to our FT
  
 
-Adding Choice objects to our Poll page
---------------------------------------
+Adding Choices to the Poll admin page
+=====================================
 
 Now, our polls currently only have a question - we want to give each poll
 a set of possible answers, or "choices", for the user to pick between. Ideally,
@@ -388,15 +415,15 @@ And let's do a unit test run::
 
     FAILED (errors=1)
 
-no attribute save - let's make our Choice class into a proper Django model::
+No attribute save - let's make our Choice class into a proper Django model::
 
     class Choice(models.Model):
         pass
 
-Have you noticed it says "326 tests"?  Surely we haven't written that many?
-That's because ``manage.py test`` runs all the tests for all the Django stuff,
-as well as your own tests.  If you want to, you can tell Django to just run the
-tests for your own app, like this::
+Have you noticed the way it says "326 tests"?  Surely we haven't written that
+many, I hear you ask? That's because ``manage.py test`` runs all the tests for
+all the Django stuff, as well as your own tests.  If you want to, you can tell
+Django to just run the tests for your own app, like this::
 
     $ python manage.py test polls
     Creating test database for alias 'default'...
@@ -415,11 +442,16 @@ tests for your own app, like this::
     FAILED (errors=1)
     Destroying test database for alias 'default'...
 
-Our tests are complaining that the "poll" object has no attribute
+OK, our tests are complaining that the "poll" object has no attribute
 ``choice_set``. This is a special attribute that allows you to retrieve all the
 related Choice objects for a particular poll, and it gets added by Django whenever
 you define a relationship between two models - a foreign key relationship for 
-example. Let's add that now
+example. 
+
+You can see some more examples of creating Polls and related Choices here:
+https://docs.djangoproject.com/en/1.3/intro/tutorial01/#playing-with-the-api
+
+Let's add that relationship now
 
 .. sourcecode:: python
 
@@ -567,6 +599,6 @@ And re-run our tests::
 
     OK
 
-Hooray!  Tune in next week, for when we *really* get off the admin site, and
+Hooray!  Tune in next week, for when we finally get off the admin site, and
 into testing some Django pages we've written ourselves...
 
