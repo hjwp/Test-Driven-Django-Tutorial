@@ -52,6 +52,14 @@ class TestPollsAdmin(FunctionalTest):
         time_field = self.browser.find_element_by_name('pub_date_1')
         time_field.send_keys('00:00')
 
+        # She sees she can enter choices for the Poll.  She adds three
+        choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
+        choice_1.send_keys('Very awesome')
+        choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
+        choice_2.send_keys('Quite awesome')
+        choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
+        choice_3.send_keys('Moderately awesome')
+
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         save_button.click()
 

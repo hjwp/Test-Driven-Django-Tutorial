@@ -146,7 +146,7 @@ the object.  So let's say we want our polls listed by their question
         )
         self.assertEquals(len(new_poll_links), 1)
 
-That's our FT finished.  If you've lost track in amongst all the copy & pasting,
+If you've lost track in amongst all the copy & pasting,
 you can compare your version to mine, which is hosted here:
 https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_admin.py
 
@@ -268,54 +268,60 @@ And you should now find that the unit tests pass::
     Ran 325 tests in 2.526s
 
 
-And now, our functional tests should pass::
-
+And now, our functional tests should get to the end::
 
     ----------------------------------------------------------------------
     Ran 1 test in 7.065s
 
     OK
+
+Hooray!  Sadly that "OK" won't last for long - we want to add more to our FT
  
+
 Adding Choice objects to our Poll page
 --------------------------------------
 
-#TODO!
+Now, our polls currently only have a question - we want to give each poll
+a set of possible answers, or "choices", for the user to pick between. Ideally,
+we want Gertrude to be able to fill in the choices on the same screen as
+she defines the question.  Thankfully, Django allows this - you can see it
+in the Django tutorial, you can have Choices on the same page as the "Add 
+new Poll" page.
 
-Let's start by writing out our FT as human-readable comments, which describe
-the user's actions, and the expected behaviour of the site
+https://docs.djangoproject.com/en/1.3/intro/tutorial02/#adding-related-objects
 
+So let's add that as an intermediate step in our FT, in between where
+Florence enters the question, and when she hits save.  
+
+.. sourcecode:: python
+
+        [...]
+        time_field.send_keys('00:00')
+
+        # She sees she can enter choices for the Poll.  She adds three
+        choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
+        choice_1.send_keys('Very awesome')
+        choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
+        choice_2.send_keys('Quite awesome')
+        choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
+        choice_3.send_keys('Moderately awesome')
+
+        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+        [...]
+
+
+For now you'll have to trust me on those ``choice_set-0-choice`` name attributes!
 Let's try running our fts again::
 
-    ======================================================================
-    ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 40, in test_voting_on_a_new_poll
-        self._setup_polls_via_admin()
-      File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 26, in _setup_polls_via_admin
-        choice_1 = self.browser.find_element_by_name('choice_0')
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 244, in find_element_by_name
-        return self.find_element(by=By.NAME, value=name)
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 525, in find_element
-        {'using': by, 'value': value})['value']
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 144, in execute
-        self.error_handler.check_response(response)
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 118, in check_response
-        raise exception_class(message, screen, stacktrace)
     NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' 
-
-    ----------------------------------------------------------------------
-    Ran 2 tests in 23.710s
-
-    FAILED (errors=1)
 
 
 Relations between models: Polls and Choices
 -------------------------------------------
 
-Right, the FT can't find the "choice" elements to fill in on the admin page.
-Let's go ahead and create our "Choice" model then. As usual, we start with some
-unit tests - ``polls/tests.py``
+Right, naturally the FT can't find the "choice" elements to fill in on the
+admin page, because there's no such thing yet! Let's go ahead and create our
+"Choice" model then. As usual, we start with some unit tests - in ``polls/tests.py``
 
 .. sourcecode:: python
 
