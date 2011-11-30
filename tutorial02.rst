@@ -1,120 +1,290 @@
 Welcome to part 2 of the tutorial!  Hope you've had a little break, maybe a
 nice chocolate biscuit, and are super-excited to do more!
 
-So far we've only worked with the Django admin site - now it's time to start
-creating our own web pages.  Much more fun.
+Tutorial 2 - Customising the admin site
+=======================================
 
-So, the next thing we want to do is write some of the test of what non-admin
-users will see of our polls application - viewing existing polls, responding to
-polls by submitting a choice, and viewing poll results.
+Last time we managed to get the admin site up and running, this time it's 
+time to actualy get it working the way we want it to, so that we can
+use it to create new polls for our site.
 
-So, let's write a functional test that does all three of those things. We'll
-create a new file for it called ``fts/test_polls.py``.  We'll be re-using some
-of the code from ``test_admin.py``, so you might want to do a "save as"
-based on that file.
+Inspecting the admin site to decide what to test next
+-----------------------------------------------------
 
-Writing the FT as comments
---------------------------
+Let's fire up the test server, and do a bit of browsing around the admin site -
+that way we can figure out what we want the "Polls" bit to look like.
+
+    python manage.py runserver
+
+Then, open your web browser and go to ``http://localhost:8000/admin/``.
+Login with the admin username and password (``admin / adm1n``).
+
+If you go into the Polls section and try and create a new Poll, you need
+to click on a link that says "Add Poll" - let's add that to our FT, in
+``polls/test_amin.py``
+
+.. sourcecode:: python
+
+        # She sees a link to 'add' a new poll, so she clicks it
+        new_poll_link = self.browser.find_element_by_link_text('Add poll')
+        new_poll_link.click()
+
+``find_element_by_link_text`` is a very useful Selenium function - it's a 
+good combination of the presentation layer (what the user sees when they 
+click a link) and the functionality of the site (we click a hyperlink,
+which will take us to a different page, or at least "do" something!)
+
+Now, when you click the link you should see a menu a bit like this.
+
+.. image:: /static/images/add_poll_need_verbose_name_for_pub_date.png
+
+Pretty neat, but `Pub date` isn't a very nice label for our publication date
+field.  Django normally generates labels for its admin fields automatically,
+by just taking the field name and capitalising it, converting underscores
+to spaces.  So that works well for ``question``, but not so well for ``pub_date``.
+
+So that's one thing we'll want to change.  Let's add a test for that to the end of
+our FT
+
+.. sourcecode:: python
+
+        # She sees some input fields for "Question" and "Date published"
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Question:', body.text)
+        self.assertIn('Date published:', body.text)
+
+
+
+More ways of finding elements on the page using Selenium
+--------------------------------------------------------
+
+Try filling in a new Poll, and fill in the 'date' entry but not a 'time'.  You'll
+find django complains that the field is required. So, in our test, we need to
+fill in three fields: `question`, `date`, and `time`. 
+
+In order to get Selenium to find the text input boxes for those fields, there
+are several options::
+
+    find_element_by_id 
+    find_element_by_xpath
+    find_element_by_link_text
+    find_element_by_name
+    find_element_by_tag_name
+    find_element_by_css_selector
+
+And several others - the Selenium Webdriver documentation is still a bit sparse,
+but you can look at the source code, and most of the methods have fairly self-
+explanatory names...
+
+http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
+
+In our case `by name` is a useful way of finding fields, because the name
+attribute is usually associated with input fields from forms.  If you take a
+look at the HTML source code for the Django admin page for entering a new poll
+(either the raw source, or using a tool like Firebug, or developer tools in
+Google Chrome), you'll find out that the 'name' for our three fields are
+`question`, `pub_date_0` and `pub_date_1`.::
+
+    <label for="id_question" class="required">Question:</label>
+    <input id="id_question" type="text" class="vTextField" name="question" maxlength="200" />
+
+    <label for="id_pub_date_0" class="required">Date published:</label>
+    <p class="datetime">
+        Date: 
+        <input id="id_pub_date_0" type="text" class="vDateField" name="pub_date_0" size="10" />
+        <br />
+        Time:
+        <input id="id_pub_date_1" type="text" class="vTimeField" name="pub_date_1" size="8" />
+    </p>
+                        
+                    
+
+Let's use them in our FT
+
+.. sourcecode:: python
+
+        # She sees some input fields for "Question" and "Date published"
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Question:', body.text)
+        self.assertIn('Date published:', body.text)
+
+        # She types in an interesting question for the Poll
+        question_field = self.browser.find_element_by_name('question')
+        question_field.send_keys("How awesome is Test-Driven Development?")
+
+        # She sets the date and time of publication - it'll be a new year's
+        # poll!
+        date_field = self.browser.find_element_by_name('pub_date_0')
+        date_field.send_keys('01/01/12')
+        time_field = self.browser.find_element_by_name('pub_date_1')
+        time_field.send_keys('00:00')
+
+
+We can also use the CSS selector to pick up the "Save" button
+
+.. sourcecode:: python
+
+        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+        save_button.click()
+
+
+Finally, we'll want to have our test check that the new Poll appears on the
+listings page.  If you've entered a Poll, you'll have noticed that the polls
+are just described as "Poll object".  
+
+.. image:: /static/images/django_admin_poll_object_needs_verbose_name.png
+
+Django lets you give them more descriptive names, including any attribute of
+the object.  So let's say we want our polls listed by their question
+
+.. sourcecode:: python
+
+        # She is returned to the "Polls" listing, where she can see her
+        # new poll, listed as a clickable link
+        new_poll_links = self.browser.find_elements_by_link_text(
+                "How awesome is Test-Driven Development?"
+        )
+        self.assertEquals(len(new_poll_links), 1)
+
+That's our FT finished.  If you've lost track in amongst all the copy & pasting,
+you can compare your version to mine, which is hosted here:
+https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_admin.py
+
+
+Human-readable names for models and their attributes
+----------------------------------------------------
+
+Let's re-run our tests.  Here's our first expected failure, the fact that "Pub
+date" isn't the label we want for our field ("Date published")::
+
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 43, in 
+      test_can_create_new_poll_via_admin_site
+        self.assertIn('Date published:', body.text)
+        django.kill() #TODO: doesn't kill child processes, fix
+    AssertionError: 'Date published:' not found in u'Django administration\n
+    Welcome, admin. Change password / Log out\n
+    Home \u203a Polls \u203a Polls \u203a Add poll\nAdd poll\nQuestion:\n
+    Pub date:\nDate:  Today | \nTime:  Now | '
+
+    ----------------------------------------------------------------------
+
+Django stores human-readable names for model attributes in a special attribute
+called `verbose_name`.  Let's write a unit test that checks the verbose name
+for our ``pub_date`` field.  Add the following method to ``polls\tests.py``
+
+.. sourcecode:: python
+
+    def test_verbose_name_for_pub_date(self):
+        for field in Poll._meta.fields:
+            if field.name ==  'pub_date':
+                self.assertEquals(field.verbose_name, 'Date published')
+
+
+To write this test, we have to grovel through the ``_meta`` attribute on the
+Poll class.  That's some Django-voodoo right there, and you may have to take my
+word for it, but it's a way to get at some of the information about the
+metadata on the model. There's more info here (James Bennet is one of the
+original Django developers, and wrote a book about it too)
+http://www.b-list.org/weblog/2007/nov/04/working-models/
+
+Anyway, running our tests with ``python manage.py test`` gives us our expected
+fail::
+
+    AssertionError: 'pub date' != 'Date published'
+
+And we can make the change in ``models.py``
+
+.. sourcecode:: python
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField(verbose_name='Date published')
+
+Re-running our functional tests, things have moved on::
+
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/test_admin.py", line 63, in 
+      test_can_create_new_poll_via_admin_site
+        self.assertEquals(len(new_poll_links), 1)
+    AssertionError: 0 != 1
+
+    ----------------------------------------------------------------------
+
+We're almost there - the FT is complaining it can't find a link to a Poll
+which has the text of our question.  To make this work, we need to tell
+Django how to print out a Poll object.  this happens in the ``__unicode__``
+method.  As usual, we unit test first, in this case it's a very simple one
+
+.. sourcecode:: python
+
+    def test_poll_objects_are_named_after_their_question(self):
+        p = Poll()
+        p.question = 'How is babby formed?'
+        self.assertEquals(unicode(p), 'How is babby formed?')
+
+Running the unit tests shows the following error::
+
+    ======================================================================
+    FAIL: test_poll_objects_are_named_after_their_question (polls.tests.TestPollsModel)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/polls/tests.py", line 37, in 
+      test_poll_objects_are_named_after_their_question
+        self.assertEquals(unicode(p), 'How is babby formed?')
+    AssertionError: u'Poll object' != 'How is babby formed?'
+
+    ----------------------------------------------------------------------
+
+And the fix is simple too - we define a ``__unicode__`` method on our Poll class,
+in ``models.py``
+
+.. sourcecode:: python
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField(verbose_name='Date published')
+
+        def __unicode__(self):
+            return self.question
+
+
+And you should now find that the unit tests pass::
+
+    harry@harry-laptop:~/workspace/mysite:master$ python manage.py test
+    Creating test database for alias 'default'...
+    ............................................................................
+    ............................................................................
+    ............................................................................
+    ............................................................................
+    .....................
+    ----------------------------------------------------------------------
+    Ran 325 tests in 2.526s
+
+
+And now, our functional tests should pass::
+
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 7.065s
+
+    OK
+ 
+Adding Choice objects to our Poll page
+--------------------------------------
+
+#TODO!
 
 Let's start by writing out our FT as human-readable comments, which describe
 the user's actions, and the expected behaviour of the site
 
-.. sourcecode:: python
-
-    from functional_tests import FunctionalTest, ROOT
-    from selenium.webdriver.common.keys import Keys
-
-    class TestPolls(FunctionalTest):
-
-        def test_voting_on_a_new_poll(self):
-            # First, Gertrude the administrator logs into the admin site and
-            # creates a couple of new Polls, and their response choices
-
-            # Now, Herbert the regular user goes to the homepage of the site. He
-            # sees a list of polls.
-
-            # He clicks on the link to the first Poll, which is called
-            # 'How awesome is test-driven development?'
-
-            # He is taken to a poll 'results' page, which says
-            # "no-one has voted on this poll yet"
-
-            # He also sees a form, which offers him several choices.
-            # He decided to select "very awesome"
-
-            # He clicks 'submit'
-
-            # The page refreshes, and he sees that his choice
-            # has updated the results.  they now say
-            # "100 %: very awesome".
-
-            # The page also says "1 votes"
-
-            # Satisfied, he goes back to sleep
-
-
-Setting up data for the test via the admin site
------------------------------------------------
-
-A nice little test, but that very first comment rather glosses over a lot.  We
-haven't created anything to do with choices yet!  Let's split out the Gertrude
-bit into its own method, for tidiness
-
-.. sourcecode:: python
-
-        # First, Gertrude the administrator logs into the admin site and
-        # creates a couple of new Polls, and their response choices
-        self._setup_polls_via_admin()
-
-And add the new method
-
-.. sourcecode:: python
-
-    class TestPolls(FunctionalTest):
-
-        def _setup_polls_via_admin(self):
-            # Gertrude logs into the admin site
-            self.browser.get(ROOT + '/admin/')
-            username_field = self.browser.find_element_by_name('username')
-            username_field.send_keys('admin')
-            password_field = self.browser.find_element_by_name('password')
-            password_field.send_keys('adm1n')
-            password_field.send_keys(Keys.RETURN)
-
-            # She follows the link to the Polls app, and adds a new Poll
-            self.browser.find_elements_by_link_text('Polls')[1].click()
-            self.browser.find_element_by_link_text('Add poll').click()
-
-            # She enters its name, and uses the 'today' and 'now' buttons to set
-            # the publish date
-            question_field = self.browser.find_element_by_name('question')
-            question_field.send_keys("How awesome is Test-Driven Development?")
-            self.browser.find_element_by_link_text('Today').click()
-            self.browser.find_element_by_link_text('Now').click()
-
-            # She sees she can enter choices for the Poll.  She adds three
-            choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
-            choice_1.send_keys('Very awesome')
-            choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
-            choice_2.send_keys('Quite awesome')
-            choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
-            choice_3.send_keys('Moderately awesome')
-
-            # She saves her new poll
-            save_button = self.browser.find_element_by_css_selector("input[value='Save']")
-            save_button.click()
-
-            # She is returned to the "Polls" listing, where she can see her
-            # new poll, listed as a clickable link
-            new_poll_links = self.browser.find_elements_by_link_text(
-                    "How awesome is Test-Driven Development?"
-            )
-            self.assertEquals(len(new_poll_links), 1)
-
-            # She logs out of the admin site
-            self.browser.find_element_by_link_text('Log out').click()
-
-Looks like I was lying about not messing about with the admin site any more. Ah well. Let's try running our fts again::
+Let's try running our fts again::
 
     ======================================================================
     ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
