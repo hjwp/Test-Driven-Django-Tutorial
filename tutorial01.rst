@@ -140,8 +140,8 @@ accounts, permissions groups, and, in our case, polls.  The admin site will let
 admin users create new polls, enter their descriptive text and start and end
 dates and so on, before they are published via the user-facing websiteke. 
 All this stuff comes 'for free' and automatically, just using the Django admin
-site.  
- ne
+site.
+
 You can find out more about the philosophy behind the admin site, including Django's
 background in the newspaper industry, here:
 
@@ -437,7 +437,8 @@ site.::
 If you take another look at ``http://localhost/``, you will probably see an
 error message like this::
 
-<TODO screenshot>
+.. image:: /static/images/page_not_found_debug_error.png
+
 
 Now that we've switched on the admin site, Django no longer serves its default
 "it worked" page.  It will give us helpful error messages (while we leave 
@@ -447,7 +448,7 @@ active url on the site is ``/admin/``.
 So let's go there instead - point your browser towards ``http://localhost/admin/``,
 and you should see a slightly different error message
 
-<TODO screenshot>
+.. image:: /static/images/no_such_table_error.png
 
 
 Django is telling us that there's a missing table in the database.  The solution
@@ -487,12 +488,12 @@ Let's see if that worked - try firing up the test server again::
 And if you go back to ``http://localhost/admin/``, you should see the
 Django login screen::
 
-<TODO screenshot>
+.. image:: /static/images/django_admin_login.png
 
 And if you try logging in with the username and password we set up earlier
 (``admin`` and ``adm1n``), you should be taken to the main Django admin page
 
-<TODO screenshot>
+.. image:: /static/images/django_admin_logged_in.png
 
 By default, the admin site lets you manage users (like the ``admin`` user we
 set up just now), as well as Groups and Sites (no need to worry about those 
@@ -554,9 +555,8 @@ We're using a couple of new test methods here...
       which it locates by using the ``name="xyz"`` HTML attribute
 
     * ``send_keys`` - which sends keystrokes, as if the user was typing
-      something (notice also the ``Keys.RETURN``, which sends an enter key
-      - there are lots of other options inside ``Keys``, like tabs, modifier
-        keys etc
+      something (notice also the ``Keys.RETURN``, which sends an enter key- there
+      are lots of other options inside ``Keys``, like tabs, modifier keys etc
 
     * ``find_elements_by_link_text`` - notice the **s** on ``elements``; this
       method returns a *list* of WebElements.
