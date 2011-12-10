@@ -13,6 +13,8 @@ Writing the FT as comments
 Let's start by writing out our FT as human-readable comments, which describe
 the user's actions, and the expected behaviour of the site
 
+Create a new file for it called ``fts/test_polls.py``.  
+
 .. sourcecode:: python
 
     from functional_tests import FunctionalTest, ROOT
@@ -54,20 +56,40 @@ A nice little test, but that very first comment rather glosses over a lot.
 Let's split out the Gertrude bit into its own method, for tidiness, and 
 copy and paste in some code from the admin test.
 
+You'll see I've changed things slightly, because in the admin test we entered
+just one poll and one set of choices, whereas here we're doing several - so
+you'll see there's a little loop, and I'm storing the polls' questions and
+choices in a couple of namedtuples.  
+*(If you've never seen a namedtuple in Python before, you should definitely
+look them up! They're a neat way of specificying a structured data type - more
+info here: 
+http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)*
+
 .. sourcecode:: python
 
-        # First, Gertrude the administrator logs into the admin site and
-        # creates a couple of new Polls, and their response choices
-        self._setup_polls_via_admin()
+    from functional_tests import FunctionalTest, ROOT
+    from selenium.webdriver.common.keys import Keys
+    from collections import namedtuple
 
-And add the new method
-
-#TODO: modify this to use workshop loop method to create many polls
-
-.. sourcecode:: python
+    PollInfo = namedtuple('PollInfo', ['question', 'choices'])
+    POLL1 = PollInfo(
+        question="How awesome is Test-Driven Development?",
+        choices=[
+            'Very awesome',
+            'Quite awesome',
+            'Moderately awesome',
+        ],
+    )
+    POLL2 = PollInfo(
+        question="Which workshop treat do you prefer?",
+        choices=[
+            'Beer',
+            'Pizza',
+            'The Acquisition of Knowledge',
+        ],
+    )
 
     class TestPolls(FunctionalTest):
-
         def _setup_polls_via_admin(self):
             # Gertrude logs into the admin site
             self.browser.get(ROOT + '/admin/')
@@ -77,54 +99,75 @@ And add the new method
             password_field.send_keys('adm1n')
             password_field.send_keys(Keys.RETURN)
 
-            # She follows the link to the Polls app, and adds a new Poll
-            self.browser.find_elements_by_link_text('Polls')[1].click()
-            self.browser.find_element_by_link_text('Add poll').click()
+            # She has a number of polls to enter.  For each one, she:
 
-            # She enters its name, and uses the 'today' and 'now' buttons to set
-            # the publish date
-            question_field = self.browser.find_element_by_name('question')
-            question_field.send_keys("How awesome is Test-Driven Development?")
-            self.browser.find_element_by_link_text('Today').click()
-            self.browser.find_element_by_link_text('Now').click()
+            for poll_info in [POLL1, POLL2]:
+                # Follows the link to the Polls app, and adds a new Poll
+                self.browser.find_elements_by_link_text('Polls')[1].click()
+                self.browser.find_element_by_link_text('Add poll').click()
 
-            # She sees she can enter choices for the Poll.  She adds three
-            choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
-            choice_1.send_keys('Very awesome')
-            choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
-            choice_2.send_keys('Quite awesome')
-            choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
-            choice_3.send_keys('Moderately awesome')
+                # Enters its name, and uses the 'today' and 'now' buttons to set
+                # the publish date
+                question_field = self.browser.find_element_by_name('question')
+                question_field.send_keys(poll_info.question)
+                self.browser.find_element_by_link_text('Today').click()
+                self.browser.find_element_by_link_text('Now').click()
 
-            # She saves her new poll
-            save_button = self.browser.find_element_by_css_selector("input[value='Save']")
-            save_button.click()
+                # Sees she can enter choices for the Poll on this same page,
+                # so she does
+                for i, choice_text in enumerate(poll_info.choices):
+                    choice_field = self.browser.find_element_by_name('choice_set-%d-choice' % i)
+                    choice_field.send_keys(choice_text)
 
-            # She is returned to the "Polls" listing, where she can see her
-            # new poll, listed as a clickable link
-            new_poll_links = self.browser.find_elements_by_link_text(
-                    "How awesome is Test-Driven Development?"
-            )
-            self.assertEquals(len(new_poll_links), 1)
+                # Saves her new poll
+                save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+                save_button.click()
+
+                # Is returned to the "Polls" listing, where she can see her
+                # new poll, listed as a clickable link by its name
+                new_poll_links = self.browser.find_elements_by_link_text(
+                        poll_info.question
+                )
+                self.assertEquals(len(new_poll_links), 1)
+
+                # She goes back to the root of the admin site
+                self.browser.get(ROOT + '/admin/')
 
             # She logs out of the admin site
             self.browser.find_element_by_link_text('Log out').click()
 
+
+        def test_voting_on_a_new_poll(self):
+            # First, Gertrude the administrator logs into the admin site and
+            # creates a couple of new Polls, and their response choices
+            self._setup_polls_via_admin()
+
+            self.fail('TODO')
+
+
+Now, if you try running that test, you should see selenium run through and
+enter the two polls, and then exit with the "TODO"::
+
+    ======================================================================
+    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 76, in test_voting_on_a_new_poll
+        self.fail('TODO')
+    AssertionError: TODO
+    ----------------------------------------------------------------------
+
+If it fails any earlier than that, you may not have completed the last couple
+of tutorials in quite the same way I specified.  Figure out what's wrong!
+
+
+
 At last! An FT for a normal page
 --------------------------------
 
-So, the next thing we want to do is write some of the test of what non-admin
-users will see of our polls application - viewing existing polls, responding to
-polls by submitting a choice, and viewing poll results.
-
-Last time we wrote the code to get Gertrude the admin to log in and create a 
-poll.  Let's write the next bit, where Herbert the normal user opens up our
+Let's write the exciting bit of our test, where Herbert the normal user opens up our
 website, sees some polls and votes on them.
 
-So, let's write a functional test that does all three of those things. We'll
-create a new file for it called ``fts/test_polls.py``.  We'll be re-using some
-of the code from ``test_admin.py``, so you might want to do a "save as"
-based on that file.
 
 .. sourcecode:: python
 

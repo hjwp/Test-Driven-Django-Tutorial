@@ -3,16 +3,22 @@ from selenium.webdriver.common.keys import Keys
 from collections import namedtuple
 
 PollInfo = namedtuple('PollInfo', ['question', 'choices'])
-POLL1 = PollInfo("How awesome is Test-Driven Development?", [
-    'Very awesome',
-    'Quite awesome',
-    'Moderately awesome',
-])
-POLL2 = PollInfo("Which workshop treat do you prefer?", [
-    'Beer',
-    'Pizza',
-    'The Acquisition of Knowledge',
-])
+POLL1 = PollInfo(
+    question="How awesome is Test-Driven Development?",
+    choices=[
+        'Very awesome',
+        'Quite awesome',
+        'Moderately awesome',
+    ],
+)
+POLL2 = PollInfo(
+    question="Which workshop treat do you prefer?",
+    choices=[
+        'Beer',
+        'Pizza',
+        'The Acquisition of Knowledge',
+    ],
+)
 
 class TestPolls(FunctionalTest):
     def _setup_polls_via_admin(self):
@@ -66,6 +72,8 @@ class TestPolls(FunctionalTest):
         # First, Gertrude the administrator logs into the admin site and
         # creates a couple of new Polls, and their response choices
         self._setup_polls_via_admin()
+
+        self.fail('TODO')
 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
