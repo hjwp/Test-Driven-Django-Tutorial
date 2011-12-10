@@ -1,5 +1,13 @@
 Welcome to part 3 of the tutorial!  This week we'll finally get into writing
-our own web pages, rather than using the Django Admin site.
+our own web pages, rather than using the Django Admin site.  Here's a summary
+of what we'll get up to:
+
+* Write an FT that views and responds to a Poll
+
+* Create a url, view and template for our site homepage
+
+* Use the Django Test Client to write unit tests for the above
+
 
 Part 3 - A normal web page, using Django views and templates
 ==========================================================
@@ -279,7 +287,7 @@ I've imported the views module, so I can refer to my various view functions as
 
 .. sourcecode:: python
 
-        (r'^$', 'mysite.polls_views.polls'),
+        (r'^$', 'mysite.views.home'),
 
 I like my way because it uses the 'real' view - it requires that we actually
 have a view defined in ``views.py``, and that it imports properly... But it's a
@@ -446,7 +454,7 @@ Edit ``home.html`` with your favourite editor,
       <body>
         <h1>Polls</h1>
         {% for poll in polls %}
-          {{ poll.question }}
+          <p>{{ poll.question }}</p>
         {% endfor %}
       </body>
     </html>
@@ -467,11 +475,7 @@ some special django control codes.  These are either surrounded with
     from django.shortcuts import render
     from polls.models import Poll
 
-    def polls(request):
-        content = ''
-        for poll in Poll.objects.all():
-            content += poll.question
-
+    def home(request):
         return render(request, 'home.html')
 
 Our last unit test error was that we weren't using a template - let's see if this
@@ -491,9 +495,9 @@ content...
 
 Looking at the template code, you can see that we want to iterate through a
 variable called ``polls``.  The way we pass this into a template is via a
-special kind of dictionary called a `context`.  The Django test client also
-lets us check on what context objects were used in rendering a response, so
-we can write a test for that too:
+dictionary called a `context`.  The Django test client also lets us check on
+what context objects were used in rendering a response, so we can write a test
+for that too:
 
 .. sourcecode:: python
 
@@ -509,6 +513,10 @@ we can write a test for that too:
         self.assertIn(poll1.question, response.content)
         self.assertIn(poll2.question, response.content)
 
+
+Notice the way we've had to call ``list`` on ``polls_in_context`` - that's
+because Django queries return special ``QuerySet`` objects, which, although
+they behave like lists, don't quite compare equal like them.
 
 Now, re-running the tests gives us::
 
@@ -530,17 +538,10 @@ the test forwards:
 
 .. sourcecode:: python
 
-    def polls(request):
-        content = ''
-        for poll in Poll.objects.all():
-            content += poll.question
-
+    def home(request):
         context = {'polls': []}
         return render(request, 'home.html', context)
 
-Notice the way we've had to call ``list`` on ``polls_in_context`` - that's
-because Django queries return special ``QuerySet`` objects, which, although
-they behave like lists, don't quite compare equal like them.
 
 Now the unit tests say::
 
@@ -568,7 +569,7 @@ Let's fix our code so the tests pass:
     from django.shortcuts import render
     from polls.models import Poll
 
-    def polls(request):
+    def home(request):
         context = {'polls': Poll.objects.all()}
         return render(request, 'home.html', context)
 
@@ -732,7 +733,8 @@ Running this (``python manage.py test polls``) gives::
     NoReverseMatch: Reverse for 'mysite.polls.views.poll' with arguments '()' and keyword arguments '{'poll_id': 1}' not found.
     ----------------------------------------------------------------------
 
-So, the ``reverse`` function can't find a url or a view to match our request - let's add one!
+So, the ``reverse`` function can't find a url or a view to match our request -
+let's add placeholders for them:
 
 Capturing parameters from URLs 
 ------------------------------
@@ -742,14 +744,26 @@ In ``urls.py``:
 .. sourcecode:: python
 
     urlpatterns = patterns('',
-        (r'^$', polls_views.polls),
-        (r'^poll/(\d+)/$', polls_views.poll),
+        (r'^$', views.home),
+        (r'^poll/(\d+)/$', views.poll),
         (r'^admin/', include(admin.site.urls)),
     )
 
-The new line will match any url which starts with `poll/`, then a number made up of one or
-more digits - the matching group ``(\d+)``, which will be captured and passed as the first
-argument to our view - which is reflected in the reverse function's ``args`` parameter.
+The new line will match any url which starts with `poll/`, then a number made
+up of one or more digits - the matching group ``(\d+)``, which will be captured
+and passed as the first argument to our view - which is reflected in the
+reverse function's ``args`` parameter.
+
+We'll also need to add at least a dummy view in ``views.py``
+
+.. sourcecode:: python
+
+    def home(request):
+        context = {'polls': Poll.objects.all()}
+        return render(request, 'home.html', context)
+
+    def poll():
+        pass
 
 Now our unit tests give a different error::
 
@@ -762,16 +776,6 @@ Now our unit tests give a different error::
     AssertionError: '/poll/1/' not found in '<html>\n  <body>\n    <h1>Polls</h1>\n    \n      6 times 7\n    \n      life, the universe and everything\n    \n  </body>\n</html>\n'
     ----------------------------------------------------------------------
 
-We'll also need to add at least a dummy view in ``views.py``
-
-.. sourcecode:: python
-
-    def polls(request):
-        context = {'polls': Poll.objects.all()}
-        return render(request, 'home.html', context)
-
-    def poll():
-        pass
 
 The templates don't include the urls yet. Let's add them:
 
@@ -781,7 +785,7 @@ The templates don't include the urls yet. Let's add them:
       <body>
         <h1>Polls</h1>
         {% for poll in polls %}
-          <a href="{% url mysite.polls.views.poll poll.id %}">{{ poll.question }}</a>
+          <p><a href="{% url mysite.polls.views.poll poll.id %}">{{ poll.question }}</a></p>
         {% endfor %}
       </body>
     </html>
