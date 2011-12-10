@@ -179,25 +179,33 @@ website, sees some polls and votes on them.
 
 .. sourcecode:: python
 
-    def test_voting_on_a_new_poll(self): # First, Gertrude the administrator
-    logs into the admin site and # creates a couple of new Polls, and their
-    response choices self._setup_polls_via_admin()
+    def test_voting_on_a_new_poll(self): 
+        # First, Gertrude the administrator logs into the admin site and
+        # creates a couple of new Polls, and their response choices
+        self._setup_polls_via_admin()
 
-        # Now, Herbert the regular user goes to the homepage of the site. He #
-        sees a list of polls. self.browser.get(ROOT) heading =
-        self.browser.find_element_by_tag_name('h1')
+        # Now, Herbert the regular user goes to the homepage of the site. He
+        # sees a list of polls.
+        self.browser.get(ROOT)
+        heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(heading.text, 'Polls')
 
-        # He clicks on the link to the first Poll, which is called # 'How
-        awesome is test-driven development?'
-        self.browser.find_element_by_link_text('How awesome is Test-Driven
-        Development?').click()
+        # He clicks on the link to the first Poll, which is called
+        # 'How awesome is test-driven development?'
+        first_poll_title = 'How awesome is Test-Driven Development?'
+        self.browser.find_element_by_link_text(first_poll_title).click()
 
-        # He is taken to a poll 'results' page, which says # "no-one has voted
-        on this poll yet" heading = self.browser.find_element_by_tag_name('h1')
-        self.assertEquals(heading.text, 'Poll Results') body =
-        self.browser.find_element_by_tag_name('body') self.assertIn('No-one has
-        voted on this poll yet', body.text)
+        # He is taken to a poll 'results' page, which says
+        # "no-one has voted on this poll yet"
+        main_heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(main_heading.text, 'Poll Results')
+        sub_heading = self.browser.find_element_by_tag_name('h2')
+        self.assertEquals(sub_heading.text, first_poll_title)
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('No-one has voted on this poll yet', body.text)
+
+        self.fail('TODO')
+
 
 We've started with the first bit, where Herbert goes to the main page of the
 site, we check that he can see a Poll there, and that he can click on it.  Then

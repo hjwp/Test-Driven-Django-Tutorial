@@ -1,10 +1,26 @@
 Welcome to part 4 of the tutorial!  In this part at how we can let
 users vote on our poll, in other words, **web forms!**. Hooray.
 
-Let's start by extending our FT, to show Herbert voting on a poll:
+Tutorial 4: Using a form
+========================
+
+Here's the outline of what we're going to do in this tutorial:
+
+    * extend the FT to show Herbert voting on the poll
+
+    * create a url, view and template to generate pages for individual polls
+
+    * create a Django form to handle choices
+
+
+Extending the FT to vote using radio buttons
+--------------------------------------------
+
+Let's start by extending our FT, to show Herbert voting on a poll. In ``fts/test_polls.py``:
 
 .. sourcecode:: python
 
+        [...] 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
         self.browser.get(ROOT)
@@ -54,13 +70,15 @@ Let's start by extending our FT, to show Herbert voting on a poll:
         # The page refreshes, and he sees that his choice
         # has updated the results.  they now say
         # "100 %: very awesome".
+        self.fail('TODO')
 
         # The page also says "1 votes"
 
         # Satisfied, he goes back to sleep
 
-The functional tests are still telling us that we need to fix our polls view
-though::
+
+If you run them, you'll find that they are still telling us about a "TypeError" on
+the individual poll page though::
 
     ======================================================================
     FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
@@ -72,7 +90,12 @@ though::
     ----------------------------------------------------------------------
     Ran 2 tests in 25.927s
 
-Let's work on the unit tests for the ``poll`` view then:
+
+That because, currently, our ``poll`` view is just a placeholder function.  We need
+to make into into a real Django view, which returns information about a poll.
+
+Let's work on the unit tests for the ``poll`` view then. Make a new class for them
+in ``polls/tests.py``:
 
 .. sourcecode:: python
 
@@ -105,8 +128,8 @@ Running the tests gives::
 
     TypeError: poll() takes no arguments (2 given)
 
-(I'm going to be shortening the test outputs from now on.  You're a grown-up
-now, you can handle it!)
+(*I'm going to be shortening the test outputs from now on.  You're a grown-up
+now, you can handle it! :-)*
 
 Let's make our view take two arguments:
 
@@ -152,7 +175,7 @@ Fine and dandy, let's make one::
 
      touch polls/templates/poll.html    
 
-Now the tests want us to pass a `poll` variable in the template's context::
+Now the tests want us to pass a ``poll`` variable in the template's context::
 
     KeyError: 'poll'
 
@@ -231,7 +254,7 @@ Mmmh, `OK`.  Let's see what the FTs think?::
 
     NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
-Ah, we forgot to include a general heading for the page
+Ah, we forgot to include a general heading for the page - the FT is checking the ``h1`` and ``h2`` headings:
 
 .. sourcecode:: python
 
@@ -240,7 +263,7 @@ Ah, we forgot to include a general heading for the page
         sub_heading = self.browser.find_element_by_tag_name('h2')
         self.assertEquals(sub_heading.text, first_poll_title)
 
-So let's add an ``h1`` with "Poll Results" in it:
+So, in our template, let's add an ``h1`` with "Poll Results" in it:
 
 .. sourcecode:: html+django
 
@@ -255,7 +278,11 @@ So let's add an ``h1`` with "Poll Results" in it:
       </body>
     </html>
 
-Now what?::
+
+Using a Django form for poll choices
+------------------------------------
+
+Now what does the FT say?::
 
     ======================================================================
     FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
