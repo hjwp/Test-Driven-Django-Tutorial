@@ -138,11 +138,11 @@ using the wrong template (just to check we are testing it)
 .. sourcecode:: python
 
     def poll(request, poll_id):
-        return render(request, 'polls.html')
+        return render(request, 'home.html')
 
 Good, looks like we are testiing it properly::
 
-    AssertionError: 'polls.html' != 'poll.html'
+    AssertionError: 'home.html' != 'poll.html'
 
 And changing it to ``poll.html`` gives us::
 
@@ -161,7 +161,7 @@ So let's do that, again, the minimum possible change to satisfy the tests:
 .. sourcecode:: python
 
     def poll(request, poll_id):
-        return render(request, 'polls.html', {'poll': None})
+        return render(request, 'poll.html', {'poll': None})
 
 And the tests get a little further on::
 

@@ -60,6 +60,7 @@ You'll see I've changed things slightly, because in the admin test we entered
 just one poll and one set of choices, whereas here we're doing several - so
 you'll see there's a little loop, and I'm storing the polls' questions and
 choices in a couple of namedtuples.  
+
 (*If you've never seen a namedtuple in Python before, you should definitely
 look them up! They're a neat way of specificying a structured data type - more
 info here:*
@@ -100,7 +101,6 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
             password_field.send_keys(Keys.RETURN)
 
             # She has a number of polls to enter.  For each one, she:
-
             for poll_info in [POLL1, POLL2]:
                 # Follows the link to the Polls app, and adds a new Poll
                 self.browser.find_elements_by_link_text('Polls')[1].click()
@@ -171,27 +171,29 @@ website, sees some polls and votes on them.
 
 .. sourcecode:: python
 
-    def test_voting_on_a_new_poll(self):
-        # First, Gertrude the administrator logs into the admin site and
-        # creates a couple of new Polls, and their response choices
-        self._setup_polls_via_admin()
+    def test_voting_on_a_new_poll(self): # First, Gertrude the administrator
+    logs into the admin site and # creates a couple of new Polls, and their
+    response choices self._setup_polls_via_admin()
 
-        # Now, Herbert the regular user goes to the homepage of the site. He
-        # sees a list of polls.
-        self.browser.get(ROOT)
-        heading = self.browser.find_element_by_tag_name('h1')
+        # Now, Herbert the regular user goes to the homepage of the site. He #
+        sees a list of polls. self.browser.get(ROOT) heading =
+        self.browser.find_element_by_tag_name('h1')
         self.assertEquals(heading.text, 'Polls')
 
-        # He clicks on the link to the first Poll, which is called
-        # 'How awesome is test-driven development?'
-        self.browser.find_element_by_link_text('How awesome is Test-Driven Development?').click()
+        # He clicks on the link to the first Poll, which is called # 'How
+        awesome is test-driven development?'
+        self.browser.find_element_by_link_text('How awesome is Test-Driven
+        Development?').click()
 
-        # He is taken to a poll 'results' page, which says
-        # "no-one has voted on this poll yet"
-        heading = self.browser.find_element_by_tag_name('h1')
-        self.assertEquals(heading.text, 'Poll Results')
-        body = self.browser.find_element_by_tag_name('body')
-        self.assertIn('No-one has voted on this poll yet', body.text)
+        # He is taken to a poll 'results' page, which says # "no-one has voted
+        on this poll yet" heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(heading.text, 'Poll Results') body =
+        self.browser.find_element_by_tag_name('body') self.assertIn('No-one has
+        voted on this poll yet', body.text)
+
+We've started with the first bit, where Herbert goes to the main page of the
+site, we check that he can see a Poll there, and that he can click on it.  Then
+we look for the default 'no votes yet' message on the next page.
 
 Let's run that, and see where we get::
 
@@ -209,75 +211,84 @@ Let's run that, and see where we get::
 URLS and view functions, and the Django Test Client
 ---------------------------------------------------
 
-The FT is telling us that going to the `ROOT` url (/) produces a 404. We need to tell
-Django what kind of web page to return for the root of our site - the home page if 
-you like.
+The FT is telling us that going to the `ROOT` url (/) produces a 404. We need
+to tell Django what kind of web page to return for the root of our site - the
+home page if you like.
 
-Django uses a file called ``urls.py``, to route visitors to the python function that
-will deal with producing a response for them.  These functions are called `views` in
-Django terminology, and they live in ``views.py``. (This is essentially an MVC pattern, there's some discussion of it here: https://docs.djangoproject.com/en/dev/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names) 
+Django uses a file called ``urls.py``, to route visitors to the python function
+that will deal with producing a response for them.  These functions are called
+`views` in Django terminology, and they live in ``views.py``. 
 
-Let's add a new test to ``tests.py``.  I'm going to use the Django Test Client, which
-has some helpful features for testing views.  More info here:
+(*This is essentially an MVC pattern, there's some discussion of it here:*
+https://docs.djangoproject.com/en/dev/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names) 
+
+Let's add a new test to ``tests.py``.  I'm going to use the Django Test Client,
+which has some helpful features for testing views.  More info here:
 
 https://docs.djangoproject.com/en/1.3/topics/testing/
+
+We'll create a new class to test our home page view:
 
 .. sourcecode:: python
 
     from django.test.client import Client
     [...]
+    class TestHomePageView(TestCase):
 
-    def test_root_url_shows_all_polls(self):
-        # set up some polls
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
-        poll1.save()
-        poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
-        poll2.save()
+        def test_root_url_shows_all_polls(self):
+            # set up some polls
+            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1.save()
+            poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+            poll2.save()
 
-        client = Client()
-        response = client.get('/')
+            client = Client()
+            response = client.get('/')
 
-        self.assertIn(poll1.question, response.content)
-        self.assertIn(poll2.question, response.content)
+            self.assertIn(poll1.question, response.content)
+            self.assertIn(poll2.question, response.content)
 
-Don't forget the import at the top!  Now, our first run of the tests will probably 
-complain of a with ``TemplateDoesNotExist: 404.html``.  Django wants us to create a
-template for our "404 error" page.  We'll come back to that later.  For now, let's
-make the ``/`` url return a real HTTP response.
+Don't forget the import at the top!  
+
+Now, our first run of the tests will probably complain of a with
+``TemplateDoesNotExist: 404.html``.  Django wants us to create a template for
+our "404 error" page.  We'll come back to that later.  For now, let's make the
+``/`` url return a real HTTP response.
  
 First we'll create a dummy view in ``views.py``:
 
 .. sourcecode:: python
 
-    def polls(request):
+    def home(request):
         pass
 
 Now let's hook up this view inside ``urls.py``:
 
 .. sourcecode:: python
 
-    from mysite.polls import views as polls_views
+    from mysite.polls import views
 
     urlpatterns = patterns('',
-        (r'^$', polls_views.polls),
+        (r'^$', views.home),
         (r'^admin/', include(admin.site.urls)),
     )
 
-You may notice the slightly unorthodox import of ``polls.views``  - the alternative is you
-can feed in views as strings to lines in ``urlpatterns``, without importing anything, like
-this:
+I've imported the views module, so I can refer to my various view functions as
+``views.x`` - the alternative is you can feed in views as strings to lines in
+``urlpatterns``, without importing anything, like this:
 
 .. sourcecode:: python
 
         (r'^$', 'mysite.polls_views.polls'),
 
-I like my way because it uses the 'real' view - it requires that we actually have a view
-defined in views.py, and that it imports properly... But it's a personal preference!
+I like my way because it uses the 'real' view - it requires that we actually
+have a view defined in ``views.py``, and that it imports properly... But it's a
+personal preference!
 
 Re-running our tests should show us a different error::
 
     ======================================================================
-    ERROR: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    ERROR: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 92, in test_root_url_shows_all_polls
@@ -288,7 +299,7 @@ Re-running our tests should show us a different error::
         return self.request(**r)
       File "/usr/lib/pymodules/python2.7/django/core/handlers/base.py", line 129, in get_response
         raise ValueError("The view %s.%s didn't return an HttpResponse object." % (callback.__module__, view_name))
-    ValueError: The view mysite.polls.views.polls didn't return an HttpResponse object.
+    ValueError: The view mysite.polls.views.home didn't return an HttpResponse object.
     ----------------------------------------------------------------------
 
 Let's get the view to return an HttpResponse:
@@ -297,13 +308,13 @@ Let's get the view to return an HttpResponse:
 
     from django.http import HttpResponse
 
-    def polls(request):
+    def home(request):
         return HttpResponse()
 
 The tests are now more instructive::
 
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 96, in test_root_url_shows_all_polls
@@ -315,15 +326,15 @@ The Django Template system
 --------------------------
 
 So far, we're returning a blank page.  Now, to get the tests to pass, it would
-be simple enough to just return a response that contained the questions of our two
-polls as `raw` text - like this:
+be simple enough to just return a response that contained the questions of our
+two polls as "raw" text - like this:
 
 .. sourcecode:: python
 
     from django.http import HttpResponse
     from polls.models import Poll
 
-    def polls(request):
+    def home(request):
         content = ''
         for poll in Poll.objects.all():
             content += poll.question
@@ -332,7 +343,8 @@ polls as `raw` text - like this:
 
 Sure enough, that gets our limited unit tests passing::
 
-    23:06 ~/workspace/tddjango_site/source/mysite (master)$ python manage.py test polls
+    $ python manage.py test polls
+
     Creating test database for alias 'default'...
     ......
     ----------------------------------------------------------------------
@@ -342,11 +354,14 @@ Sure enough, that gets our limited unit tests passing::
     Destroying test database for alias 'default'...
 
 
-Now, this probably seems like a slightly artificial situation - for starters, the two
-poll's names will just be concatenated together, without even a space or a carriage
-return. We can't possibly leave the situation like this.  But the point of TDD is to
-be driven by the tests.  At each stage, we only write the code that our tests require,
-because that makes absolutely sure that we have tests for all of our code.
+Now, this probably seems like a slightly artificial situation - for starters,
+the two poll's names will just be concatenated together, without even a space
+or a carriage return. We can't possibly leave the situation like this for real 
+users to see!
+
+But the point of TDD is to be driven by the tests.  At each stage, we only
+write the code that our tests require, because that makes absolutely sure that
+we have tests for all of our code.
 
 So, rather than anticipate what we might want to put in our HttpResponse, let's
 go to the FT now to see what to do next.::
@@ -371,9 +386,10 @@ go to the FT now to see what to do next.::
     Ran 2 tests in 29.119s
 
 
-The FT wants an ``h1`` heading tag on the page.  Now, again, we could hard-code this
-into view (maybe starting with ``content = <h1>Polls</h1>`` before the ``for`` loop),
-but at this point it seems sensible to start to use Django's template system.
+The FT wants an ``h1`` heading tag on the page.  Now, again, we could hard-code
+this into view (maybe starting with ``content = <h1>Polls</h1>`` before the
+``for`` loop), but at this point it seems sensible to start to use Django's
+template system - that will provide a much more natural way to write web pages.
 
 The Django Test Client lets us check whether a response was rendered using a
 template, by using a special attribute of the response called ``templates``,
@@ -381,31 +397,48 @@ so let's use that.  In ``tests.py``:
 
 .. sourcecode:: python
 
-        template_names_used = [t.name for t in response.templates]
-        self.assertIn('polls.html', template_names_used)
+    class TestHomePageView(TestCase):
 
-        self.assertIn(poll1.question, response.content)
-        self.assertIn(poll2.question, response.content)
+        def test_root_url_shows_links_to_all_polls(self):
+            # set up some polls
+            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1.save()
+            poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+            poll2.save()
+
+            client = Client()
+            response = client.get('/')
+
+            template_names_used = [t.name for t in response.templates]
+            self.assertIn('home.html', template_names_used)
+
+            # check we've passed the polls to the template
+            polls_in_context = response.context['polls']
+            self.assertEquals(list(polls_in_context), [poll1, poll2])
+
+            # check the poll names appear on the page
+            self.assertIn(poll1.question, response.content)
+            self.assertIn(poll2.question, response.content)
 
 
 Testing ``python manage.py test polls``::
  
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 94, in test_root_url_shows_all_polls
-        self.assertIn('polls.html', response.templates)
-    AssertionError: 'polls.html' not found in []
+        self.assertIn('home.html', response.templates)
+    AssertionError: 'home.html' not found in []
     ----------------------------------------------------------------------
     Ran 6 tests in 0.009s
 
 So let's now create our template::
 
     mkdir mysite/polls/templates
-    touch mysite/polls/templates/polls.html
+    touch mysite/polls/templates/home.html
 
-Edit ``polls.html`` with your favourite editor, 
+Edit ``home.html`` with your favourite editor, 
     
 .. sourcecode:: html+django
 
@@ -439,13 +472,13 @@ some special django control codes.  These are either surrounded with
         for poll in Poll.objects.all():
             content += poll.question
 
-        return render(request, 'polls.html')
+        return render(request, 'home.html')
 
 Our last unit test error was that we weren't using a template - let's see if this
 fixes it::
 
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
@@ -468,7 +501,7 @@ we can write a test for that too:
         response = client.get('/')
 
         template_names_used = [t.name for t in response.templates]
-        self.assertIn('polls.html', template_names_used)
+        self.assertIn('home.html', template_names_used)
 
         polls_in_context = response.context['polls']
         self.assertEquals(list(polls_in_context), [poll1, poll2])
@@ -480,7 +513,7 @@ we can write a test for that too:
 Now, re-running the tests gives us::
 
     ======================================================================
-    ERROR: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    ERROR: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
@@ -503,7 +536,7 @@ the test forwards:
             content += poll.question
 
         context = {'polls': []}
-        return render(request, 'polls.html', context)
+        return render(request, 'home.html', context)
 
 Notice the way we've had to call ``list`` on ``polls_in_context`` - that's
 because Django queries return special ``QuerySet`` objects, which, although
@@ -512,7 +545,7 @@ they behave like lists, don't quite compare equal like them.
 Now the unit tests say::
 
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestAllPollsView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 98, in test_root_url_shows_all_polls
@@ -537,7 +570,7 @@ Let's fix our code so the tests pass:
 
     def polls(request):
         context = {'polls': Poll.objects.all()}
-        return render(request, 'polls.html', context)
+        return render(request, 'home.html', context)
 
 Ta-da!::
 
@@ -574,7 +607,7 @@ Testing philosophy: what to test in templates
 Ah - although our page may contain the name of our Poll, it's not yet a link we
 can click.
 
-The way we'd fix this is in the ``polls.html`` template, by adding an ``<a href=``.
+The way we'd fix this is in the ``home.html`` template, by adding an ``<a href=``.
 
 So is this something we write a unit test for as well?  Some people would tend to
 say that this is one unit test too many...  Since this is a guide to `rigorous`
@@ -655,7 +688,7 @@ the poll using its ``id``.  Here's what that translates to in ``tests.py``:
 
     from django.core.urlresolvers import reverse
 
-    class TestAllPollsView(TestCase):
+    class TestHomePageView(TestCase):
 
         def test_root_url_shows_links_to_all_polls(self):
             # set up some polls
@@ -668,7 +701,7 @@ the poll using its ``id``.  Here's what that translates to in ``tests.py``:
             response = client.get('/')
 
             template_names_used = [t.name for t in response.templates]
-            self.assertIn('polls.html', template_names_used)
+            self.assertIn('home.html', template_names_used)
 
             # check we've passed the polls to the template
             polls_in_context = response.context['polls']
@@ -687,7 +720,7 @@ the poll using its ``id``.  Here's what that translates to in ``tests.py``:
 Running this (``python manage.py test polls``) gives::
 
     ======================================================================
-    ERROR: test_root_url_shows_links_to_all_polls (polls.tests.TestAllPollsView)
+    ERROR: test_root_url_shows_links_to_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 107, in test_root_url_shows_links_to_all_polls
@@ -721,7 +754,7 @@ argument to our view - which is reflected in the reverse function's ``args`` par
 Now our unit tests give a different error::
 
     ======================================================================
-    FAIL: test_root_url_shows_links_to_all_polls (polls.tests.TestAllPollsView)
+    FAIL: test_root_url_shows_links_to_all_polls (polls.tests.TestHomePageView)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 108, in test_root_url_shows_links_to_all_polls
@@ -735,7 +768,7 @@ We'll also need to add at least a dummy view in ``views.py``
 
     def polls(request):
         context = {'polls': Poll.objects.all()}
-        return render(request, 'polls.html', context)
+        return render(request, 'home.html', context)
 
     def poll():
         pass

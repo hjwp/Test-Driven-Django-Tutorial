@@ -1,11 +1,10 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 from polls.models import Poll
 from polls.forms import PollVoteForm
 
 def polls(request):
     context = {'polls': Poll.objects.all()}
-    return render(request, 'polls.html', context)
+    return render(request, 'home.html', context)
 
 def poll(request, poll_id):
     poll = Poll.objects.get(pk=poll_id)

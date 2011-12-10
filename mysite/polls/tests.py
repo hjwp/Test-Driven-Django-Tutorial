@@ -81,7 +81,7 @@ class TestPollChoicesModel(TestCase):
 
 
 
-class TestAllPollsView(TestCase):
+class TestHomePageView(TestCase):
 
     def test_root_url_shows_links_to_all_polls(self):
         # set up some polls
@@ -93,8 +93,9 @@ class TestAllPollsView(TestCase):
         client = Client()
         response = client.get('/')
 
+        # check we've used the "home.html" template
         template_names_used = [t.name for t in response.templates]
-        self.assertIn('polls.html', template_names_used)
+        self.assertIn('home.html', template_names_used)
 
         # check we've passed the polls to the template
         polls_in_context = response.context['polls']
@@ -150,6 +151,7 @@ class TestSinglePollView(TestCase):
         # by checking for the choice text
         self.assertIn(choice3.choice, response.content)
         self.assertIn(choice4.choice, response.content.replace('&#39;', "'"))
+
 
 
 class TestPollsVoteForm(TestCase):

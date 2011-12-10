@@ -31,7 +31,6 @@ class TestPolls(FunctionalTest):
         password_field.send_keys(Keys.RETURN)
 
         # She has a number of polls to enter.  For each one, she:
-
         for poll_info in [POLL1, POLL2]:
             # Follows the link to the Polls app, and adds a new Poll
             self.browser.find_elements_by_link_text('Polls')[1].click()
@@ -72,8 +71,6 @@ class TestPolls(FunctionalTest):
         # First, Gertrude the administrator logs into the admin site and
         # creates a couple of new Polls, and their response choices
         self._setup_polls_via_admin()
-
-        self.fail('TODO')
 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
