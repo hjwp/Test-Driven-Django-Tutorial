@@ -60,10 +60,10 @@ You'll see I've changed things slightly, because in the admin test we entered
 just one poll and one set of choices, whereas here we're doing several - so
 you'll see there's a little loop, and I'm storing the polls' questions and
 choices in a couple of namedtuples.  
-*(If you've never seen a namedtuple in Python before, you should definitely
+(*If you've never seen a namedtuple in Python before, you should definitely
 look them up! They're a neat way of specificying a structured data type - more
-info here: 
-http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)*
+info here:*
+http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
 
 .. sourcecode:: python
 
