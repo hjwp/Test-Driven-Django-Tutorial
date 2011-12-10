@@ -1,6 +1,9 @@
 Welcome to part 3 of the tutorial!  This week we'll finally get into writing
 our own web pages, rather than using the Django Admin site.
 
+Part 3 - A normal web page, using Django views and templates
+==========================================================
+
 Let's pick up our FT where we left off - we now have the admin site set up to
 add Polls, including Choices.  We now want to flesh out what the user sees.
 
