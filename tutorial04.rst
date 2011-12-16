@@ -16,7 +16,8 @@ Here's the outline of what we're going to do in this tutorial:
 Extending the FT to vote using radio buttons
 --------------------------------------------
 
-Let's start by extending our FT, to show Herbert voting on a poll. In ``fts/test_polls.py``:
+Let's start by extending our FT, to show Herbert voting on a poll. In
+``fts/test_polls.py``:
 
 .. sourcecode:: python
 
@@ -250,7 +251,7 @@ And that's enough to make the unit tests happy::
 
     OK
 
-Mmmh, `OK`.  Let's see what the FTs think?::
+Mmmh, `OK`. And doughnuts. Let's see what the FTs think?::
 
     NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
@@ -301,12 +302,13 @@ Now what does the FT say?::
     ----------------------------------------------------------------------
 
 Ah, we need to add the poll Choices as a series of radio inputs.  Now the official Django
-tutorial shows you how to hard-code them in HTML, but Django can do even better than that:
+tutorial shows you how to hard-code them in HTML:
 
 https://docs.djangoproject.com/en/1.3/intro/tutorial04/
 
-Django's forms system will generate radio buttons for us, if we can just give it the right
-incantations.  Let's create a new test in ``tests.py``:
+But Django can do even better than that - Django's forms system will generate
+radio buttons for us, if we can just give it the right incantations.  Let's
+create a new test in ``tests.py``:
 
 
 .. sourcecode:: python
@@ -345,9 +347,15 @@ incantations.  Let's create a new test in ``tests.py``:
             # check it uses radio inputs to render
             self.assertIn('input type="radio"', form.as_p())
 
-You might prefer to put the import at the top of the file.  And, for it to work, we
-may as well create something minimal for it to import! Create a file called
-``polls/forms.py``.
+You might prefer to put the import at the top of the file.  
+
+Looking through the code, you can see we instantiate a form, passing it a poll object.
+We then examine the form's ``fields`` attribute, find the one called ``vote``
+(this will also be the ``name`` of the HTML input element), and we check the
+``choices`` for that field.
+
+For the test to even get off the ground, we may as well create something
+minimal for it to import! Create a file called ``polls/forms.py``.
 
 .. sourcecode:: python
 
@@ -357,11 +365,12 @@ may as well create something minimal for it to import! Create a file called
 And let's start another test/code cycle, woo -::
 
     python manage.py test polls
+
     [...]
         form = PollVoteForm(poll=poll)
     TypeError: object.__new__() takes no parameters
 
-We override __init__.py to change the constructor:
+We override ``__init__.py`` to change the constructor:
 
 .. sourcecode:: python
 
@@ -369,11 +378,12 @@ We override __init__.py to change the constructor:
         def __init__(self, poll):
             pass
 
-...::
+... ::
+
     self.assertEquals(form.fields.keys(), ['vote'])
     AttributeError: 'PollVoteForm' object has no attribute 'fields'
 
-to give the form a 'fields' attribute, we can make it inherit from
+To give the form a 'fields' attribute, we can make it inherit from
 a real Django form class, and call its parent constructor:
 
 .. sourcecode:: python
@@ -384,11 +394,12 @@ a real Django form class, and call its parent constructor:
         def __init__(self, poll):
             super(self.__class__, self).__init__()
 
-Now we get::
+One day, Python 3 will make all this ``super`` nonsense much more sensible.
+One day. Anyway, now we get::
 
     AssertionError: Lists differ: [] != ['vote']
 
-Django form fields are defined a bit like model fields - as inline
+Django form fields are defined a bit like model fields - using inline
 class attributes. There are various types of fields, in this case
 we want one that has `choices` - a ``ChoiceField``.
 You can find out more about form fields here:
@@ -421,6 +432,7 @@ https://docs.djangoproject.com/en/1.3/ref/models/fields/#field-choices
 Mmmmmh, list comprehensions... 
 
 The final test is to make sure we have radio boxes as the HTML input type.
+
 We're using ``as_p()``, a method provided on all Django forms which renders
 the form to HTML for us - we can see exactly what the HTML looks like in the
 next test output::
@@ -440,22 +452,26 @@ this using a `widget`, in this case a ``RadioSelect``
             super(self.__class__, self).__init__()
             self.fields['vote'].choices = [(c.id, c.choice) for c in poll.choice_set.all()]
 
+OK so far?  Django forms have *fields*, some of which may have *choices*, and
+we can choose how the field will be displayed on page using a *widget*.  Right.
+
 And that should get the tests passing!  If you're curious to see what the form
 HTML actually looks like, why not temporarily put a ``print form.as_p()`` at
 the end of the test?   Print statements in tests can be very useful for
 exploratory programming... You could try ``form.as_table()`` too if you like...
 
-Right, where where we?  Let's do a quick check of the functional tests
-(incidentally, are you rather bored of watching the FT run through the
+Right, where where we?  Let's do a quick check of the functional tests.
+
+(*incidentally, are you rather bored of watching the FT run through the
 admin test each time?  I was, so I've built in a second argument to the FT
-runner that lets you filter by name of test - just pass in ``polls`` and
-it will only run FTs in files whose names contain the world ``polls``.)::
+runner that lets you filter by name of test - just pass in* ``polls`` *and
+it will only run FTs in files whose names contain the world* ``polls``.)::
 
     python functional_tests.py polls
     [...]
     AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...
 
-Ah yes, we still haven't actually used the form yet!  Let's go back to
+Ah yes, we still haven't actually *used* the form yet!  Let's go back to
 our ``TestSinglePollView``, and add some extra code (you can copy and
 paste some of it from the form test)
 
@@ -501,6 +517,8 @@ paste some of it from the form test)
 
 Now the unit tests give us::
 
+    python manage.py test polls
+    [...]
     KeyError: 'form'
 
 So back in ``views.py``:
