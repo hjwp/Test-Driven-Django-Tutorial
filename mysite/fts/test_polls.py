@@ -122,6 +122,7 @@ class TestPolls(FunctionalTest):
         # The page refreshes, and he sees that his choice
         # has updated the results.  they now say
         # "100 %: very awesome".
+        self.fail('TODO')
 
         # The page also says "1 votes"
 

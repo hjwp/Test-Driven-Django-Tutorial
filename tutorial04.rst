@@ -668,15 +668,18 @@ template:
     </html>
 
 
-And now... our tests pass!::
+And now... our tests get to the end!::
 
-    .
+    ======================================================================
+    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
     ----------------------------------------------------------------------
-    Ran 1 test in 16.946s
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 125, in test_voting_on_a_new_poll
+        self.fail('TODO')
+    AssertionError: TODO
+    ----------------------------------------------------------------------
 
-    OK
 
-Well, that's only because we haven't finished writing them really. Tune in
-next week for when we finish our tests, handle POST requests, and do super-fun
-form validation too...
+Tune in next week for when we finish our tests, handle POST requests, and do
+super-fun form validation too...
 
