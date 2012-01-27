@@ -77,6 +77,66 @@ class TestSinglePollView(TestCase):
         self.assertIn(choice4.choice, response.content.replace('&#39;', "'"))
 
 
-    def test_view_can_handle_votes_via_POST(self):
-        pass
+    def test_view_shows_percentage_of_votes_and_total_votes(self):
+        # set up a poll with choices
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=1)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=2)
+        choice2.save()
 
+        client = Client()
+        response = client.get('/poll/%d/' % (poll1.id, ))
+
+        # check the percentages of votes are shown, sensibly rounded
+        self.assertIn('33 %: 42', response.content)
+        self.assertIn('67 %: The Ultimate Answer', response.content)
+        self.assertNotIn('No-one has voted', response.content)
+
+
+    def test_view_shows_total_votes(self):
+        # set up a poll with choices
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=1)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=2)
+        choice2.save()
+
+        client = Client()
+        response = client.get('/poll/%d/' % (poll1.id, ))
+        self.assertIn('3 votes', response.content)
+
+        # also check we only pluralise "votes" if necessary. details!
+        choice2.votes = 0
+        choice2.save()
+        response = client.get('/poll/%d/' % (poll1.id, ))
+        self.assertIn('1 vote', response.content)
+        self.assertNotIn('1 votes', response.content)
+
+
+    def test_view_can_handle_votes_via_POST(self):
+        # set up a poll with choices
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=3)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=5)
+        choice2.save()
+
+        # set up our POST data - keys and values are strings
+        post_data = {'vote': str(choice2.id)}
+
+        # make our request to the view
+        client = Client()
+        poll_url = '/poll/%d/' % (poll1.id,)
+        response = client.post(poll_url, data=post_data)
+
+        # now we should see an extra vote for the choice
+        choice_in_db = Choice.objects.get(id=choice2.id)
+        self.assertEquals(choice_in_db.votes, 6)
+
+        # always redirect after a POST - even if, in this case, we go back
+        # to the same page.
+        self.assertRedirects(response, poll_url)

@@ -256,13 +256,675 @@ it makes it easy to show form validation errors to the user...
 
 The Django Test Client can generate POST requests as easily as GET ones, we just
 need to tell it what the data should be. Let's write a new test in
-``polls/tests/test_views.py``
+``polls/tests/test_views.py`` - we can copy a fair bit from the one above it...
 
 .. sourcecode:: python
 
 
+    class TestSinglePollView(TestCase):
 
-Django puts POST data into a special dictionary on the request object,
-``request.POST``.  It also tells us whether a request was a GET or a POST inside
-the ``method`` attribute.  That makes it pretty easy to
+        def test_page_shows_poll_title_and_no_votes_message(self):
+            [...]
 
+        def test_view_can_handle_votes_via_POST(self):
+            # set up a poll with choices
+            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1.save()
+            choice1 = Choice(poll=poll1, choice='42', votes=0)
+            choice1.save()
+            choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
+            choice2.save()
+
+            # set up our POST data - keys and values are strings
+            post_data = {'vote': str(choice2.id)}
+
+            # make our request to the view
+            client = Client()
+            poll_url = '/poll/%d/' % (poll1.id,)
+            response = client.post(poll_url, data=post_data)
+
+            # now we should see a vote for the choice
+            self.assertEquals(choice1.votes, 1)
+
+            # always redirect after a POST - even if, in this case, we go back
+            # to the same page.
+            self.assertRedirects(response, poll_url)
+
+Right, let's see how it fails, first::
+
+    ======================================================================
+    FAIL: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.TestSinglePollView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/../mysite/polls/tests/test_views.py", line 98, in test_view_can_handle_votes_via_POST
+        self.assertEquals(choice1.votes, 4)
+    AssertionError: 3 != 4
+
+    ----------------------------------------------------------------------
+
+So, the first thing to do is increase the "votes" counter on the appropriate
+Choice object... Django puts POST data into a special dictionary on the request
+object, ``request.POST``, so let's use that - I'm adding three new lines at the
+beginning of the view:
+
+
+.. sourcecode:: python
+
+    from polls.models import Choice, Poll
+    [...]
+
+    def poll(request, poll_id):
+        choice = Choice.objects.get(id=request.POST['vote'])
+        choice.votes += 1
+        choice.save()
+
+        poll = Poll.objects.get(pk=poll_id)
+        form = PollVoteForm(poll=poll)
+        return render(request, 'poll.html', {'poll': poll, 'form': form})
+
+
+Let's see what the tests think::
+
+    $ ./manage.py test polls
+    Creating test database for alias 'default'...
+    .......EE
+    ======================================================================
+    ERROR: test_page_shows_poll_title_and_no_votes_message (mysite.polls.tests.test_views.TestSinglePollView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/../mysite/polls/tests/test_views.py", line 57, in test_page_shows_poll_title_and_no_votes_message
+      [...]
+    MultiValueDictKeyError: "Key 'vote' not found in <QueryDict: {}>"
+
+    ======================================================================
+    ERROR: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.TestSinglePollView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/../mysite/polls/tests/test_views.py", line 105, in test_view_can_handle_votes_via_POST
+        self.assertRedirects(response, poll_url)
+        AssertionError: Response didn't redirect as expected: Response code was 200 (expected 302)
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.031s
+
+Oh dear - although we've got our POST test a little bit further along, we seem to 
+have broken another test.  You might argue, it was pretty obvious that was going to
+happen, because I've introduced code to upvote choices which is applied for both
+GET and POST requests - I should have checked whether the request was a POST or a
+GET, and used an ``if``.  And, in fact, it was pretty obvious - I was being
+deliberately stupid, and made that mistake on purpose.  The point was to demonstrate
+how TDD can save you from your own stupidity, by telling you immediately when you 
+break anything...  Save those brain cells for the *really* hard problems.
+
+So, Django tells us whether a request was a GET or a POST inside the ``method``
+attribute.  Let's add an ``if``:
+
+.. sourcecode:: python
+
+    def poll(request, poll_id):
+        if request.method == 'POST':
+            choice = Choice.objects.get(id=request.POST['vote'])
+            choice.votes += 1
+            choice.save()
+
+        poll = Poll.objects.get(pk=poll_id)
+        form = PollVoteForm(poll=poll)
+        return render(request, 'poll.html', {'poll': poll, 'form': form})
+
+And testing...::
+
+    ERROR: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.TestSinglePollView)
+    AssertionError: Response didn't redirect as expected: Response code was 200 (expected 302)
+
+
+Right, now we need to do our redirect (*Always redirect after a POST* -
+http://www.theserverside.com/news/1365146/Redirect-After-Post).  Django has a
+class called ``HttpResponseRedirect`` for this, which takes a URL.  We'll use
+the ``reverse`` function from the last tutorial to get the right URL...
+
+.. sourcecode:: python
+
+    from django.core.urlresolvers import reverse
+    from django.http import HttpResponseRedirect
+    [...]
+
+    def poll(request, poll_id):
+        if request.method == 'POST':
+            choice = Choice.objects.get(id=request.POST['vote'])
+            choice.votes += 1
+            choice.save()
+            return HttpResponseRedirect(reverse('poll', args=[poll_id,]))
+
+        poll = Poll.objects.get(pk=poll_id)
+        form = PollVoteForm(poll=poll)
+        return render(request, 'poll.html', {'poll': poll, 'form': form})
+
+Lovely!  let's see that at work::
+
+    $ ./manage.py test polls
+    Creating test database for alias 'default'...
+    .........
+    ----------------------------------------------------------------------
+    Ran 9 tests in 0.023s
+
+    OK
+
+Hooray!  Let's see if it gets the FT any further::
+
+    $ ./functional_tests.py polls
+    [...]
+
+    AssertionError: '100 %: Very awesome' not found in u'Poll Results\nHow awesome is Test-Driven Development?\nNo-one has voted on this poll yet\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
+
+Nope.  We still have to get our page to reflect the percentage of votes.  Let's make
+a quick test in ``test_views``:
+
+.. sourcecode:: python
+
+    def test_view_shows_percentage_of_votes(self):
+        # set up a poll with choices
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=1)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=2)
+        choice2.save()
+
+        client = Client()
+        response = client.get('/poll/%d/' % (poll1.id, ))
+
+        # check the percentages of votes are shown, sensibly rounded
+        self.assertIn('33 %: 42', response.content)
+        self.assertIn('67 %: The Ultimate Answer', response.content)
+
+        # and that the 'no-one has voted' message is gone
+        self.assertNotIn('No-one has voted', response.content)
+
+
+    def test_view_can_handle_votes_via_POST(self):
+        [...]
+
+Running it gives::
+
+    AssertionError: '33 %: 42' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n    <input type="submit" />\n\n    \n  </body>\n</html>\n'
+
+
+Which is all very well - but, actually, the view (or the template) aren't really the
+right place to calculate percentage figures.  Let's hang that off the model,
+as a custom function instead.  This test should make my intentions clear.  In
+``polls/tests/test_models.py``:
+
+.. sourcecode:: python
+
+    def test_choice_can_calculate_its_own_percentage_of_votes(self):
+        poll = Poll(question='who?', pub_date='1999-01-02')
+        poll.save()
+        choice1 = Choice(poll=poll,choice='me',votes=2)
+        choice1.save()
+        choice2 = Choice(poll=poll,choice='you',votes=1)
+        choice2.save()
+
+        self.assertEquals(choice1.percentage(), 66)
+        self.assertEquals(choice2.percentage(), 33)
+
+Self-explanatory?  Let's implement.  We should now get a new test error::
+
+    $ ./manage.py test polls
+    .E........F
+    AttributeError: 'Choice' object has no attribute 'percentage'
+
+
+Let's give ``Choice`` a percentage function. In ``models.py``
+
+.. sourcecode:: python
+
+
+    class Choice(models.Model):
+        poll = models.ForeignKey(Poll)
+        choice = models.CharField(max_length=200)
+        votes = models.IntegerField(default=0)
+
+        def percentage(self):
+            pass
+
+Re-running the tests::
+
+    self.assertEquals(choice1.percentage(), 66)
+    AssertionError: None != 66
+
+And implementing:
+
+.. sourcecode:: python
+
+    def percentage(self):
+        return 100 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+
+Ah, not quite::
+
+    self.assertEquals(choice1.percentage(), 67)
+    AssertionError: 66 != 67
+
+Darn that integer division! Let's try this:
+
+.. sourcecode:: python
+
+    def percentage(self):
+        return round(
+            100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+        )
+
+
+That gets our model test passing. Now let's use our new percentage function in our
+template, ``polls/templates/poll.html``
+            
+.. sourcecode:: html+django
+
+    <html>
+      <body>
+        <h1>Poll Results</h1>
+        
+        <h2>{{poll.question}}</h2>
+
+        <ul>
+        {% for choice in poll.choice_set.all %}
+          <li>{{ choice.percentage }} %: {{ choice.choice }}</li>
+        {% endfor %}
+        </ul>
+
+        <p>No-one has voted on this poll yet</p>
+
+        <h3>Add your vote</h3>
+        {{form.as_p}}
+        <input type="submit" />
+
+        
+      </body>
+    </html>
+
+
+Let's try re-running our tests now::
+
+    ........E.F
+    [...]
+    TemplateSyntaxError: Caught ZeroDivisionError while rendering: float division by zero
+    [...]
+    AssertionError: '33 %: 42' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.0 %: 42</li>\n    \n      <li>67.0 %: The Ultimate Answer</li>\n    \n    </ul>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n    <input type="submit" />\n\n    \n  </body>\n</html>\n'
+
+
+ Oh no!  Bad to worse!  Our percentage function really is refusing to make our lives
+ easy - it's susceptible to zero-division errors, and it's producing floats rather
+ than nice printable percentages... Let's fix that.  (but, again, notice the way it's
+ the tests picking up all these little bugs for us, rather than us having to try 
+ and anticipate them all in advance, or test all the edge cases manually...)
+
+ So, let's make our percentage function return a proper, accurate float
+ representation of the percentage (or as accurate as floating-point arithmetic
+ will allow), and we'll handle the presentation issues in the template. We'll
+ also make it handle the 0-case
+
+.. sourcecode:: python
+
+    def test_choice_can_calculate_its_own_percentage_of_votes(self):
+        poll = Poll(question='who?', pub_date='1999-01-02')
+        poll.save()
+        choice1 = Choice(poll=poll,choice='me',votes=2)
+        choice1.save()
+        choice2 = Choice(poll=poll,choice='you',votes=1)
+        choice2.save()
+
+        self.assertEquals(choice1.percentage(), 100 * 2 / 3.0)
+        self.assertEquals(choice2.percentage(), 100 * 1 / 3.0)
+
+        # also check 0-votes case
+        choice1.votes = 0
+        choice1.save()
+        choice2.votes = 0
+        choice2.save()
+        self.assertEquals(choice1.percentage(), 0)
+        self.assertEquals(choice2.percentage(), 0)
+
+Re-run the tests::
+
+    self.assertEquals(choice1.percentage(), 100 * 2 / 3.0)
+    AssertionError: 67.0 != 66.66666666666667
+
+Removing the ``round()``...
+
+.. sourcecode:: python
+
+        return 100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+
+And now we get the 0-case error::
+
+    return 100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+    ZeroDivisionError: float division by zero
+
+Which we can fix with a ``try/except`` (*Better to ask for forgiveness than
+permission*)
+ 
+.. sourcecode:: python
+
+    def percentage(self):
+        try:
+            return 100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+        except ZeroDivisionError:
+            return 0
+
+
+Phew.  That takes us down to just one final test error::
+
+    ..........F
+    ======================================================================
+    FAIL: test_view_shows_percentage_of_votes (mysite.polls.tests.test_views.TestSinglePollView)
+    self.assertNotIn('No-one has voted', response.content)
+    AssertionError: 'No-one has voted' unexpectedly found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3333333333 %: 42</li>\n    \n      <li>66.6666666667 %: The Ultimate Answer</li>\n    \n    </ul>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n    <input type="submit" />\n\n    \n  </body>\n</html>\n'
+
+Now, how are we going to decide on whether to show or hide this "no votes yet"
+message?  Ideally, we want to be able to ask the Poll object its total number of
+votes... That might come in useful elsewhere too...
+
+Let's hope this test/code cycle is self-explanatory. Start with ``test_models.py``:
+
+.. sourcecode:: python
+
+    class TestPollsModel(TestCase):
+        [...]
+
+        def test_poll_can_tell_you_its_total_number_of_votes(self):
+            p = Poll(question='where',pub_date='2000-01-02')
+            p.save()
+            c1 = Choice(poll=p,choice='here',votes=0)
+            c1.save()
+            c2 = Choice(poll=p,choice='there',votes=0)
+            c2.save()
+
+            self.assertEquals(p.total_votes(), 0)
+
+            c1.votes = 1000
+            c1.save()
+            c2.votes = 22
+            c2.save()
+            self.assertEquals(p.total_votes(), 1022)
+
+tests::
+
+    AttributeError: 'Poll' object has no attribute 'total_votes'
+
+``models.py``
+
+.. sourcecode:: python
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField(verbose_name='Date published')
+
+        def __unicode__(self):
+            return self.question
+
+
+        def total_votes(self):
+            pass
+
+tests::
+
+    AssertionError: None != 0
+
+``models.py``
+
+.. sourcecode:: python
+
+        def total_votes(self):
+            return 0
+
+(oh yeah, TDD.  You love it).  Tests::
+
+    AssertionError: 0 != 1022
+
+Good. ``models.py``
+
+.. sourcecode:: python
+
+    def total_votes(self):
+        return sum(c.votes for c in self.choice_set.all())
+
+And that's a pass.  Now, does that ``sum`` remind you of anything.  Let's refactor::
+
+
+    class Choice(models.Model):
+        poll = models.ForeignKey(Poll)
+        choice = models.CharField(max_length=200)
+        votes = models.IntegerField(default=0)
+
+        def percentage(self):
+            try:
+                return 100.0 * self.votes / self.poll.total_votes()
+            except ZeroDivisionError:
+                return 0
+
+Re-running the tests, all the right ones still pass.  Let's finally get onto our
+little message. Back in our template, ``polls/templates/poll.html``:
+
+.. sourcecode:: html+django
+
+    <html>
+      <body>
+        <h1>Poll Results</h1>
+        
+        <h2>{{poll.question}}</h2>
+
+        <ul>
+        {% for choice in poll.choice_set.all %}
+          <li>{{ choice.percentage }} %: {{ choice.choice }}</li>
+        {% endfor %}
+        </ul>
+
+
+        {% if not poll.total_votes %}
+          <p>No-one has voted on this poll yet</p>
+        {% endif %}
+
+        <h3>Add your vote</h3>
+        {{form.as_p}}
+        <input type="submit" />
+
+        
+      </body>
+    </html>
+
+And re-run the tests::
+
+    ............
+    ----------------------------------------------------------------------
+    Ran 12 tests in 0.043s
+    OK
+
+At last!  What about the FT?::
+
+    ======================================================================
+    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 126, in test_voting_on_a_new_poll
+        self.assertIn('100 %: Very awesome', body_text)
+    AssertionError: '100 %: Very awesome' not found in u'Poll Results\nHow awesome is Test-Driven Development?\n0 %: Very awesome\n0 %: Quite awesome\n0 %: Moderately awesome\nNo-one has voted on this poll yet\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 5.677s
+
+Hmm, not quite.  What is missing?  The "submit" button doesn't seem to be working...
+Ah! Yes - we haven't actually wired up our form yet.  Django's ``form.as_p()``
+function doesn't actually give you a ``<form>`` tag - you have to do that
+yourself, which gives you the choice over where the form sends its data.  Let's do 
+that, in the template, ``polls/templates/poll.html``:
+
+.. sourcecode:: html+django
+
+    <html>
+      <body>
+        <h1>Poll Results</h1>
+        
+        <h2>{{poll.question}}</h2>
+
+        <ul>
+        {% for choice in poll.choice_set.all %}
+          <li>{{ choice.percentage }} %: {{ choice.choice }}</li>
+        {% endfor %}
+        </ul>
+
+
+        {% if not poll.total_votes %}
+          <p>No-one has voted on this poll yet</p>
+        {% endif %}
+
+        <h3>Add your vote</h3>
+        <form method="POST" action="">
+          {{form.as_p}}
+          <input type="submit" />
+        </form>
+
+        
+      </body>
+    </html>
+
+Re-running the FT, we get::
+
+    AssertionError: '100 %: Very awesome' not found in u"Forbidden (403)\nCSRF verification failed. Request aborted.\nHelp\nReason given for failure:\n    CSRF token missing or incorrect.\n    \nIn general, this can occur when there is a genuine Cross Site Request Forgery, or when Django's CSRF mechanism has not been used correctly. For POST forms, you need to ensure:\nThe view function uses RequestContext for the template, instead of Context.\nIn the template, there is a {% csrf_token %} template tag inside each POST form that targets an internal URL.\nIf you are not using CsrfViewMiddleware, then you must use csrf_protect on any views that use the csrf_token template tag, as well as those that accept the POST data.\nYou're seeing the help section of this page because you have DEBUG = True in your Django settings file. Change that to False, and only the initial error message will be displayed.\nYou can customize this page using the CSRF_FAILURE_VIEW setting."
+
+Pretty helpful, as error messages go.  Let's add an amazing Django voodoo CSRF tag:
+
+.. sourcecode:: html+django
+
+    <form method="POST" action="">
+      {% csrf_token %}
+      {{form.as_p}}
+      <input type="submit" />
+    </form>
+
+And now?::
+
+    AssertionError: '100 %: Very awesome' not found in u'Poll Results\nHow awesome is Test-Driven Development?\n100.0 %: Very awesome\n0.0 %: Quite awesome\n0.0 %: Moderately awesome\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
+
+Still not quite, arg! Just a tiny formatting error though.  We can fix this
+using one of Django's built-in template filters:
+
+https://docs.djangoproject.com/en/1.3/ref/templates/builtins/
+
+.. sourcecode:: html+django
+    <ul>
+    {% for choice in poll.choice_set.all %}
+      <li>{{ choice.percentage|floatformat }} %: {{ choice.choice }}</li>
+    {% endfor %}
+    </ul>
+
+
+Now what?::
+
+    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    AssertionError: '1 vote' not found in u'Poll Results\nHow awesome is Test-Driven Development?\n100 %: Very awesome\n0 %: Quite awesome\n0 %: Moderately awesome\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
+
+Aha, looks like that ``total_votes`` function is going to come in useful again!
+
+Let's add a tiny test to our ``test_views.py``:
+
+.. sourcecode:: python 
+
+    def test_view_shows_total_votes(self):
+        # set up a poll with choices
+        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=1)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=2)
+        choice2.save()
+
+        client = Client()
+        response = client.get('/poll/%d/' % (poll1.id, ))
+        self.assertIn('3 votes', response.content)
+
+        # also check we only pluralise "votes" if necessary. details!
+        choice2.votes = 0
+        choice2.save()
+        response = client.get('/poll/%d/' % (poll1.id, ))
+        self.assertIn('1 vote', response.content)
+        self.assertNotIn('1 votes', response.content)
+
+
+Running those tests::
+
+    FAIL: test_view_shows_percentage_of_votes_and_total_votes (mysite.polls.tests.test_views.TestSinglePollView)
+    AssertionError: '33 %: 42' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3 %: 42</li>\n    \n      <li>66.7 %: The Ultimate Answer</li>\n    \n    </ul>\n\n\n    \n\n    <h3>Add your vote</h3>\n    <form method="POST" action="">\n      <div style=\'display:none\'><input type=\'hidden\' name=\'csrfmiddlewaretoken\' value=\'ac03d928c29ccbfe6fd0828aec8ede4e\' /></div>\n      <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n      <input type="submit" />\n    </form>\n\n    \n  </body>\n</html>\n'
+
+    FAIL: test_view_shows_total_votes (mysite.polls.tests.test_views.TestSinglePollView)
+    AssertionError: '3 votes' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3 %: 42</li>\n    \n      <li>66.7 %: The Ultimate Answer</li>\n    \n    </ul>\n\n\n    \n\n    <h3>Add your vote</h3>\n    <form method="POST" action="">\n      <div style=\'display:none\'><input type=\'hidden\' name=\'csrfmiddlewaretoken\' value=\'d9fd2b61be1299d84b48f4c378b15ec3\' /></div>\n      <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n      <input type="submit" />\n    </form>\n\n    \n  </body>\n</html>\n'
+
+
+Ah, aside from our expected failure, it looks like we also have a minor regression.
+Getting this presentational stuff right is fiddly!  Still, the fix isn't too
+difficult, back in our template:
+
+.. sourcecode:: html+django
+
+    <html>
+      <body>
+        <h1>Poll Results</h1>
+        
+        <h2>{{poll.question}}</h2>
+
+        <ul>
+        {% for choice in poll.choice_set.all %}
+          <li>{{ choice.percentage|floatformat:0 }} %: {{ choice.choice }}</li>
+        {% endfor %}
+        </ul>
+
+
+        {% if poll.total_votes %}
+          <p>{{ poll.total_votes }} vote{{ poll.total_votes|pluralize }}</p>
+        {% else %}
+          <p>No-one has voted on this poll yet</p>
+        {% endif %}
+
+        <h3>Add your vote</h3>
+        <form method="POST" action="">
+          {% csrf_token %}
+          {{form.as_p}}
+          <input type="submit" />
+        </form>
+
+        
+      </body>
+    </html>
+
+We've transformed our ``if not`` into an ``if else`` too, which is nice.
+
+Unit tests::
+
+    $ ./manage.py test polls
+    Creating test database for alias 'default'...
+    .............
+    ----------------------------------------------------------------------
+    Ran 13 tests in 0.061s
+
+Now, how about those functional tests?::
+
+    $ ./functional_tests.py polls
+    .
+    ----------------------------------------------------------------------
+    Ran 1 test in 5.920s
+
+
+Hooray!  Just to be safe, it's worth running **all** the unit tests, and all
+the functional tests too...::
+
+    $ ./manage.py test
+    [...]
+    Ran 335 tests in 1.908s
+    OK
+
+
+    $ ./functional_tests.py
+    [...]
+    Ran 2 tests in 10.580s
+    OK
+
+
+Well, that feels like a nice place to break until next time.  See you soon!
