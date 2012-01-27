@@ -8,7 +8,9 @@ Here's the outline of what we're going to do in this tutorial:
 
     * handle POST requests
 
-    * tbc!
+    * helper functions on models
+
+    * quite a lot of fiddling with presentational stuff!
 
 
 Finishing the FT
@@ -344,8 +346,8 @@ Let's see what the tests think::
         self.assertRedirects(response, poll_url)
         AssertionError: Response didn't redirect as expected: Response code was 200 (expected 302)
 
-----------------------------------------------------------------------
-Ran 9 tests in 0.031s
+    ----------------------------------------------------------------------
+    Ran 9 tests in 0.031s
 
 Oh dear - although we've got our POST test a little bit further along, we seem to 
 have broken another test.  You might argue, it was pretty obvious that was going to
@@ -810,6 +812,7 @@ using one of Django's built-in template filters:
 https://docs.djangoproject.com/en/1.3/ref/templates/builtins/
 
 .. sourcecode:: html+django
+
     <ul>
     {% for choice in poll.choice_set.all %}
       <li>{{ choice.percentage|floatformat }} %: {{ choice.choice }}</li>
