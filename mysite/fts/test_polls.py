@@ -122,9 +122,48 @@ class TestPolls(FunctionalTest):
         # The page refreshes, and he sees that his choice
         # has updated the results.  they now say
         # "100 %: very awesome".
-        self.fail('TODO')
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('100 %: Very awesome', body_text)
 
-        # The page also says "1 votes"
+        # The page also says "1 vote"
+        self.assertIn('1 vote', body_text)
+
+        # Harold suspects that the website isn't very well protected
+        # against people submitting multiple votes yet, so he tries
+        # to do a little astroturfing
+
+        chosen = self.browser.find_element_by_css_selector(
+                "input[value='1']"
+        )
+        chosen.click()
+        self.browser.find_element_by_css_selector(
+                "input[type='submit']"
+            ).click()
+
+        # The page refreshes, and he sees that his choice
+        # has updated the results.  it still says
+        # "100 %: very awesome".
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('100 %: Very awesome', body_text)
+
+        # But the page now says "2 votes"
+        self.assertIn('2 votes', body_text)
+
+        # Cackling manically over his l33t haxx0ring skills, he tries
+        # voting for a different choice
+        chosen = self.browser.find_element_by_css_selector(
+                "input[value='2']"
+        )
+        chosen.click()
+        self.browser.find_element_by_css_selector(
+                "input[type='submit']"
+            ).click()
+
+        # Now, the percentages update, as well as the votes
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('67 %: Very awesome', body_text)
+        self.assertIn('33 %: Quite awesome', body_text)
+        self.assertIn('3 votes', body_text)
 
         # Satisfied, he goes back to sleep
 
