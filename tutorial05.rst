@@ -60,6 +60,9 @@ this point, you might find it's getting a little hard to find your way around
 ``tests.py`` - the file is getting a little cluttered.  I think it's time to
 do some *refactoring*, and move things around a bit.
 
+Refactoring the tests
+---------------------
+
 Refactoring means making changes to your code that have no functional impact - and
 you can refactor your test code as well as your production code.  The purpose of
 refactoring is usually to try and make your code more legible, less complex, or 
@@ -174,6 +177,92 @@ And now::
 
     OK
 
-Much better.  Small, baby steps, with a quick check at each stage that everything 
-still works.
+That's better.  Small, baby steps, with a quick check at each stage that everything 
+still works... Now, if you're anything like I was when I was first introduced to this
+method, you'll be screaming out, internally  - "Come on!  We could easily just do
+all this stuff in one go!"... And, maybe that's even true.  But then, think back to
+those times you've started off on a mission to refactor your code, and you've just
+dived straight in.  You make a bunch of changes here, and then you move onto that part
+there, and then you remember you also wanted to change this thing back here, and then
+you just have to copy and paste these bits there, rename this, and while we're
+at it we'll just do this and then, oh gosh where was I again?  Pretty soon you find
+yourself at the bottom of a depth-first tree, with no idea of how to get back to where
+you started, and no idea of what you need to do to get it all working again.
+
+So think back to all those times, and maybe erring on the side of caution isn't so
+bad.  Once you get used to it, you'll find you can fly through it!
+
+Anyways - next, let's do the views tests. Here's the way I did it:
+
+  * Save a copy of ``tests.py`` as ``test_views.py``
+
+  * Delete ``TestPollsVoteForm`` from ``test_views.py``
+
+  * Delete ``TestHomePageView`` and ``TestSinglePollView`` from ``tests.py``
+
+  * add ``from mysite.polls.tests.test_views import *`` to ``polls/tests/__init__,py``
+
+  * tidy up imports
+
+Re-running the tests, everything looks ok::
+
+    $ ./manage.py test polls 
+    Creating test database for alias 'default'...
+    .........
+    ----------------------------------------------------------------------
+    Ran 9 tests in 0.017s
+
+    OK
+
+And our final step is to rename ``tests.py`` to ``test_forms.py``.  We'll need to
+change the import too:
+
+.. sourcecode:: python
+
+    from mysite.polls.tests.test_forms import *
+    from mysite.polls.tests.test_models import *
+    from mysite.polls.tests.test_views import *
+
+Re-running the tests should give us 9 tests again, and we end up with 3 much more
+manageable, shorter files.  Hooray.  
+
+At this stage your polls app should look something like this::
+
+   templates/
+        home.html
+        poll.html
+    tests/
+        __init__.py
+        test_forms.py
+        test_models.py
+        test_views.py
+    __init__.py
+    admin.py
+    forms.py
+    models.py
+    views.py
+
+Pretty neat and tidy!
+
+Let's get back to what we were doing...
+
+
+Dealing with POST requests in a view
+------------------------------------
+
+The normal pattern in Django is to use the view that renders your form for GET
+requests, to also process form submissions via POST.  The main reason is that
+it makes it easy to show form validation errors to the user...
+
+The Django Test Client can generate POST requests as easily as GET ones, we just
+need to tell it what the data should be. Let's write a new test in
+``polls/tests/test_views.py``
+
+.. sourcecode:: python
+
+
+
+Django puts POST data into a special dictionary on the request object,
+``request.POST``.  It also tells us whether a request was a GET or a POST inside
+the ``method`` attribute.  That makes it pretty easy to
 
