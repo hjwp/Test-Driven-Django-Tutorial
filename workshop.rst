@@ -4,11 +4,12 @@ WELCOME TO THE TEST-DRIVEN-DJANGO WORKSHOP
 Required installations
 ----------------------
 
- - python (2.7 if poss, 2.6 otherwise)
- - git
- - firefox
- - django (can easy_install)
- - easy_install selenium
+ - Python (2.7 if poss, 2.6 otherwise)
+ - Git
+ - Firefox
+ - Django (easy_install) 
+ - Selenium (easy_install)
+ - unittest2 # if on Python 2.6 (easy_install)
 
 Checkout
 --------
@@ -46,30 +47,45 @@ Who knows what?
     - Selenium
 
 
+Laptops, tools and working
+--------------------------
+
+    - who is on Windows? Mac? Linux? VM? headless?? (the last is bad)
+
+    - who is using an IDE?
+
+
+
 The Plan
 --------
 
-    - to run through contents of Django tutorial
-    - ie, a polls/voting app
+    - To run through contents of official Django tutorial
+        - ie, a polls/voting app
+        - but TDD all the way
 
-    - I will provide various materials
-      - via  a git repo
-
-    - PART 1: the Django admin site
+    - PART 1: Basic setup & the Django admin site
         - first selenium FT
         - first unit tests
-        - models.py
+        - models.py, admin.py
 
-    - PART 2: the site home page
+    - PART 2: Customising the admin site
+        - extending the FT
+        - add a second model: Choice
+        - more detailed unit tests
+
+    - PART 3: the site home page
         - the Django Test Client
         - views.py
         - templates
 
-    - PART 3: individual poll voting pagekk
-        - more advanced url capturing
+    - PART 4: individual poll voting page
+        - more advanced urls 
         - forms
 
-    - PART 4: (if time) - form processing
+    - PART 5: form processing
+        - POST request
+        - refactoring
+
 
 
 
@@ -78,17 +94,23 @@ The Plan
 How we will work
 ----------------
 
+    - I will provide various bits of code to build on
+        - via the git repo
+    
     - We'll do the first two stages together - I code, you code
-        - parts 3 and 4 will be free-form (with help!)
+        - parts 3 and 4 will be more free-form 
 
     - the approach: full TDD:
        - no code before tests
-       - fts first - Selenium
+       - FTs first - Selenium
        - then unit tests - unittest & Django Test Client
 
-
-
-
+    - We go at the speed of the slowest person
+      - Ask questions
+      - when I say "does everyone get that", don't just nod!
+      - my glamorous assistant will keep a track of the current source tree on
+        flipchart
+      - JB & I will come round from time to time and take a look
 
 
 

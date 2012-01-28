@@ -142,8 +142,8 @@ dates and so on, before they are published via the user-facing websiteke.
 All this stuff comes 'for free' and automatically, just using the Django admin
 site.
 
-You can find out more about the philosophy behind the admin site, including Django's
-background in the newspaper industry, here:
+You can find out more about the philosophy behind the admin site, including
+Django's background in the newspaper industry, here:
 
 https://docs.djangoproject.com/en/1.3/intro/tutorial02/
 
@@ -152,13 +152,15 @@ admin site using an admin username and password, and create a new poll.  Here's
 a couple of screenshots of what the admin site looks like:
 
 .. image:: /static/images/admin03t.png
+
 .. image:: /static/images/admin05t.png
 
 
 We'll add more to this test later, but for now let's just get it to do the
 absolute minimum:  we want the test to open up the admin site (which we want to
 be available via the url ``/admin/``), and see that it "looks OK" - for this,
-we'll check that the page contains the words *Django administration*
+we'll check that the page contains the words *Django administration*, which
+it does by default.
 
 Let's create a directory to keep our FTs in called, um, ``fts``::
 
@@ -220,7 +222,7 @@ Next we use
 
     body = self.browser.find_element_by_tag_name('body') 
 
-``find_element_by_tag_name`` tells selenium to look through the page and find
+``find_element_by_tag_name`` tells Selenium to look through the page and find
 the HTML element for a particular tag - in this case, ``body``, which means
 the whole of the visible part of the page.  The method returns an ``WebElement``
 object, which represents the HTML element.
