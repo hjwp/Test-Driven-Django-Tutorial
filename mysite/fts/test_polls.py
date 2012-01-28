@@ -74,26 +74,55 @@ class TestPolls(FunctionalTest):
 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
-        self.fail('TODO')
+        self.browser.get(ROOT)
+        heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(heading.text, 'Polls')
 
         # He clicks on the link to the first Poll, which is called
         # 'How awesome is test-driven development?'
+        first_poll_title = 'How awesome is Test-Driven Development?'
+        self.browser.find_element_by_link_text(first_poll_title).click()
 
         # He is taken to a poll 'results' page, which says
         # "no-one has voted on this poll yet"
+        main_heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(main_heading.text, 'Poll Results')
+        sub_heading = self.browser.find_element_by_tag_name('h2')
+        self.assertEquals(sub_heading.text, first_poll_title)
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('No-one has voted on this poll yet', body.text)
 
         # He also sees a form, which offers him several choices.
         # There are three options with radio buttons
+        choice_inputs = self.browser.find_elements_by_css_selector(
+                "input[type='radio']"
+        )
+        self.assertEquals(len(choice_inputs), 3)
 
         # The buttons have labels to explain them
-
+        choice_labels = choice_inputs = self.browser.find_elements_by_tag_name('label')
+        choices_text = [c.text for c in choice_labels]
+        self.assertEquals(choices_text, [
+            'Vote:', # this label is auto-generated for the whole form
+            'Very awesome',
+            'Quite awesome',
+            'Moderately awesome',
+        ])
         # He decided to select "very awesome", which is answer #1
+        chosen = self.browser.find_element_by_css_selector(
+                "input[value='1']"
+        )
+        chosen.click()
 
         # Herbert clicks 'submit'
+        self.browser.find_element_by_css_selector(
+                "input[type='submit']"
+            ).click()
 
         # The page refreshes, and he sees that his choice
         # has updated the results.  they now say
         # "100 %: very awesome".
+        self.fail('TODO')
 
         # The page also says "1 vote"
 
