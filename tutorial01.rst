@@ -71,7 +71,7 @@ https://docs.djangoproject.com/en/1.3/intro/install/
 Setting up our Django project
 -----------------------------
 
-Django structures websites as "projects", each of which can onon have several
+Django structures websites as "projects", each of which can have several
 constituent "apps"... Ostensibly, the idea is that apps can be self-contained,
 so that you could use one app in several projects... Well, I've never actually
 seen that done, but it remains a nice way of splitting up your code.

@@ -6,9 +6,11 @@ Tutorial 5: Processing form submissions
 
 Here's the outline of what we're going to do in this tutorial:
 
-    * handle POST requests
+    * wire up our vote form so we can submit votes
 
-    * helper functions on models
+    * amend our view to also handle POST requests
+
+    * use helper functions on models
 
     * quite a lot of fiddling with presentational stuff!
 
