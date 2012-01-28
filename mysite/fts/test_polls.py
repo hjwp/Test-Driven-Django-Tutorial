@@ -74,6 +74,7 @@ class TestPolls(FunctionalTest):
 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
+        self.fail('TODO')
 
         # He clicks on the link to the first Poll, which is called
         # 'How awesome is test-driven development?'

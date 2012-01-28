@@ -8,18 +8,8 @@ class Poll(models.Model):
         return self.question
 
 
-    def total_votes(self):
-        return sum(c.votes for c in self.choice_set.all())
-
-
 
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
     choice = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
-
-    def percentage(self):
-        try:
-            return 100.0 * self.votes / self.poll.total_votes()
-        except ZeroDivisionError:
-            return 0
