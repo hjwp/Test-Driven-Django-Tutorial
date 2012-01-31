@@ -14,7 +14,7 @@ Here's an outline of what we're going to do:
 
     * Customise the human-readable display for polls
 
-    * Create "Choice" model objects to go with polls
+    * Create "Choice" related model objects to go with polls
 
     * Add choices to the admin site
 

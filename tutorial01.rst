@@ -271,8 +271,9 @@ it, and put it in the root of your project (in the ``mysite`` folder::
 
     wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/mysite/functional_tests.py 
 
-*(Again, if you're on windows, you may not have ``wget``.  Just go ahead and download the file
-manually from the project on github, by going to the link above and doing a "Save As")*
+*(Again, if you're on windows, you may not have ``wget``.  Just go ahead and
+download the file manually from the project on github, by going to the link
+above and doing a "Save As")*
 
 You can try running it now::
 
@@ -789,7 +790,8 @@ question attribute.  Let's fix that
     class Poll(models.Model):
         question = models.CharField(max_length=200)
 
-<TODO: decide how/whether to test max_length - too complex for an intro?>
+<TODO: decide how/whether to test max_length - too complex for an intro?  Plus, hard
+because sqlite doesn't enfore max_length!>
 
 Now our tests get slightly further - they tell us we need to add a pub_date::
 

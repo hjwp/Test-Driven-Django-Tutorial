@@ -7,19 +7,19 @@ Required installations
  - Python (2.7 if poss, 2.6 otherwise)
  - Git
  - Firefox
- - Django (easy_install) 
- - Selenium (easy_install)
- - unittest2 # if on Python 2.6 (easy_install)
+ - easy_install (aka "setuptools" - ``apt-get install python-setuptools``)
+ - Django (``easy_install django``) 
+ - Selenium (``easy_install selenium``)
+ - unittest2 # if on Python 2.6 (``easy_install unittest2``)
 
 Checkout
 --------
 
 checkout the base repo::
 
-   git clone --branch workshop https://github.com/hjwp/Test-Driven-Django-Tutorial.git
-   git fetch --tags
-   git checkout PART1
-
+   git clone https://github.com/hjwp/Test-Driven-Django-Tutorial tddworkshop
+   cd tddworkshop
+   git checkout workshop_part1
 
 
 
@@ -123,29 +123,35 @@ CHECKOUT
 
 checkout the base repo::
 
-   git clone --branch workshop https://github.com/hjwp/Test-Driven-Django-Tutorial.git
-   git fetch --tags
-   git checkout PART1
+   git clone https://github.com/hjwp/Test-Driven-Django-Tutorial tddworkshop
+   cd tddworkshop
+   git checkout workshop_part1
+
 
 Now we follow ``tutorial01.rst``
 
 Some notes:
 
     - in the bit where I suggest a ``wget``, you can just ``mv`` the
-      ``functional_test.py`` from where I've put it in the root of the repo...
-
-    - we'll stop at the first assert in ``test_admin.py`` and try running it
-
-    - possible discussion over ``max_length`` and ``verbose_name`` - is this 
-      like testing constants?
-
-    - time scheduled: 1 hour
+      ``functional_test.py`` from where I've put it in the root of the repo into your
+      ``mysite`` directory...
 
     - notes for windows users:  
       - ``https`` checkout for github
       - ``move`` not ``mv``.
       - ``django-admin.py startproject mysite`` (note extra .py)
       - ``python manage.py runserver 8001``
+
+Advanced sections:
+
+    - try to use ``element.click()`` to click submit button instead of pressing
+      Enter.  May need to use ``find_element_by_css_selector``.
+
+    - Could you use ``Poll.objects.get`` instead of ``Poll.objects.all`` in the 
+      unit test? What would it change?
+
+    - Can you test max_length on CharFields? (ask for hints!)
+
 
 
 
@@ -154,16 +160,15 @@ Some notes:
 PART 2:
 =======
 
-Checkout next part::
+Now we follow ``tutorial02.rst`` 
 
-    git stash
-    git checkout PART2 
+Notes / advanced sections
 
-Now we follow ``tutorial03.rst`` 
-                         ^- NB - 03, not 02 ;-)
+    - start by using "Pub date", rather than "Date Published"
 
+    - similarly, just assert we see a link with "Poll object" on next screen
 
-
+    - never mind unit test for verbose_name
 
 
 
@@ -173,7 +178,7 @@ PART 3:
 Checkout next part::
 
     git stash
-    git checkout PART3 
+    git checkout workshop_part3
 
-Now we follow ``tutorial04.rst`` 
+Now we follow ``tutorial03.rst`` 
 
