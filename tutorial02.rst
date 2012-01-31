@@ -14,7 +14,7 @@ Here's an outline of what we're going to do:
 
     * Customise the human-readable display for polls
 
-    * Create "Choice" model objects to go with polls
+    * Create "Choice" related model objects to go with polls
 
     * Add choices to the admin site
 
@@ -32,10 +32,17 @@ Then, open your web browser and go to ``http://localhost:8000/admin/``.
 Login with the admin username and password (``admin / adm1n``).
 
 If you go into the Polls section and try and create a new Poll, you need
-to click on a link that says "Add Poll" - let's add that to our FT, in
-``polls/test_amin.py``
+to click on a link that says "Add Poll" - let's add that to our FT.  Delete
+the "TODO", then add the following, in ``polls/test_amin.py``:
 
 .. sourcecode:: python
+
+        # She now sees a couple of hyperlink that says "Polls"
+        polls_links = self.browser.find_elements_by_link_text('Polls')
+        self.assertEquals(len(polls_links), 2)
+
+        # The second one looks more exciting, so she clicks it
+        polls_links[1].click()
 
         # She sees a link to 'add' a new poll, so she clicks it
         new_poll_link = self.browser.find_element_by_link_text('Add poll')
