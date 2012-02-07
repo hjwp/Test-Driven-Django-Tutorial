@@ -81,7 +81,7 @@ match ``views.py``, a ``test_models.py`` to match ``models.py``, and so on.
 Let's start by running all our unit tests, making sure they all pass, *and making
 a note of how many of them there are* - we don't want to lose any in the process!::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     Creating test database for alias 'default'...
     .........
     ----------------------------------------------------------------------
@@ -121,7 +121,7 @@ Then, edit ``polls/tests/__init__.py``, and add the ``import``:
 At this point, we should be able to run the tests again. Let's do so, and check that
 exactly the same number of them get run::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     Creating test database for alias 'default'...
     .........
     ----------------------------------------------------------------------
@@ -155,7 +155,7 @@ The way I chose to do it was:
 
 OK, is the job done?  Let's try re-running our tests::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     Creating test database for alias 'default'...
     ....
     ----------------------------------------------------------------------
@@ -173,7 +173,7 @@ that we import all tests into the ``tests/__init__.py``
 
 And now::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     Creating test database for alias 'default'...
     .........
     ----------------------------------------------------------------------
@@ -210,7 +210,7 @@ Anyways - next, let's do the views tests. Here's the way I did it:
 
 Re-running the tests, everything looks ok::
 
-    $ ./manage.py test polls 
+    $ python manage.py test polls 
     Creating test database for alias 'default'...
     .........
     ----------------------------------------------------------------------
@@ -405,7 +405,7 @@ the ``reverse`` function from the last tutorial to get the right URL...
 
 Lovely!  let's see that at work::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     Creating test database for alias 'default'...
     .........
     ----------------------------------------------------------------------
@@ -415,7 +415,7 @@ Lovely!  let's see that at work::
 
 Hooray!  Let's see if it gets the FT any further::
 
-    $ ./functional_tests.py polls
+    $ python functional_tests.py polls
     [...]
 
     AssertionError: '100 %: Very awesome' not found in u'Poll Results\nHow awesome is Test-Driven Development?\nNo-one has voted on this poll yet\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
@@ -473,7 +473,7 @@ as a custom function instead.  This test should make my intentions clear.  In
 
 Self-explanatory?  Let's implement.  We should now get a new test error::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     .E........F
     AttributeError: 'Choice' object has no attribute 'percentage'
 
@@ -903,7 +903,7 @@ We've transformed our ``if not`` into an ``if else`` too, which is nice.
 
 Unit tests::
 
-    $ ./manage.py test polls
+    $ python manage.py test polls
     Creating test database for alias 'default'...
     .............
     ----------------------------------------------------------------------
@@ -911,7 +911,7 @@ Unit tests::
 
 Now, how about those functional tests?::
 
-    $ ./functional_tests.py polls
+    $ python functional_tests.py polls
     .
     ----------------------------------------------------------------------
     Ran 1 test in 5.920s
@@ -920,13 +920,13 @@ Now, how about those functional tests?::
 Hooray!  Just to be safe, it's worth running **all** the unit tests, and all
 the functional tests too...::
 
-    $ ./manage.py test
+    $ python manage.py test
     [...]
     Ran 335 tests in 1.908s
     OK
 
 
-    $ ./functional_tests.py
+    $ python functional_tests.py
     [...]
     Ran 2 tests in 10.580s
     OK
