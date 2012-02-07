@@ -495,8 +495,8 @@ paste some of it from the form test)
         client = Client()
         response = client.get('/poll/%d/' % (poll2.id, ))
 
-        # check we use the right template
-        self.assertEquals(response.templates[0].name, 'poll.html')
+        # check we've used the right template
+        self.assertTemplateUsed(response, 'poll.html')
 
         # check we've passed the right poll into the context
         self.assertEquals(response.context['poll'], poll2)

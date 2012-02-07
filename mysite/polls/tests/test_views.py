@@ -17,9 +17,8 @@ class TestHomePageView(TestCase):
         client = Client()
         response = client.get('/')
 
-        # check we've used the "home.html" template
-        template_names_used = [t.name for t in response.templates]
-        self.assertIn('home.html', template_names_used)
+        # check we've used the right template
+        self.assertTemplateUsed(response, 'home.html')
 
         # check we've passed the polls to the template
         polls_in_context = response.context['polls']
@@ -56,8 +55,8 @@ class TestSinglePollView(TestCase):
         client = Client()
         response = client.get('/poll/%d/' % (poll2.id, ))
 
-        # check we use the right template
-        self.assertEquals(response.templates[0].name, 'poll.html')
+        # check we've used the right template
+        self.assertTemplateUsed(response, 'poll.html')
 
         # check we've passed the right poll into the context
         self.assertEquals(response.context['poll'], poll2)

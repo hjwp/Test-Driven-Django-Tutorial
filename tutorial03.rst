@@ -407,8 +407,8 @@ this into view (maybe starting with ``content = <h1>Polls</h1>`` before the
 ``for`` loop), but at this point it seems sensible to start to use Django's
 template system - that will provide a much more natural way to write web pages.
 
-The Django Test Client lets us check whether a response was rendered using a
-template, by using a special attribute of the response called ``templates``,
+The Django TestCase lets us check whether a response was rendered using a
+template, by using a special method response called ``assertTemplateUsed``,
 so let's use that.  In ``tests.py``:
 
 .. sourcecode:: python
@@ -425,8 +425,8 @@ so let's use that.  In ``tests.py``:
             client = Client()
             response = client.get('/')
 
-            template_names_used = [t.name for t in response.templates]
-            self.assertIn('home.html', template_names_used)
+            # check we've used the right template
+            self.assertTemplateUsed(response, 'home.html')
 
             # check we've passed the polls to the template
             polls_in_context = response.context['polls']
@@ -444,8 +444,10 @@ Testing ``python manage.py test polls``::
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 94, in test_root_url_shows_all_polls
-        self.assertIn('home.html', response.templates)
-    AssertionError: 'home.html' not found in []
+        self.assertTemplateUsed(response, 'home.html')
+      File "/usr/lib/pymodules/python2.7/django/test/testcases.py", line 510, in assertTemplateUsed
+        self.fail(msg_prefix + "No templates used to render the response")
+    AssertionError: No templates used to render the response
     ----------------------------------------------------------------------
     Ran 6 tests in 0.009s
 
