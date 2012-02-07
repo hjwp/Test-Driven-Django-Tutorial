@@ -475,10 +475,10 @@ some special django control codes.  These are either surrounded with
 - ``}}`` for printing variables.  You can find out more about the Django template
 language here:
 
- https://docs.djangoproject.com/en/1.3/topics/templates/ 
+https://docs.djangoproject.com/en/1.3/topics/templates/ 
 
- Let's rewrite our code to use this template.  For this we can use the Django
- ``render`` function, which takes the request and the name of the template:
+Let's rewrite our code to use this template.  For this we can use the Django
+``render`` function, which takes the request and the name of the template:
 
 .. sourcecode:: python
 
@@ -514,12 +514,14 @@ for that too:
         client = Client()
         response = client.get('/')
 
-        template_names_used = [t.name for t in response.templates]
-        self.assertIn('home.html', template_names_used)
+        # check we've used the right template
+        self.assertTemplateUsed(response, 'home.html')
 
+        # check we've passed the polls to the template
         polls_in_context = response.context['polls']
         self.assertEquals(list(polls_in_context), [poll1, poll2])
 
+        # check the poll names appear on the page
         self.assertIn(poll1.question, response.content)
         self.assertIn(poll2.question, response.content)
 
