@@ -299,7 +299,7 @@ I've imported the views module, so I can refer to my various view functions as
 
 I like my way because it uses the 'real' view - it requires that we actually
 have a view defined in ``views.py``, and that it imports properly... But it's a
-personal preference!
+personal preference.
 
 Re-running our tests should show us a different error::
 
@@ -623,7 +623,7 @@ can click.
 The way we'd fix this is in the ``home.html`` template, by adding an ``<a href=``.
 
 So is this something we write a unit test for as well?  Some people would tend to
-say that this is one unit test too many...  Since this is a guide to `rigorous`
+say that this is one unit test too many...  Since this is a guide to **rigorous**
 TDD, I'm going to say we probably should in this case.
 
 On the other hand, if we write a unit test for every single last bit of html
