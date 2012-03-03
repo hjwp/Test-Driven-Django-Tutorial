@@ -2,6 +2,7 @@
 try: import unittest2 as unittest #for Python <= 2.6
 except: import unittest
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import subprocess
 import sys
 
@@ -9,10 +10,13 @@ import settings_for_fts
 from django.core.management import call_command, setup_environ
 setup_environ(settings_for_fts)
 from django.contrib.auth.models import User
+from django.conf import settings
 
-
-ROOT = 'http://localhost:8001'
-
+# determine the root of the server
+if hasattr(settings, 'ROOT'):
+    ROOT = settings.ROOT
+else:
+    ROOT = 'http://localhost:8001'
 
 class FunctionalTest(unittest.TestCase):
 
@@ -21,7 +25,12 @@ class FunctionalTest(unittest.TestCase):
         # restart django server each test, because otherwise it doesn't see the
         # effects of resetting the db
         self.django = start_django_server()
-        self.browser = webdriver.Firefox()
+        # Use a remote driver if setup
+        if hasattr(settings, 'REMOTE_DRIVER_URL'):
+            self.browser = webdriver.Remote(command_executor=settings.REMOTE_DRIVER_URL,
+                                            desired_capabilities=DesiredCapabilities.FIREFOX)
+        else:
+            self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(5)
 
 
@@ -39,7 +48,7 @@ def start_django_server():
     #noreload ensures single process
     return subprocess.Popen([
             'python', 'manage.py', 'runserver',
-            ROOT.replace('http://', ''), '--noreload', '--settings=settings_for_fts'
+            ROOT.replace('http://', ''), '--noreload', '--settings=settings_for_fts',
     ])
 
 
