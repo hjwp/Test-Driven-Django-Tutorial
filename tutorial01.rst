@@ -176,6 +176,7 @@ Now, let's create a new file inside the ``fts`` folder called
 ``test_admin.py``, which will be our first Functional test:
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
 
     from functional_tests import FunctionalTest, ROOT
 
@@ -296,6 +297,7 @@ open it up in your favourite text editor. Find the lines that mention ``DATABASE
 and change the setting for ``ENGINE`` and ``NAME``, like so
 
 .. sourcecode:: python
+    :filename: mysite/settings.py
 
     DATABASES = {
         'default': {
@@ -370,6 +372,7 @@ do is uncoment a couple of lines.
 First, in ``settings.py`` we add ``django.contrib.admin`` to ``INSTALLED_APPS``:
 
 .. sourcecode:: python
+    :filename: mysite/settings.py
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -387,6 +390,7 @@ And in ``urls.py``, we uncomment three lines that mention the admin site -
 two near the top, and one near the bottom
 
 .. sourcecode:: python
+    :filename: mysite/urls.py
 
     from django.contrib import admin
     admin.autodiscover()
@@ -523,6 +527,8 @@ So, we now want our FT to cover logging into the admin site,
 and checking that "Polls" is an option on the main page:
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
+
     from functional_tests import FunctionalTest, ROOT
     from selenium.webdriver.common.keys import Keys
 
@@ -611,6 +617,7 @@ and would it please take notice of this new polls app and assume we want to
 use it - we do this by adding it to ``INSTALLED_APPS`` in ``settings.py``:
 
 .. sourcecode:: python
+    :filename: mysite/settings.py
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -638,6 +645,7 @@ The Django unit test runner will automatically run any tests we put in
 else, but for now, let's use that file:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     import datetime
     from django.test import TestCase
@@ -728,6 +736,8 @@ a tiny bit further on!
 So let's create a minimal Poll class, in ``polls/models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
+    
 
     from django.db import models
 
@@ -764,6 +774,7 @@ it's not a Django model object.  Let's make the minimal change required to get
 our tests further on
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Poll(models.Model):
         pass
@@ -786,6 +797,7 @@ the object back out of the database, and it's telling us that we haven't saved t
 question attribute.  Let's fix that
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -807,6 +819,7 @@ Now our tests get slightly further - they tell us we need to add a pub_date::
 Let's add that too
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -856,6 +869,7 @@ To do that, we just need to create a new file with the following three lines
 inside the polls app called, ``polls/admin.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/admin.py
 
     from polls.models import Poll
     from django.contrib import admin
