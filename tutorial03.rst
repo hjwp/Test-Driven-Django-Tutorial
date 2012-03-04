@@ -1,3 +1,6 @@
+Part 3 - A normal web page, using Django views and templates
+============================================================
+
 Welcome to part 3 of the tutorial!  This week we'll finally get into writing
 our own web pages, rather than using the Django Admin site.  Here's a summary
 of what we'll get up to:
@@ -8,9 +11,6 @@ of what we'll get up to:
 
 * Use the Django Test Client to write unit tests for the above
 
-
-Part 3 - A normal web page, using Django views and templates
-==========================================================
 
 Let's pick up our FT where we left off - we now have the admin site set up to
 add Polls, including Choices.  We now want to flesh out what the user sees.
@@ -24,6 +24,7 @@ the user's actions, and the expected behaviour of the site
 Create a new file for it called ``fts/test_polls.py``.  
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_polls.py
 
     from functional_tests import FunctionalTest, ROOT
     from selenium.webdriver.common.keys import Keys
@@ -75,6 +76,7 @@ info here:*
 http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_polls.py
 
     from functional_tests import FunctionalTest, ROOT
     from selenium.webdriver.common.keys import Keys
@@ -178,6 +180,7 @@ website, sees some polls and votes on them.
 
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_polls.py
 
     def test_voting_on_a_new_poll(self): 
         # First, Gertrude the administrator logs into the admin site and
@@ -246,6 +249,7 @@ https://docs.djangoproject.com/en/1.3/topics/testing/
 We'll create a new class to test our home page view:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     from django.test.client import Client
     [...]
@@ -274,6 +278,7 @@ our "404 error" page.  We'll come back to that later.  For now, let's make the
 First we'll create a dummy view in ``views.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def home(request):
         pass
@@ -281,6 +286,7 @@ First we'll create a dummy view in ``views.py``:
 Now let's hook up this view inside ``urls.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/urls.py
 
     from mysite.polls import views
 
@@ -321,6 +327,7 @@ Re-running our tests should show us a different error::
 Let's get the view to return an HttpResponse:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     from django.http import HttpResponse
 
@@ -346,6 +353,7 @@ be simple enough to just return a response that contained the questions of our
 two polls as "raw" text - like this:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     from django.http import HttpResponse
     from polls.models import Poll
@@ -412,6 +420,7 @@ template, by using a special method response called ``assertTemplateUsed``,
 so let's use that.  In ``tests.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     class TestHomePageView(TestCase):
 
@@ -459,6 +468,7 @@ So let's now create our template::
 Edit ``home.html`` with your favourite editor, 
     
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -481,6 +491,7 @@ Let's rewrite our code to use this template.  For this we can use the Django
 ``render`` function, which takes the request and the name of the template:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     from django.shortcuts import render
     from polls.models import Poll
@@ -510,6 +521,7 @@ what context objects were used in rendering a response, so we can write a test
 for that too:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
         client = Client()
         response = client.get('/')
@@ -549,6 +561,7 @@ but make them empty - again, the idea is to make the minimal change to move
 the test forwards:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def home(request):
         context = {'polls': []}
@@ -577,6 +590,7 @@ Now the unit tests say::
 Let's fix our code so the tests pass:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     from django.shortcuts import render
     from polls.models import Poll
@@ -698,6 +712,7 @@ be making a view for seeing an individual `Poll` object, so we'll probably find
 the poll using its ``id``.  Here's what that translates to in ``tests.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     from django.core.urlresolvers import reverse
 
@@ -754,6 +769,7 @@ Capturing parameters from URLs
 In ``urls.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/urls.py
 
     urlpatterns = patterns('',
         (r'^$', views.home),
@@ -769,6 +785,7 @@ reverse function's ``args`` parameter.
 We'll also need to add at least a dummy view in ``views.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/urls.py
 
     def home(request):
         context = {'polls': Poll.objects.all()}
@@ -792,6 +809,7 @@ Now our unit tests give a different error::
 The templates don't include the urls yet. Let's add them:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>

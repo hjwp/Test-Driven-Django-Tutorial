@@ -33,9 +33,10 @@ Login with the admin username and password (``admin / adm1n``).
 
 If you go into the Polls section and try and create a new Poll, you need
 to click on a link that says "Add Poll" - let's add that to our FT.  Delete
-the "TODO", then add the following, in ``polls/test_amin.py``:
+the "TODO", then add the following, in ``fts/test_amin.py``:
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
 
         # She now sees a couple of hyperlink that says "Polls"
         polls_links = self.browser.find_elements_by_link_text('Polls')
@@ -66,6 +67,7 @@ So that's one thing we'll want to change.  Let's add a test for that to the end 
 our FT
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
 
         # She sees some input fields for "Question" and "Date published"
         body = self.browser.find_element_by_tag_name('body')
@@ -108,6 +110,7 @@ Google Chrome), you'll find out that the 'name' for our three fields are
 
 
 .. sourcecode:: html
+    :filename: html source for admin site
 
     <label for="id_question" class="required">Question:</label>
     <input id="id_question" type="text" class="vTextField" name="question" maxlength="200" />
@@ -126,6 +129,7 @@ Google Chrome), you'll find out that the 'name' for our three fields are
 Let's use them in our FT
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
 
         # She sees some input fields for "Question" and "Date published"
         body = self.browser.find_element_by_tag_name('body')
@@ -147,6 +151,7 @@ Let's use them in our FT
 We can also use the CSS selector to pick up the "Save" button
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
 
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         save_button.click()
@@ -162,6 +167,7 @@ Django lets you give them more descriptive names, including any attribute of
 the object.  So let's say we want our polls listed by their question
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
 
         # She is returned to the "Polls" listing, where she can see her
         # new poll, listed as a clickable link
@@ -202,9 +208,10 @@ Unit testing the verbose name for pub_date
 
 Django stores human-readable names for model attributes in a special attribute
 called `verbose_name`.  Let's write a unit test that checks the verbose name
-for our ``pub_date`` field.  Add the following method to ``polls\tests.py``
+for our ``pub_date`` field.  Add the following method to ``polls/tests.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     def test_verbose_name_for_pub_date(self):
         for field in Poll._meta.fields:
@@ -229,6 +236,7 @@ Now that we have a unit test, we can implement! Let's make a change in
 ``models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -257,6 +265,7 @@ happens in the ``__unicode__`` method.  As usual, we unit test first, in this
 case it's a very simple one -
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     def test_poll_objects_are_named_after_their_question(self):
         p = Poll()
@@ -280,6 +289,7 @@ And the fix is simple too - we define a ``__unicode__`` method on our Poll class
 in ``models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -328,6 +338,7 @@ So let's add that as an intermediate step in our FT, in between where
 Florence enters the question, and when she hits save.  
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_admin.py
 
         [...]
         time_field.send_keys('00:00')
@@ -358,6 +369,7 @@ admin page, because there's no such thing yet! Let's go ahead and create our
 "Choice" model then. As usual, we start with some unit tests - in ``polls/tests.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     class TestPollChoicesModel(TestCase):
 
@@ -397,12 +409,14 @@ admin page, because there's no such thing yet! Let's go ahead and create our
 Also remember to add the import to the top of the file
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     from polls.models import Choice, Poll
 
 And we may as well give it something to import too - in ``polls/models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Choice(object):
         pass
@@ -461,6 +475,7 @@ https://docs.djangoproject.com/en/1.3/intro/tutorial01/#playing-with-the-api
 Let's add that relationship now
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)
@@ -480,6 +495,7 @@ Re-running the unit tests, we get::
 Let's give Choice a choice...
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)
@@ -492,6 +508,7 @@ Tests again::
 Let's add votes
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)
@@ -541,6 +558,7 @@ Let's edit ``polls/admin.py``, and do some customising on the way the Poll
 admin page works
 
 .. sourcecode:: python
+    :filename: mysite/polls/admin.py
 
     from django.contrib import admin
     from polls.models import Choice, Poll
@@ -580,6 +598,7 @@ may need to ``syncdb``)
 Let's make 'votes' default to 0, by adding a new test in ``tests.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     def test_choice_defaults(self):
         choice = Choice()
@@ -592,6 +611,7 @@ And run it::
 And set the default, in ``polls/models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Choice(models.Model):
         poll = models.ForeignKey(Poll)

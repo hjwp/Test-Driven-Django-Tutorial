@@ -22,6 +22,7 @@ Let's pick up from the ``TODO`` in our FT, and extend it to include viewing the
 effects of submitting a vote on a poll. In ``fts/test_polls.py``:
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_polls.py
 
         [...] 
 
@@ -115,6 +116,7 @@ Depending on your operating system, that could look something like this::
 Then, edit ``polls/tests/__init__.py``, and add the ``import``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/__init__.py
 
     from mysite.polls.tests.tests import *
 
@@ -167,6 +169,7 @@ Ah, no - only 4 tests.  We've lost 5 somewhere.  That's because we need to make 
 that we import all tests into the ``tests/__init__.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/__init__.py
 
     from mysite.polls.tests.tests import *
     from mysite.polls.tests.test_models import *
@@ -222,6 +225,7 @@ And our final step is to rename ``tests.py`` to ``test_forms.py``.  We'll need t
 change the import too:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/__init__.py
 
     from mysite.polls.tests.test_forms import *
     from mysite.polls.tests.test_models import *
@@ -263,6 +267,7 @@ need to tell it what the data should be. Let's write a new test in
 ``polls/tests/test_views.py`` - we can copy a fair bit from the one above it...
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/test_views.py
 
 
     class TestSinglePollView(TestCase):
@@ -313,6 +318,7 @@ beginning of the view:
 
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     from polls.models import Choice, Poll
     [...]
@@ -364,6 +370,7 @@ So, Django tells us whether a request was a GET or a POST inside the ``method``
 attribute.  Let's add an ``if``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         if request.method == 'POST':
@@ -387,6 +394,7 @@ class called ``HttpResponseRedirect`` for this, which takes a URL.  We'll use
 the ``reverse`` function from the last tutorial to get the right URL...
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     from django.core.urlresolvers import reverse
     from django.http import HttpResponseRedirect
@@ -424,6 +432,7 @@ Nope.  We still have to get our page to reflect the percentage of votes.  Let's 
 a quick test in ``test_views``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/test_views.py
 
     def test_view_shows_percentage_of_votes(self):
         # set up a poll with choices
@@ -459,6 +468,7 @@ as a custom function instead.  This test should make my intentions clear.  In
 ``polls/tests/test_models.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/test_models.py
 
     def test_choice_can_calculate_its_own_percentage_of_votes(self):
         poll = Poll(question='who?', pub_date='1999-01-02')
@@ -481,6 +491,7 @@ Self-explanatory?  Let's implement.  We should now get a new test error::
 Let's give ``Choice`` a percentage function. In ``models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
 
     class Choice(models.Model):
@@ -499,6 +510,7 @@ Re-running the tests::
 And implementing:
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     def percentage(self):
         return 100 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
@@ -511,6 +523,7 @@ Ah, not quite::
 Darn that integer division! Let's try this:
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     def percentage(self):
         return round(
@@ -522,6 +535,7 @@ That gets our model test passing. Now let's use our new percentage function in o
 template, ``polls/templates/poll.html``
             
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>
@@ -567,6 +581,7 @@ Let's try re-running our tests now::
  also make it handle the 0-case
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/test_models.py
 
     def test_choice_can_calculate_its_own_percentage_of_votes(self):
         poll = Poll(question='who?', pub_date='1999-01-02')
@@ -595,6 +610,7 @@ Re-run the tests::
 Removing the ``round()``...
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
         return 100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
 
@@ -607,6 +623,7 @@ Which we can fix with a ``try/except`` (*Better to ask for forgiveness than
 permission*)
  
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     def percentage(self):
         try:
@@ -630,6 +647,7 @@ votes... That might come in useful elsewhere too...
 Let's hope this test/code cycle is self-explanatory. Start with ``test_models.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests/test_models.py
 
     class TestPollsModel(TestCase):
         [...]
@@ -657,6 +675,7 @@ tests::
 ``models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     class Poll(models.Model):
         question = models.CharField(max_length=200)
@@ -676,6 +695,7 @@ tests::
 ``models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
         def total_votes(self):
             return 0
@@ -687,6 +707,7 @@ tests::
 Good. ``models.py``
 
 .. sourcecode:: python
+    :filename: mysite/polls/models.py
 
     def total_votes(self):
         return sum(c.votes for c in self.choice_set.all())
@@ -709,6 +730,7 @@ Re-running the tests, all the right ones still pass.  Let's finally get onto our
 little message. Back in our template, ``polls/templates/poll.html``:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>
@@ -762,6 +784,7 @@ yourself, which gives you the choice over where the form sends its data.  Let's 
 that, in the template, ``polls/templates/poll.html``:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>
@@ -797,6 +820,7 @@ Re-running the FT, we get::
 Pretty helpful, as error messages go.  Let's add an amazing Django voodoo CSRF tag:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <form method="POST" action="">
       {% csrf_token %}
@@ -814,6 +838,7 @@ using one of Django's built-in template filters:
 https://docs.djangoproject.com/en/1.3/ref/templates/builtins/
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <ul>
     {% for choice in poll.choice_set.all %}
@@ -832,6 +857,7 @@ Aha, looks like that ``total_votes`` function is going to come in useful again!
 Let's add a tiny test to our ``test_views.py``:
 
 .. sourcecode:: python 
+    :filename: mysite/polls/tests/test_views.py
 
     def test_view_shows_total_votes(self):
         # set up a poll with choices
@@ -868,6 +894,7 @@ Getting this presentational stuff right is fiddly!  Still, the fix isn't too
 difficult, back in our template:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>

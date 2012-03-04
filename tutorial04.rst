@@ -20,6 +20,7 @@ Let's start by extending our FT, to show Herbert voting on a poll. In
 ``fts/test_polls.py``:
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_polls.py
 
         [...] 
         # Now, Herbert the regular user goes to the homepage of the site. He
@@ -99,6 +100,7 @@ Let's work on the unit tests for the ``poll`` view then. Make a new class for th
 in ``polls/tests.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     class TestSinglePollView(TestCase):
 
@@ -135,6 +137,7 @@ now, you can handle it! :-)*
 Let's make our view take two arguments:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         pass
@@ -146,6 +149,7 @@ Now we get::
 Again, a minimal fix:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         return HttpResponse()
@@ -160,6 +164,7 @@ view didn't use a template.  Let's try fixing that - but deliberately
 using the wrong template (just to check we are testing it)
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         return render(request, 'home.html')
@@ -183,6 +188,7 @@ Now the tests want us to pass a ``poll`` variable in the template's context::
 So let's do that, again, the minimum possible change to satisfy the tests:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         return render(request, 'poll.html', {'poll': None})
@@ -194,6 +200,7 @@ And the tests get a little further on::
 And they even tell us what to do next - pass in the right `Poll` object:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         poll = Poll.objects.get(pk=poll_id)
@@ -219,6 +226,7 @@ We need to get our template to include the poll's question. Let's make it
 into a page heading:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -233,6 +241,7 @@ Now the tests want our 'no polls yet' message::
 So let's include that:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -258,6 +267,7 @@ Mmmh, `OK`. And doughnuts. Let's see what the FTs think?::
 Ah, we forgot to include a general heading for the page - the FT is checking the ``h1`` and ``h2`` headings:
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_polls.py
 
         main_heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(main_heading.text, 'Poll Results')
@@ -267,6 +277,7 @@ Ah, we forgot to include a general heading for the page - the FT is checking the
 So, in our template, let's add an ``h1`` with "Poll Results" in it:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -312,6 +323,7 @@ create a new test in ``tests.py``:
 
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     from polls.forms import PollVoteForm
 
@@ -358,6 +370,7 @@ For the test to even get off the ground, we may as well create something
 minimal for it to import! Create a file called ``polls/forms.py``.
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(object):
         pass
@@ -373,6 +386,7 @@ And let's start another test/code cycle, woo -::
 We override ``__init__.py`` to change the constructor:
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(object):
         def __init__(self, poll):
@@ -387,6 +401,7 @@ To give the form a 'fields' attribute, we can make it inherit from
 a real Django form class, and call its parent constructor:
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     from django import forms
 
@@ -407,6 +422,7 @@ You can find out more about form fields here:
 https://docs.djangoproject.com/en/1.3/ref/forms/fields/
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(forms.Form):
         vote = forms.ChoiceField()
@@ -424,6 +440,7 @@ constructor (you can read up on choices in Django here)
 https://docs.djangoproject.com/en/1.3/ref/models/fields/#field-choices
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     def __init__(self, poll):
         super(self.__class__, self).__init__()
@@ -444,6 +461,7 @@ Django has defaulted to using a ``select/option`` input form.  We can change
 this using a `widget`, in this case a ``RadioSelect``
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(forms.Form):
         vote = forms.ChoiceField(widget=forms.RadioSelect())
@@ -476,44 +494,47 @@ our ``TestSinglePollView``, and add some extra code (you can copy and
 paste some of it from the form test)
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
-    def test_page_shows_poll_title_and_no_votes_message(self):
-        # set up two polls, to check the right one gets used
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
-        poll1.save()
-        choice1 = Choice(poll=poll1, choice='42', votes=0)
-        choice1.save()
-        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
-        choice2.save()
-        poll2 = Poll(question='time', pub_date='2001-01-01')
-        poll2.save()
-        choice3 = Choice(poll=poll2, choice='PM', votes=0)
-        choice3.save()
-        choice4 = Choice(poll=poll2, choice="Gardener's", votes=0)
-        choice4.save()
+    class TestSinglePollView(TestCase):
 
-        client = Client()
-        response = client.get('/poll/%d/' % (poll2.id, ))
+        def test_page_shows_poll_title_and_no_votes_message(self):
+            # set up two polls, to check the right one gets used
+            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1.save()
+            choice1 = Choice(poll=poll1, choice='42', votes=0)
+            choice1.save()
+            choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
+            choice2.save()
+            poll2 = Poll(question='time', pub_date='2001-01-01')
+            poll2.save()
+            choice3 = Choice(poll=poll2, choice='PM', votes=0)
+            choice3.save()
+            choice4 = Choice(poll=poll2, choice="Gardener's", votes=0)
+            choice4.save()
 
-        # check we've used the right template
-        self.assertTemplateUsed(response, 'poll.html')
+            client = Client()
+            response = client.get('/poll/%d/' % (poll2.id, ))
 
-        # check we've passed the right poll into the context
-        self.assertEquals(response.context['poll'], poll2)
+            # check we've used the right template
+            self.assertTemplateUsed(response, 'poll.html')
 
-        # check the poll's question appears on the page
-        self.assertIn(poll2.question, response.content)
+            # check we've passed the right poll into the context
+            self.assertEquals(response.context['poll'], poll2)
 
-        # check our 'no votes yet' message appears
-        self.assertIn('No-one has voted on this poll yet', response.content)
+            # check the poll's question appears on the page
+            self.assertIn(poll2.question, response.content)
 
-        # check we've passed in a form of the right type
-        self.assertTrue(isinstance(response.context['form'], PollVoteForm))
+            # check our 'no votes yet' message appears
+            self.assertIn('No-one has voted on this poll yet', response.content)
 
-        # and check the check the form is being used in the template,
-        # by checking for the choice text
-        self.assertIn(choice3.choice, response.content)
-        self.assertIn(choice4.choice, response.content)
+            # check we've passed in a form of the right type
+            self.assertTrue(isinstance(response.context['form'], PollVoteForm))
+
+            # and check the check the form is being used in the template,
+            # by checking for the choice text
+            self.assertIn(choice3.choice, response.content)
+            self.assertIn(choice4.choice, response.content)
 
 Now the unit tests give us::
 
@@ -524,6 +545,7 @@ Now the unit tests give us::
 So back in ``views.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         poll = Poll.objects.get(pk=poll_id)
@@ -537,6 +559,7 @@ Now::
 So:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         poll = Poll.objects.get(pk=poll_id)
@@ -551,6 +574,7 @@ And::
 So, in ``polls/templates/poll.html``:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -577,7 +601,8 @@ us. I suppose that's my come-uppance for trying to include British in-jokes in
 my tutorial.  Let's implement a minor hack in our test:
 
 
-.. sourcecode:: html+django
+.. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
         self.assertIn(choice4.choice, response.content.replace('&#39;', "'"))
 
@@ -619,6 +644,7 @@ extra label which says "Vote:" above the radio buttons - well, since it doesn't
 do any harm, for now maybe it's easiest to just change the FT:
 
 .. sourcecode:: python
+    :filename: mysite/fts/test_polls.py
 
         # He also sees a form, which offers him several choices.
         # There are three options with radio buttons
@@ -650,6 +676,7 @@ Well, a button is easy enough to add, although it may not do much... In the
 template:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
