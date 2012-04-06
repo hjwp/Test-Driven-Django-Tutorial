@@ -6,29 +6,30 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import subprocess
 import sys
 
-import settings_for_fts
+# use settings_for_fts as django settings
+from mysite import settings_for_fts
 from django.core.management import call_command, setup_environ
 setup_environ(settings_for_fts)
+
 from django.contrib.auth.models import User
 from django.conf import settings
 
-# determine the root of the server
+ROOT = 'http://localhost:8001'
+# use server root from settings if available
 if hasattr(settings, 'ROOT'):
     ROOT = settings.ROOT
-else:
-    ROOT = 'http://localhost:8001'
 
 class FunctionalTest(unittest.TestCase):
 
     def setUp(self):
-        reset_database()
         # restart django server each test, because otherwise it doesn't see the
         # effects of resetting the db
+        reset_database()
         self.django = start_django_server()
-        # Use a remote driver if setup
+
+        # Use a remote driver if setup in settings.py
         if hasattr(settings, 'REMOTE_DRIVER_URL'):
-            self.browser = webdriver.Remote(command_executor=settings.REMOTE_DRIVER_URL,
-                                            desired_capabilities=DesiredCapabilities.FIREFOX)
+            self.browser = webdriver.Remote(command_executor=settings.REMOTE_DRIVER_URL, desired_capabilities=DesiredCapabilities.FIREFOX)
         else:
             self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(5)
@@ -45,10 +46,11 @@ def run_syncdb():
 
 
 def start_django_server():
-    #noreload ensures single process
     return subprocess.Popen([
             'python', 'manage.py', 'runserver',
-            ROOT.replace('http://', ''), '--noreload', '--settings=settings_for_fts',
+            ROOT.replace('http://', ''),
+            '--noreload',  # ensures single process
+            '--settings=mysite.settings_for_fts',
     ])
 
 
@@ -63,10 +65,10 @@ def reset_database():
 def run_functional_tests(pattern=None):
     print 'running tests'
     if pattern is None:
-        tests = unittest.defaultTestLoader.discover('fts')
+        tests = unittest.defaultTestLoader.discover('mysite.fts')
     else:
         pattern_with_globs = '*%s*' % (pattern,)
-        tests = unittest.defaultTestLoader.discover('fts', pattern=pattern_with_globs)
+        tests = unittest.defaultTestLoader.discover('mysite.fts', pattern=pattern_with_globs)
 
     runner = unittest.TextTestRunner()
     runner.run(tests)
