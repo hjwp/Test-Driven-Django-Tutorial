@@ -317,7 +317,7 @@ We need to edit two files: ``settings.py`` and ``urls.py``.  In both cases, Djan
 First, in ``settings.py`` we add ``django.contrib.admin`` to ``INSTALLED_APPS``:
 
 .. sourcecode:: python
-    :filename: mysite/settings.py
+    :filename: mysite/mysite/settings.py
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -334,7 +334,7 @@ First, in ``settings.py`` we add ``django.contrib.admin`` to ``INSTALLED_APPS``:
 And in ``urls.py``, we uncomment three lines that mention the admin site - two near the top, and one near the bottom
 
 .. sourcecode:: python
-    :filename: mysite/urls.py
+    :filename: mysite/mysite/urls.py
 
     from django.contrib import admin
     admin.autodiscover()
@@ -537,7 +537,7 @@ When that commmand completes, you should see that Django will create a new folde
 The next thing we need to do is tell Django that, yes, we really meant it, and would it please take notice of this new polls app and assume we want to use it - we do this by adding it to ``INSTALLED_APPS`` in ``settings.py``:
 
 .. sourcecode:: python
-    :filename: mysite/settings.py
+    :filename: mysite/mysite/settings.py
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -626,10 +626,7 @@ You should see an error like this::
         from polls.models import Poll
       ImportError: cannot import name Poll
 
-Not the most interesting of test errors - we need to create a Poll object for the
-test to import.  In TDD, once we've got a test that fails, we're finally allowed
-to write some "real" code.  But only the minimum required to get the tests to get 
-a tiny bit further on!
+Not the most interesting of test errors - we need to create a Poll object for the test to import.  In TDD, once we've got a test that fails, we're finally allowed to write some "real" code.  But only the minimum required to get the tests to get a tiny bit further on!
 
 So let's create a minimal Poll class, in ``polls/models.py``
 
@@ -642,9 +639,7 @@ So let's create a minimal Poll class, in ``polls/models.py``
     class Poll(object):
         pass 
 
-And re-run the tests.  Pretty soon you'll get into the rhythm of TDD - run the
-tests, change a tiny bit of code, check the tests again, see what tiny bit of
-code to write next. Run the tests...::
+And re-run the tests.  Pretty soon you'll get into the rhythm of TDD - run the tests, change a tiny bit of code, check the tests again, see what tiny bit of code to write next. Run the tests...::
 
     Creating test database for alias 'default'...
     ............................................................................
@@ -667,9 +662,7 @@ code to write next. Run the tests...::
     Destroying test database for alias 'default'...
 
 
-Right, the tests are telling us that we can't "save" our Poll.  That's because
-it's not a Django model object.  Let's make the minimal change required to get 
-our tests further on
+Right, the tests are telling us that we can't "save" our Poll.  That's because it's not a Django model object.  Let's make the minimal change required to get our tests further on
 
 .. sourcecode:: python
     :filename: mysite/polls/models.py
@@ -677,8 +670,7 @@ our tests further on
     class Poll(models.Model):
         pass
 
-Inheriting from Django's ``Model`` class will give us the ``save()`` method.
-Running the tests again, we should see a slight change to the error message::
+Inheriting from Django's ``Model`` class will give us the ``save()`` method. Running the tests again, we should see a slight change to the error message::
 
     ======================================================================
     ERROR: test_creating_a_new_poll_and_saving_it_to_the_database (polls.tests.TestPollsModel)
@@ -690,9 +682,7 @@ Running the tests again, we should see a slight change to the error message::
 
     ----------------------------------------------------------------------
 
-Notice that the tests have got all the way through to line 26, where we retrieve
-the object back out of the database, and it's telling us that we haven't saved the
-question attribute.  Let's fix that
+Notice that the tests have got all the way through to line 26, where we retrieve the object back out of the database, and it's telling us that we haven't saved the question attribute.  Let's fix that, by telling Django that we want polls to have an attribute called "question".
 
 .. sourcecode:: python
     :filename: mysite/polls/models.py
@@ -700,8 +690,11 @@ question attribute.  Let's fix that
     class Poll(models.Model):
         question = models.CharField(max_length=200)
 
-<TODO: decide how/whether to test max_length - too complex for an intro?  Plus, hard
-because sqlite doesn't enfore max_length!>
+
+The `question` attribute will be translated into a column in the databse.  We use a type of ``models.CharField`` because we want to store a string of characters.  Django has lots more field types for different data types, see the full list here:
+https://docs.djangoproject.com/en/1.4/ref/models/fields/#field-types
+
+<TODO: decide how/whether to test max_length - too complex for an intro?  Plus, hard because sqlite doesn't enfore max_length!>
 
 Now our tests get slightly further - they tell us we need to add a pub_date::
 
@@ -739,8 +732,7 @@ And run the tests again::
 
 Hooray!  The joy of that unbroken string of dots!  That lovely, understated "OK".
 
-So, we've now created a new model (table) for our database, the Poll, which has
-two attributes (columns).
+So, we've now created a new model (table) for our database, the Poll, which has two attributes (columns).
 
 
 Back to the functional tests: registering the model with the admin site
@@ -761,10 +753,7 @@ So the unit tests all pass. Does this mean our functional test will pass?::
     Ran 1 test in 10.203s
 
 
-Ah, not quite.  The Django admin site doesn't automatically contain every model
-you define - you need to tell it which models you want to be able to administer.
-To do that, we just need to create a new file with the following three lines
-inside the polls app called, ``polls/admin.py``:
+Ah, not quite.  The Django admin site doesn't automatically contain every model you define - you need to tell it which models you want to be able to administer. To do that, we just need to create a new file with the following three lines inside the polls app called, ``polls/admin.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/admin.py
@@ -776,22 +765,28 @@ inside the polls app called, ``polls/admin.py``:
 
 If you've done everythin right, the directory tree should now look like this::
 
-    mysite/
-      functional_tests.py
-      manage.py
-      settings_for_fts.py
-      settings.py
-      urls.py
-      fts/
-        __init__.py
-        test_admin.py
-      polls/
-        __init__.py
-        models.py
-        tests.py
-        views.py
-                
-If there's anything missing, figure out why!
+    .
+    |-- database.sqlite
+    |-- ft_database.sqlite
+    |-- fts
+    |   |-- __init__.py
+    |   `-- test_admin.py
+    |-- functional_tests.py
+    |-- manage.py
+    |-- mysite
+    |   |-- __init__.py
+    |   |-- settings_for_fts.py
+    |   |-- settings.py
+    |   |-- urls.py
+    |   `-- wsgi.py
+    `-- polls
+        |-- __init__.py
+        |-- admin.py
+        |-- models.py
+        |-- tests.py
+        `-- views.py
+
+
 
 Let's try the FT again...::
 

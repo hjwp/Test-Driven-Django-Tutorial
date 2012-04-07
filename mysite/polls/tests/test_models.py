@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 from django.test import TestCase
 from polls.models import Choice, Poll
 
@@ -10,7 +10,7 @@ class TestPollsModel(TestCase):
         # and 'pub_date' attributes
         poll = Poll()
         poll.question="What's up?"
-        poll.pub_date = datetime.datetime(2012, 12, 25)
+        poll.pub_date = timezone.now()
 
         # check we can save it to the database
         poll.save()
