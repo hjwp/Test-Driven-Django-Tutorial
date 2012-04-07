@@ -65,10 +65,10 @@ def reset_database():
 def run_functional_tests(pattern=None):
     print 'running tests'
     if pattern is None:
-        tests = unittest.defaultTestLoader.discover('mysite.fts')
+        tests = unittest.defaultTestLoader.discover('fts')
     else:
         pattern_with_globs = '*%s*' % (pattern,)
-        tests = unittest.defaultTestLoader.discover('mysite.fts', pattern=pattern_with_globs)
+        tests = unittest.defaultTestLoader.discover('fts', pattern=pattern_with_globs)
 
     runner = unittest.TextTestRunner()
     runner.run(tests)

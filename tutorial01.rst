@@ -128,23 +128,23 @@ So, our first user story is that the user should be able to log into the Django 
 
 We'll add more to this test later, but for now let's just get it to do the absolute minimum:  we want the test to open up the admin site (which we want to be available via the url ``/admin/``), and see that it "looks OK" - for this, we'll check that the page contains the words *Django administration*, which it does by default.
 
-Inside ``mysite/mysite``, let's create a directory to keep our FTs in called, um, ``fts``::
+Inside the top level ``mysite``, let's create a directory to keep our FTs in called, um, ``fts``::
 
-    cd mysite
     mkdir fts
     touch fts/__init__.py
 
 Your directory tree should now look like this::
 
+    .
+    |-- fts
+    |   `-- __init__.py
+    |-- manage.py
     `-- mysite
-        |-- manage.py
-        `-- mysite
-            |-- fts
-            |   `-- __init__.py
-            |-- __init__.py
-            |-- settings.py
-            |-- urls.py
-            `-- wsgi.py
+        |-- __init__.py
+        |-- settings.py
+        |-- urls.py
+        `-- wsgi.py
+
 
 
 
@@ -247,7 +247,7 @@ Django stores project-wide settings in a file called ``settings.py``. One of the
 Find settings ``settings.py`` in the root of the new ``mysite`` folder, and open it up in your favourite text editor. Find the lines that mention ``DATABASES``, and change the setting for ``ENGINE`` and ``NAME``, like so
 
 .. sourcecode:: python
-    :filename: mysite/settings.py
+    :filename: mysite/mysite/settings.py
 
     DATABASES = {
         'default': {
@@ -267,18 +267,20 @@ That essentially sets up an exact duplicate of the normal ``settings.py``, excep
 
 By this point your disk tree should look like this::
 
-    mysite
+    .
+    |-- fts
+    |   |-- __init__.py
+    |   `-- test_admin.py
     |-- functional_tests.py
     |-- manage.py
     `-- mysite
-        |-- fts
-        |   `-- __init__.py
-        |   `-- test_admin.py
         |-- __init__.py
         |-- settings_for_fts.py
         |-- settings.py
         |-- urls.py
         `-- wsgi.py
+
+
 
 
 If there's anything missing, figure out why!
@@ -509,17 +511,30 @@ So let's create a new app for our polls.  There's a management command for this:
 
     python manage.py startapp polls
 
-When that commmand completes, you should see that Django will create a new folder
-inside ``mysite`` called ``polls``, and in that, several new files::
+When that commmand completes, you should see that Django will create a new folder inside ``mysite`` called ``polls``, and in that, several new files::
 
-    mysite/polls/__init__.py
-    mysite/polls/models.py
-    mysite/polls/tests.py
-    mysite/polls/views.py
+    .
+    |-- database.sqlite
+    |-- ft_database.sqlite
+    |-- fts
+    |   |-- __init__.py
+    |   `-- test_admin.py
+    |-- functional_tests.py
+    |-- manage.py
+    |-- mysite
+    |   |-- __init__.py
+    |   |-- settings_for_fts.py
+    |   |-- settings.py
+    |   |-- urls.py
+    |   `-- wsgi.py
+    `-- polls
+        |-- __init__.py
+        |-- models.py
+        |-- tests.py
+        `-- views.py
 
-The next thing we need to do is tell Django that, yes, we really meant it,
-and would it please take notice of this new polls app and assume we want to
-use it - we do this by adding it to ``INSTALLED_APPS`` in ``settings.py``:
+
+The next thing we need to do is tell Django that, yes, we really meant it, and would it please take notice of this new polls app and assume we want to use it - we do this by adding it to ``INSTALLED_APPS`` in ``settings.py``:
 
 .. sourcecode:: python
     :filename: mysite/settings.py
@@ -534,20 +549,17 @@ use it - we do this by adding it to ``INSTALLED_APPS`` in ``settings.py``:
         'django.contrib.admin',
         # Uncomment the next line to enable admin documentation:
         # 'django.contrib.admindocs',
-        'mysite.polls',
+        'polls',
     )
 
 
-So next we need to create the representation of a Poll inside Django - a
-`model`, in Django terms.
+So next we need to create the representation of a Poll inside Django - a *model*, in Django terms.
 
 
 Our first unit tests: testing a new "Poll" model
 ================================================
 
-The Django unit test runner will automatically run any tests we put in
-``polls/tests.py``.  Later on, we might decide we want to put our tests somewhere
-else, but for now, let's use that file:
+The Django unit test runner will automatically run any tests we put in ``polls/tests.py``.  Later on, we might decide we want to put our tests somewhere else, but for now, let's use that file. You can delete the example test that Django put in there.  In this test, we'll create a Poll and save it to the database, then retrieve it again to check the poll was saved properly.
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -577,40 +589,22 @@ else, but for now, let's use that file:
             self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
 
 
-Whereas functional tests are meant to test how the whole system behaves, from
-the point of view of a user, unit test are meant to check that the individual
-parts of our code work the way we want them to.  Unit tests work at a much lower
-level, and they typically test individual functions or classes.
+Whereas functional tests are meant to test how the whole system behaves, from the point of view of a user, unit test are meant to check that the individual parts of our code work the way we want them to.  Unit tests work at a much lower level, and they typically test individual functions or classes.
 
-Aside from being useful as tests, in the TDD philosophy writing unit tests also
-helps us because it forces us to do some design before we start to code.
-That's because when we write test, we have to think about the function or class
-we're about to write *from the outside* - in terms of its API, and its desired
-behaviour.  Often when you find yourself struggling to write tests, finding things
-long winded, it's an indication that the design of your code isn't quite right...
+Aside from being useful as tests, in the TDD philosophy writing unit tests also helps us because it forces us to do some design before we start to code. That's because when we write test, we have to think about the function or class we're about to write *from the outside* - in terms of its API, and its desired behaviour.  Often when you find yourself struggling to write tests, finding things long winded, it's an indication that the design of your code isn't quite right...
 
 The django ORM - model classes
 ------------------------------
 
-If you've never worked with Django, this test will also be your first introduction
-to the Django `ORM` - the API for working with database objects in Django. 
+If you've never worked with Django, this test will also be your first introduction to the Django `ORM` - the API for working with database objects in Django. 
 
-You can see that everything revolves around ``Poll``, which is a class that
-represents our polls, which we import from ``models.py``.  Usually a model
-class corresponds to a single table in the database.
+You can see that everything revolves around ``Poll``, which is a class that represents our polls, which we import from ``models.py``.  Usually a model class corresponds to a single table in the database.
 
-In the test we creating a new "Poll" object, and then we set some of its
-attributes: ``question`` and ``pub_date``. The object corresponds to a row in
-the database, and the attributes are the values for the table's columns.
+In the test we creating a new "Poll" object, and then we set some of its attributes: ``question`` and ``pub_date``. The object corresponds to a row in the database, and the attributes are the values for the table's columns.
 
-Finally, we call ``save()``, which actually INSERTs the object into the
-database.
+Finally, we call ``save()``, which actually INSERTs the object into the database.
 
-Later on, you can also see how we look up existing objects from the database
-using a special classmethod, ``Poll.objects``, which lets us run queries
-against the database.  We've used the simplest possible query, ``.all()``, but
-all sorts of other options are available, and Django's API is very helpful and
-intuitive.  You can find out more at:
+Later on, you can also see how we look up existing objects from the database using a special classmethod, ``Poll.objects``, which lets us run queries against the database.  We've used the simplest possible query, ``.all()``, but all sorts of other options are available, and Django's API is very helpful and intuitive.  You can find out more at:
 
 https://docs.djangoproject.com/en/1.3/intro/tutorial01/#playing-with-the-api
 
@@ -621,12 +615,11 @@ Let's run the unit tests.::
 
     python manage.py test
 
-(when you call ``manage.py test``, Django looks through all the apps in 
-``INSTALLED_APPS``, finds tests inside them (by looking for a file called
-``tests.py``, for example), and runs them.
+(when you call ``manage.py test``, Django looks through all the apps in ``INSTALLED_APPS``, finds tests inside them (by looking for a file called ``tests.py``, for example), and runs them.
 
 You should see an error like this::
 
+      [...]
       File "/usr/local/lib/python2.7/dist-packages/Django/test/simple.py", line 35, in get_tests
         test_module = __import__('.'.join(app_path + [TEST_MODULE]), {}, {}, TEST_MODULE)
       File "/home/harry/workspace/mysite/polls/tests.py", line 2, in <module>
