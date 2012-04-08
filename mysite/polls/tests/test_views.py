@@ -40,9 +40,9 @@ class TestSinglePollView(TestCase):
 
     def test_page_shows_poll_title_and_no_votes_message(self):
         # set up two polls, to check the right one is displayed
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
-        poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
         poll2.save()
 
         client = Client()
@@ -84,7 +84,7 @@ class TestSinglePollView(TestCase):
 
     def test_view_shows_percentage_of_votes_and_total_votes(self):
         # set up a poll with choices
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
         choice1 = Choice(poll=poll1, choice='42', votes=1)
         choice1.save()
@@ -102,7 +102,7 @@ class TestSinglePollView(TestCase):
 
     def test_view_shows_total_votes(self):
         # set up a poll with choices
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
         choice1 = Choice(poll=poll1, choice='42', votes=1)
         choice1.save()
@@ -123,11 +123,11 @@ class TestSinglePollView(TestCase):
 
     def test_view_can_handle_votes_via_POST(self):
         # set up a poll with choices
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
-        choice1 = Choice(poll=poll1, choice='42', votes=3)
+        choice1 = Choice(poll=poll1, choice='42', votes=1)
         choice1.save()
-        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=5)
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=3)
         choice2.save()
 
         # set up our POST data - keys and values are strings
@@ -138,10 +138,13 @@ class TestSinglePollView(TestCase):
         poll_url = '/poll/%d/' % (poll1.id,)
         response = client.post(poll_url, data=post_data)
 
-        # now we should see an extra vote for the choice
-        choice_in_db = Choice.objects.get(id=choice2.id)
-        self.assertEquals(choice_in_db.votes, 6)
+        # retrieve the updated choice from the database
+        choice_in_db = Choice.objects.get(pk=choice2.id)
+
+        # check its votes have gone up by 1
+        self.assertEquals(choice_in_db.votes, 4)
 
         # always redirect after a POST - even if, in this case, we go back
         # to the same page.
         self.assertRedirects(response, poll_url)
+

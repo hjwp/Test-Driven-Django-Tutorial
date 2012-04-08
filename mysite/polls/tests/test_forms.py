@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.utils import timezone
+
 from polls.forms import PollVoteForm
 from polls.models import Choice, Poll
 
@@ -7,7 +9,7 @@ class TestPollsVoteForm(TestCase):
 
     def test_form_renders_poll_choices_as_radio_inputs(self):
         # set up a poll with a couple of choices
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
         choice1 = Choice(poll=poll1, choice='42', votes=0)
         choice1.save()
@@ -15,7 +17,7 @@ class TestPollsVoteForm(TestCase):
         choice2.save()
 
         # set up another poll to make sure we only see the right choices
-        poll2 = Poll(question='time', pub_date='2001-01-01')
+        poll2 = Poll(question='time', pub_date=timezone.now())
         poll2.save()
         choice3 = Choice(poll=poll2, choice='PM', votes=0)
         choice3.save()

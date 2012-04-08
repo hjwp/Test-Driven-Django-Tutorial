@@ -1,5 +1,4 @@
-Welcome to part 5 - this week we'll be looking at processing user
-input from forms.
+Welcome to part 5 - this week we'll be looking at processing user input from forms.
 
 Tutorial 5: Processing form submissions
 =======================================
@@ -18,8 +17,7 @@ Here's the outline of what we're going to do in this tutorial:
 Finishing the FT
 ----------------
 
-Let's pick up from the ``TODO`` in our FT, and extend it to include viewing the
-effects of submitting a vote on a poll. In ``fts/test_polls.py``:
+Let's pick up from the ``TODO`` in our FT, and extend it to include viewing the effects of submitting a vote on a poll. In ``fts/test_polls.py``:
 
 .. sourcecode:: python
     :filename: mysite/fts/test_polls.py
@@ -42,9 +40,7 @@ effects of submitting a vote on a poll. In ``fts/test_polls.py``:
 
         self.fail('TODO')
 
-We'll leave the "TODO" in, because we'll want to exercise the site a litte
-further, to make sure other votes update the counters appropriately.  But let's
-see if we can get a single vote working for now.
+We'll leave the "TODO" in, because we'll want to exercise the site a litte further, to make sure other votes update the counters appropriately.  But let's see if we can get a single vote working for now.
 
 If you run the FTs, you should see something like this::
 
@@ -59,28 +55,19 @@ If you run the FTs, you should see something like this::
     ----------------------------------------------------------------------
     Ran 1 test in 5.510s
 
-So, we'll need to wire up our view so that it deals with form submission.  Let's
-open up ``tests.py``. We need to find the test that deals with our view.  At
-this point, you might find it's getting a little hard to find your way around
-``tests.py`` - the file is getting a little cluttered.  I think it's time to
-do some *refactoring*, and move things around a bit.
+What's happening is that clicking the submit button has no effect - we just stay on the voting page. So, we'll need to wire up our view so that it deals with form submission.  Let's open up ``tests.py``. We need to find the test that deals with our view.
+
+At this point, you might find it's getting a little hard to find your way around ``tests.py`` - the file is getting a little cluttered.  I think it's time to do some *refactoring*, and move things around a bit.
+
 
 Refactoring the tests
 ---------------------
 
-Refactoring means making changes to your code that have no functional impact - and
-you can refactor your test code as well as your production code.  The purpose of
-refactoring is usually to try and make your code more legible, less complex, or 
-to make the architecture neater. And the most important thing about refactoring is:
-you need to make sure you don't break anything!  That's why having good tests is
-absolutely essential to trouble-free refactoring
+Refactoring means making changes to your code that have no functional impact - and you can refactor your test code as well as your production code.  The purpose of refactoring is usually to try and make your code more legible, less complex, or to make the architecture neater. And the most important thing about refactoring is: you need to make sure you don't break anything!  That's why having good tests is absolutely essential to trouble-free refactoring
 
-So, our objective is to separate out our tests.py into separate files for the view
-tests, the model tests and the form tests - so that we have a ``test_views.py`` to
-match ``views.py``, a ``test_models.py`` to match ``models.py``, and so on.
+So, our objective is to separate out our tests.py into separate files for the view tests, the model tests and the form tests - so that we have a ``test_views.py`` to match ``views.py``, a ``test_models.py`` to match ``models.py``, and so on.
 
-Let's start by running all our unit tests, making sure they all pass, *and making
-a note of how many of them there are* - we don't want to lose any in the process!::
+Let's start by running all our unit tests, making sure they all pass, *and making a note of how many of them there are* - we don't want to lose any in the process!::
 
     $ python manage.py test polls
     Creating test database for alias 'default'...
@@ -90,13 +77,9 @@ a note of how many of them there are* - we don't want to lose any in the process
 
     OK
 
-Right, 9. Now, although our objective is to move to spreading our tests into 3
-different files, we're going to take several small steps to get there.  Then, at
-each stage, we can re-run our tests to make sure everything still works.
+Right, 9 tests. Now, although our objective is to move to spreading our tests into 3 different files, we're going to take several small steps to get there.  Then, at each stage, we can re-run our tests to make sure everything still works.
 
-Now, the way the django test runner works is that it runs all the tests it can find
-in each application, in a python module called ``tests``. Currently, that's a file
-called ``tests.py``.  But we can make it into a subfolder, by doing this:
+The way the django test runner works is that it runs all the tests it can find in each application, in a python module called ``tests``. Currently, that's a file called ``tests.py``.  But we can change it into a subfolder, by doing this:
 
     * create a new folder inside ``polls`` called ``tests``
 
@@ -118,10 +101,26 @@ Then, edit ``polls/tests/__init__.py``, and add the ``import``:
 .. sourcecode:: python
     :filename: mysite/polls/tests/__init__.py
 
-    from mysite.polls.tests.tests import *
+    from polls.tests.tests import *
 
-At this point, we should be able to run the tests again. Let's do so, and check that
-exactly the same number of them get run::
+Your tree will look something like this::
+
+    `-- polls
+        |-- admin.py
+        |-- forms.py
+        |-- __init__.py
+        |-- models.py
+        |-- templates
+        |   |-- home.html
+        |   `-- poll.html
+        |-- tests
+        |   |-- __init__.py
+        |   `-- tests.py
+        `-- views.py
+
+
+
+At this point, we should be able to run the tests again. Let's do so, and check that exactly the same number of them get run::
 
     $ python manage.py test polls
     Creating test database for alias 'default'...
@@ -133,10 +132,7 @@ exactly the same number of them get run::
     Destroying test database for alias 'default'...
 
 
-Hooray!  Now we have our test in a subfolder, we can start moving them out into 
-different files.  Again, we do this step by step.  Let's start by moving all the
-model tests into a file called ``test_models.py``.  You'll need to move the 
-following classes:
+Hooray!  Now we have our test in a subfolder, we can start moving them out into different files.  Again, we do this step by step.  Let's start by moving all the model tests into a file called ``test_models.py``.  You'll need to move the following classes:
 
     * ``TestPollsModel``
 
@@ -145,8 +141,6 @@ following classes:
 The way I chose to do it was:
 
     * Make a copy of ``tests.py``, and save it as ``test_models.py``
-
-    * Delete all lines after line 81 from ``test_models.py``
 
     * Delete all lines after line 81 from ``test_models.py``, leaving our two
       model tests
@@ -165,8 +159,7 @@ OK, is the job done?  Let's try re-running our tests::
 
     OK
 
-Ah, no - only 4 tests.  We've lost 5 somewhere.  That's because we need to make sure
-that we import all tests into the ``tests/__init__.py``
+Ah, no - only 4 tests.  We've lost 5 somewhere.  That's because we need to make sure that we import all tests into the ``tests/__init__.py``
 
 .. sourcecode:: python
     :filename: mysite/polls/tests/__init__.py
@@ -184,20 +177,11 @@ And now::
 
     OK
 
-That's better.  Small, baby steps, with a quick check at each stage that everything 
-still works... Now, if you're anything like I was when I was first introduced to this
-method, you'll be screaming out, internally  - "Come on!  We could easily just do
-all this stuff in one go!"... And, maybe that's even true.  But then, think back to
-those times you've started off on a mission to refactor your code, and you've just
-dived straight in.  You make a bunch of changes here, and then you move onto that part
-there, and then you remember you also wanted to change this thing back here, and then
-you just have to copy and paste these bits there, rename this, and while we're
-at it we'll just do this and then, oh gosh where was I again?  Pretty soon you find
-yourself at the bottom of a depth-first tree, with no idea of how to get back to where
-you started, and no idea of what you need to do to get it all working again.
+That's better.  Small, baby steps, with a quick check at each stage that everything still works... 
 
-So think back to all those times, and maybe erring on the side of caution isn't so
-bad.  Once you get used to it, you'll find you can fly through it!
+Now, if you're anything like I was when I was first introduced to this method, you'll be screaming out, internally  - "Come on!  We could easily just do all this stuff in one go!"... And, maybe that's even true.  But then, think back to those times you've started off on a mission to refactor your code, and you've just dived straight in.  You make a bunch of changes here, and then you move onto that part there, and then you remember you also wanted to change this thing back here, and then you just have to copy and paste these bits there, rename this, and while we're at it we'll just do this and then, oh gosh where was I again?  Pretty soon you find yourself at the bottom of a depth-first tree, with no idea of how to get back to where you started, and no idea of what you need to do to get it all working again.
+
+So think back to all those times, and maybe erring on the side of caution isn't so bad.  Once you get used to it, you'll find you can fly through it!
 
 Anyways - next, let's do the views tests. Here's the way I did it:
 
@@ -221,8 +205,7 @@ Re-running the tests, everything looks ok::
 
     OK
 
-And our final step is to rename ``tests.py`` to ``test_forms.py``.  We'll need to
-change the import too:
+And our final step is to rename ``tests.py`` to ``test_forms.py``.  We'll need to change the import too:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests/__init__.py
@@ -231,40 +214,34 @@ change the import too:
     from mysite.polls.tests.test_models import *
     from mysite.polls.tests.test_views import *
 
-Re-running the tests should give us 9 tests again, and we end up with 3 much more
-manageable, shorter files.  Hooray.  
+Re-running the tests should give us 9 tests again, and we end up with 3 much more manageable, shorter files.  Hooray.  
 
 At this stage your polls app should look something like this::
 
-   templates/
-        home.html
-        poll.html
-    tests/
-        __init__.py
-        test_forms.py
-        test_models.py
-        test_views.py
-    __init__.py
-    admin.py
-    forms.py
-    models.py
-    views.py
+    `-- polls
+        |-- admin.py
+        |-- forms.py
+        |-- __init__.py
+        |-- models.py
+        |-- templates
+        |   |-- home.html
+        |   `-- poll.html
+        |-- tests
+        |   |-- __init__.py
+        |   |-- test_forms.py
+        |   |-- test_models.py
+        |   `-- test_views.py
+        `-- views.py
 
-Pretty neat and tidy!
-
-Let's get back to what we were doing...
+Pretty neat and tidy! Let's get back to what we were doing...
 
 
 Dealing with POST requests in a view
 ------------------------------------
 
-The normal pattern in Django is to use the view that renders your form for GET
-requests, to also process form submissions via POST.  The main reason is that
-it makes it easy to show form validation errors to the user...
+The normal pattern in Django is to use the view that renders your form for GET requests, to also process form submissions via POST.  The main reason is that it makes it easy to show form validation errors to the user...
 
-The Django Test Client can generate POST requests as easily as GET ones, we just
-need to tell it what the data should be. Let's write a new test in
-``polls/tests/test_views.py`` - we can copy a fair bit from the one above it...
+The Django Test Client can generate POST requests as easily as GET ones, we just need to tell it what the data should be. Let's write a new test in ``polls/tests/test_views.py`` - we can copy a fair bit from the one above it...
 
 .. sourcecode:: python
     :filename: mysite/polls/tests/test_views.py
@@ -272,16 +249,16 @@ need to tell it what the data should be. Let's write a new test in
 
     class TestSinglePollView(TestCase):
 
-        def test_page_shows_poll_title_and_no_votes_message(self):
+        def test_page_shows_choices_using_form(self):
             [...]
 
         def test_view_can_handle_votes_via_POST(self):
             # set up a poll with choices
-            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1 = Poll(question='6 times 7', pub_date=timezone.now())
             poll1.save()
-            choice1 = Choice(poll=poll1, choice='42', votes=0)
+            choice1 = Choice(poll=poll1, choice='42', votes=1)
             choice1.save()
-            choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
+            choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=3)
             choice2.save()
 
             # set up our POST data - keys and values are strings
@@ -292,8 +269,11 @@ need to tell it what the data should be. Let's write a new test in
             poll_url = '/poll/%d/' % (poll1.id,)
             response = client.post(poll_url, data=post_data)
 
-            # now we should see a vote for the choice
-            self.assertEquals(choice1.votes, 1)
+            # retrieve the updated choice from the database
+            choice_in_db = Choice.objects.get(pk=choice2.id)
+
+            # check it's votes have gone up by 1
+            self.assertEquals(choice_in_db.votes, 4)
 
             # always redirect after a POST - even if, in this case, we go back
             # to the same page.
@@ -306,15 +286,12 @@ Right, let's see how it fails, first::
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/../mysite/polls/tests/test_views.py", line 98, in test_view_can_handle_votes_via_POST
-        self.assertEquals(choice1.votes, 4)
+        self.assertEquals(choice_in_db.votes, 4)
     AssertionError: 3 != 4
 
     ----------------------------------------------------------------------
 
-So, the first thing to do is increase the "votes" counter on the appropriate
-Choice object... Django puts POST data into a special dictionary on the request
-object, ``request.POST``, so let's use that - I'm adding three new lines at the
-beginning of the view:
+So, the first thing to do is increase the "votes" counter on the appropriate Choice object... Django puts POST data into a special dictionary on the request object, ``request.POST``, so let's use that - I'm adding three new lines at the beginning of the view:
 
 
 .. sourcecode:: python
@@ -337,7 +314,25 @@ Let's see what the tests think::
 
     $ ./manage.py test polls
     Creating test database for alias 'default'...
-    .......EE
+    .......EEF
+    ======================================================================
+    ERROR: test_page_shows_choices_using_form (polls.tests.test_views.TestSinglePollView)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/polls/tests/test_views.py", line 76, in test_page_shows_choices_using_form
+        response = client.get('/poll/%d/' % (poll1.id, ))
+      File "/usr/local/lib/python2.7/dist-packages/django/test/client.py", line 439, in get
+        response = super(Client, self).get(path, data=data, **extra)
+      File "/usr/local/lib/python2.7/dist-packages/django/test/client.py", line 244, in get
+        return self.request(**r)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/handlers/base.py", line 111, in get_response
+        response = callback(request, *callback_args, **callback_kwargs)
+      File "/home/harry/workspace/mysite/polls/views.py", line 13, in poll
+        choice = Choice.objects.get(id=request.POST['vote'])
+      File "/usr/local/lib/python2.7/dist-packages/django/utils/datastructures.py", line 258, in __getitem__
+        raise MultiValueDictKeyError("Key %r not found in %r" % (key, self))
+    MultiValueDictKeyError: "Key 'vote' not found in <QueryDict: {}>"
+
     ======================================================================
     ERROR: test_page_shows_poll_title_and_no_votes_message (mysite.polls.tests.test_views.TestSinglePollView)
     ----------------------------------------------------------------------
@@ -357,17 +352,9 @@ Let's see what the tests think::
     ----------------------------------------------------------------------
     Ran 9 tests in 0.031s
 
-Oh dear - although we've got our POST test a little bit further along, we seem to 
-have broken another test.  You might argue, it was pretty obvious that was going to
-happen, because I've introduced code to upvote choices which is applied for both
-GET and POST requests - I should have checked whether the request was a POST or a
-GET, and used an ``if``.  And, in fact, it was pretty obvious - I was being
-deliberately stupid, and made that mistake on purpose.  The point was to demonstrate
-how TDD can save you from your own stupidity, by telling you immediately when you 
-break anything...  Save those brain cells for the *really* hard problems.
+Oh dear - although we've got our POST test a little bit further along, we seem to have broken 2 other tests.  You might argue, it was pretty obvious that was going to happen, because I've introduced code to upvote choices which is applied for both GET and POST requests - I should have checked whether the request was a POST or a GET, and used an ``if``.  And, in fact, it was pretty obvious - I was being deliberately stupid, and made that mistake on purpose.  The point was to demonstrate how TDD can save you from your own stupidity, by telling you immediately when you break anything...  Save those brain cells for the *really* hard problems.
 
-So, Django tells us whether a request was a GET or a POST inside the ``method``
-attribute.  Let's add an ``if``:
+So, Django tells us whether a request was a GET or a POST inside the ``method`` attribute.  Let's add an ``if``:
 
 .. sourcecode:: python
     :filename: mysite/polls/views.py
@@ -388,10 +375,7 @@ And testing...::
     AssertionError: Response didn't redirect as expected: Response code was 200 (expected 302)
 
 
-Right, now we need to do our redirect (*Always redirect after a POST* -
-http://www.theserverside.com/news/1365146/Redirect-After-Post).  Django has a
-class called ``HttpResponseRedirect`` for this, which takes a URL.  We'll use
-the ``reverse`` function from the last tutorial to get the right URL...
+Right, now we need to do our redirect (*Always redirect after a POST* - http://www.theserverside.com/news/1365146/Redirect-After-Post).  Django has a class called ``HttpResponseRedirect`` for this, which takes a URL.  We'll use the ``reverse`` function from the last tutorial to get the right URL...
 
 .. sourcecode:: python
     :filename: mysite/polls/views.py
@@ -405,7 +389,7 @@ the ``reverse`` function from the last tutorial to get the right URL...
             choice = Choice.objects.get(id=request.POST['vote'])
             choice.votes += 1
             choice.save()
-            return HttpResponseRedirect(reverse('poll', args=[poll_id,]))
+            return HttpResponseRedirect(reverse('polls.views.poll', args=[poll_id,]))
 
         poll = Poll.objects.get(pk=poll_id)
         form = PollVoteForm(poll=poll)
@@ -436,7 +420,7 @@ a quick test in ``test_views``:
 
     def test_view_shows_percentage_of_votes(self):
         # set up a poll with choices
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
         choice1 = Choice(poll=poll1, choice='42', votes=1)
         choice1.save()
@@ -462,23 +446,20 @@ Running it gives::
     AssertionError: '33 %: 42' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n    <input type="submit" />\n\n    \n  </body>\n</html>\n'
 
 
-Which is all very well - but, actually, the view (or the template) aren't really the
-right place to calculate percentage figures.  Let's hang that off the model,
-as a custom function instead.  This test should make my intentions clear.  In
-``polls/tests/test_models.py``:
+Which is all very well - but, actually, the view (or the template) aren't really the right place to calculate percentage figures.  Let's hang that off the model, as a custom function instead.  This test should make my intentions clear.  In ``polls/tests/test_models.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests/test_models.py
 
     def test_choice_can_calculate_its_own_percentage_of_votes(self):
-        poll = Poll(question='who?', pub_date='1999-01-02')
+        poll = Poll(question='who?', pub_date=timezone.now())
         poll.save()
         choice1 = Choice(poll=poll,choice='me',votes=2)
         choice1.save()
         choice2 = Choice(poll=poll,choice='you',votes=1)
         choice2.save()
 
-        self.assertEquals(choice1.percentage(), 66)
+        self.assertEquals(choice1.percentage(), 67)
         self.assertEquals(choice2.percentage(), 33)
 
 Self-explanatory?  Let's implement.  We should now get a new test error::
@@ -505,7 +486,7 @@ Let's give ``Choice`` a percentage function. In ``models.py``
 Re-running the tests::
 
     self.assertEquals(choice1.percentage(), 66)
-    AssertionError: None != 66
+    AssertionError: None != 67
 
 And implementing:
 
@@ -513,7 +494,8 @@ And implementing:
     :filename: mysite/polls/models.py
 
     def percentage(self):
-        return 100 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+        total_votes_on_poll = sum(c.votes for c in self.poll.choice_set.all())
+        return 100 * self.votes / total_votes_on_poll
 
 Ah, not quite::
 
@@ -526,13 +508,11 @@ Darn that integer division! Let's try this:
     :filename: mysite/polls/models.py
 
     def percentage(self):
-        return round(
-            100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
-        )
+        total_votes_on_poll = sum(c.votes for c in self.poll.choice_set.all())
+        return round(100.0 * self.votes / total_votes_on_poll)
 
 
-That gets our model test passing. Now let's use our new percentage function in our
-template, ``polls/templates/poll.html``
+That gets down from 2 failing tests to 1 failing test. Now let's use our new percentage function in our template, ``polls/templates/poll.html``
             
 .. sourcecode:: html+django
     :filename: mysite/polls/templates/poll.html
@@ -568,23 +548,18 @@ Let's try re-running our tests now::
     [...]
     AssertionError: '33 %: 42' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.0 %: 42</li>\n    \n      <li>67.0 %: The Ultimate Answer</li>\n    \n    </ul>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n    <input type="submit" />\n\n    \n  </body>\n</html>\n'
 
+    FAILED (failures=1, errors=1)
 
- Oh no!  Bad to worse!  Our percentage function really is refusing to make our lives
- easy - it's susceptible to zero-division errors, and it's producing floats rather
- than nice printable percentages... Let's fix that.  (but, again, notice the way it's
- the tests picking up all these little bugs for us, rather than us having to try 
- and anticipate them all in advance, or test all the edge cases manually...)
 
- So, let's make our percentage function return a proper, accurate float
- representation of the percentage (or as accurate as floating-point arithmetic
- will allow), and we'll handle the presentation issues in the template. We'll
- also make it handle the 0-case
+ Oh no!  Bad to worse!  Our percentage function really is refusing to make our lives easy - it's susceptible to zero-division errors, and it's producing floats rather than nice printable percentages... Let's fix that.  (but, again, notice the way it's the tests picking up all these little bugs for us, rather than us having to try and anticipate them all in advance, or test all the edge cases manually...)
+
+ So, let's make our percentage function return a proper, accurate float representation of the percentage (or as accurate as floating-point arithmetic will allow), and we'll handle the presentation issues in the template. We'll also make it handle the 0-case
 
 .. sourcecode:: python
     :filename: mysite/polls/tests/test_models.py
 
     def test_choice_can_calculate_its_own_percentage_of_votes(self):
-        poll = Poll(question='who?', pub_date='1999-01-02')
+        poll = Poll(question='who?', pub_date=timezone.now())
         poll.save()
         choice1 = Choice(poll=poll,choice='me',votes=2)
         choice1.save()
@@ -612,22 +587,25 @@ Removing the ``round()``...
 .. sourcecode:: python
     :filename: mysite/polls/models.py
 
-        return 100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+        def percentage(self):
+            total_votes_on_poll = sum(c.votes for c in self.poll.choice_set.all())
+            return 100.0 * self.votes / total_votes_on_poll
+
 
 And now we get the 0-case error::
 
     return 100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
     ZeroDivisionError: float division by zero
 
-Which we can fix with a ``try/except`` (*Better to ask for forgiveness than
-permission*)
+Which we can fix with a ``try/except`` (*Better to ask for forgiveness than for permission*)
  
 .. sourcecode:: python
     :filename: mysite/polls/models.py
 
     def percentage(self):
+        total_votes_on_poll = sum(c.votes for c in self.poll.choice_set.all())
         try:
-            return 100.0 * self.votes / sum(c.votes for c in self.poll.choice_set.all())
+            return 100.0 * self.votes / total_votes_on_poll
         except ZeroDivisionError:
             return 0
 
@@ -640,9 +618,7 @@ Phew.  That takes us down to just one final test error::
     self.assertNotIn('No-one has voted', response.content)
     AssertionError: 'No-one has voted' unexpectedly found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3333333333 %: 42</li>\n    \n      <li>66.6666666667 %: The Ultimate Answer</li>\n    \n    </ul>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n    <input type="submit" />\n\n    \n  </body>\n</html>\n'
 
-Now, how are we going to decide on whether to show or hide this "no votes yet"
-message?  Ideally, we want to be able to ask the Poll object its total number of
-votes... That might come in useful elsewhere too...
+Now, how are we going to decide on whether to show or hide this "no votes yet" message?  Ideally, we want to be able to ask the Poll object its total number of votes... That might come in useful elsewhere too...
 
 Let's hope this test/code cycle is self-explanatory. Start with ``test_models.py``:
 
@@ -653,7 +629,7 @@ Let's hope this test/code cycle is self-explanatory. Start with ``test_models.py
         [...]
 
         def test_poll_can_tell_you_its_total_number_of_votes(self):
-            p = Poll(question='where',pub_date='2000-01-02')
+            p = Poll(question='where',pub_date=tiemzone.now())
             p.save()
             c1 = Choice(poll=p,choice='here',votes=0)
             c1.save()
@@ -726,8 +702,7 @@ And that's a pass.  Now, does that ``sum`` remind you of anything.  Let's refact
             except ZeroDivisionError:
                 return 0
 
-Re-running the tests, all the right ones still pass.  Let's finally get onto our
-little message. Back in our template, ``polls/templates/poll.html``:
+Re-running the tests, all the right ones still pass.  Let's finally get onto our little message. Back in our template, ``polls/templates/poll.html``:
 
 .. sourcecode:: html+django
     :filename: mysite/polls/templates/poll.html
@@ -745,7 +720,7 @@ little message. Back in our template, ``polls/templates/poll.html``:
         </ul>
 
 
-        {% if not poll.total_votes %}
+        {% if poll.total_votes == 0 %}
           <p>No-one has voted on this poll yet</p>
         {% endif %}
 
@@ -777,11 +752,7 @@ At last!  What about the FT?::
     ----------------------------------------------------------------------
     Ran 1 test in 5.677s
 
-Hmm, not quite.  What is missing?  The "submit" button doesn't seem to be working...
-Ah! Yes - we haven't actually wired up our form yet.  Django's ``form.as_p()``
-function doesn't actually give you a ``<form>`` tag - you have to do that
-yourself, which gives you the choice over where the form sends its data.  Let's do 
-that, in the template, ``polls/templates/poll.html``:
+Hmm, not quite.  What is missing?  The "submit" button doesn't seem to be working... Ah! Yes - we haven't actually wired up our form yet.  Django's ``form.as_p()`` function doesn't actually give you a ``<form>`` tag - you have to do that yourself, which gives you the choice over where the form sends its data.  Let's do that, in the template, ``polls/templates/poll.html``:
 
 .. sourcecode:: html+django
     :filename: mysite/polls/templates/poll.html
@@ -799,7 +770,7 @@ that, in the template, ``polls/templates/poll.html``:
         </ul>
 
 
-        {% if not poll.total_votes %}
+        {% if poll.total_votes == 0 %}
           <p>No-one has voted on this poll yet</p>
         {% endif %}
 
@@ -835,7 +806,7 @@ And now?::
 Still not quite, arg! Just a tiny formatting error though.  We can fix this
 using one of Django's built-in template filters:
 
-https://docs.djangoproject.com/en/1.3/ref/templates/builtins/
+https://docs.djangoproject.com/en/1.4/ref/templates/builtins/
 
 .. sourcecode:: html+django
     :filename: mysite/polls/templates/poll.html
@@ -861,7 +832,7 @@ Let's add a tiny test to our ``test_views.py``:
 
     def test_view_shows_total_votes(self):
         # set up a poll with choices
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
         choice1 = Choice(poll=poll1, choice='42', votes=1)
         choice1.save()
@@ -889,9 +860,7 @@ Running those tests::
     AssertionError: '3 votes' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3 %: 42</li>\n    \n      <li>66.7 %: The Ultimate Answer</li>\n    \n    </ul>\n\n\n    \n\n    <h3>Add your vote</h3>\n    <form method="POST" action="">\n      <div style=\'display:none\'><input type=\'hidden\' name=\'csrfmiddlewaretoken\' value=\'d9fd2b61be1299d84b48f4c378b15ec3\' /></div>\n      <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n      <input type="submit" />\n    </form>\n\n    \n  </body>\n</html>\n'
 
 
-Ah, aside from our expected failure, it looks like we also have a minor regression.
-Getting this presentational stuff right is fiddly!  Still, the fix isn't too
-difficult, back in our template:
+Ah, aside from our expected failure, it looks like we also have a minor regression. Getting this presentational stuff right is fiddly!  Still, the fix isn't too difficult, back in our template, let's tweak the ``floatformat``, and also add in the ``total_votes``:
 
 .. sourcecode:: html+django
     :filename: mysite/polls/templates/poll.html
@@ -909,8 +878,8 @@ difficult, back in our template:
         </ul>
 
 
-        {% if poll.total_votes %}
-          <p>{{ poll.total_votes }} vote{{ poll.total_votes|pluralize }}</p>
+        {% if poll.total_votes != 0 %}
+          <p>{{ poll.total_votes }} votes</p>
         {% else %}
           <p>No-one has voted on this poll yet</p>
         {% endif %}
@@ -926,9 +895,18 @@ difficult, back in our template:
       </body>
     </html>
 
-We've transformed our ``if not`` into an ``if else`` too, which is nice.
+Another unit test run::
 
-Unit tests::
+    AssertionError: '1 votes' unexpectedly found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    <h2>6 times 7</h2>\n    <ul>\n      \n        <li>100 %: 42</li>\n      \n        <li>0 %: The Ultimate Answer</li>\n      \n    </ul>\n\n    \n      <p>1 votes</p>\n    \n\n    <h3>Add your vote</h3>\n    <form method="POST" action="">\n      <div style=\'display:none\'><input type=\'hidden\' name=\'csrfmiddlewaretoken\' value=\'kXRyayBw8agkbj2vgTXM1OEyMQjMzXWY\' /></div>\n      <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n      <input type="submit" />\n    </form>\n\n\n  </body>\n</html>\n\n'
+
+Ah yes, we want it to say "1 vote", not "1 votes".  Django's template system has a helpful ``pluralize`` function for this:
+
+.. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
+
+        <p>{{ poll.total_votes }} vote{{ poll.total_votes|pluralize }}</p>
+
+Unit tests snow pass::
 
     $ python manage.py test polls
     Creating test database for alias 'default'...
@@ -939,9 +917,54 @@ Unit tests::
 Now, how about those functional tests?::
 
     $ python functional_tests.py polls
-    .
-    ----------------------------------------------------------------------
-    Ran 1 test in 5.920s
+
+    AssertionError: TODO
+
+
+That looks good.  Let's extend the FT to make sure that multiple votes add up the way we want them to:
+
+.. sourcecode:: html+django
+    :filename: mysite/fts/test_polls.py
+
+        [...]
+        # The page also says "1 vote"
+        self.assertIn('1 vote', body_text)
+
+        # Harold suspects that the website isn't very well protected
+        # against people submitting multiple votes yet, so he tries
+        # to do a little astroturfing
+        self.browser.find_element_by_css_selector("input[value='1']").click()
+        self.browser.find_element_by_css_selector("input[type='submit']").click()
+
+        # The page refreshes, and he sees that his choice has updated the
+        # results.  it still says # "100 %: very awesome".
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('100 %: Very awesome', body_text)
+
+        # But the page now says "2 votes"
+        self.assertIn('2 votes', body_text)
+
+        # Cackling manically over his l33t haxx0ring skills, he tries
+        # voting for a different choice
+        self.browser.find_element_by_css_selector("input[value='2']").click()
+        self.browser.find_element_by_css_selector("input[type='submit']").click()
+
+        # Now, the percentages update, as well as the votes
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('67 %: Very awesome', body_text)
+        self.assertIn('33 %: Quite awesome', body_text)
+        self.assertIn('3 votes', body_text)
+
+        # Satisfied, he goes back to sleep
+
+
+Let's try that::
+
+    $ python functional_tests.py polls
+    [...]
+    Ran 1 test in 5.674s
+    OK
+
 
 
 Hooray!  Just to be safe, it's worth running **all** the unit tests, and all
