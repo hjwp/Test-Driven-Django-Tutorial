@@ -329,7 +329,7 @@ admin page, because there's no such thing yet! Let's go ahead and create our
             # start by creating a new Poll object
             poll = Poll()
             poll.question="What's up?"
-            poll.pub_date = datetime.datetime(2012, 12, 25)
+            poll.pub_date = timezone.now()
             poll.save()
 
             # now create a Choice object
