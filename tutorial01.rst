@@ -46,7 +46,7 @@ For functional testing, we'll be using the excellent Selenium.  Let's install th
 If you don't know what ``pip`` is, you'll need to find out, and install it. It's a must-have for working with Python.
 
 At this point, you should be able to open up a command line, and type ``python`` to get the Python interpreter running, and from in there you should be able to ``import django`` and ``import selenium`` without any errors.  If any of that gives you problems, take a look at:
-https://docs.djangoproject.com/en/1.3/intro/install/
+https://docs.djangoproject.com/en/1.4/intro/install/
 
 
 Setting up our Django project
@@ -117,7 +117,7 @@ We have to go all the way to the second page of the Django tutorial to see an ac
 
 You can find out more about the philosophy behind the admin site, including Django's background in the newspaper industry, here:
 
-https://docs.djangoproject.com/en/1.3/intro/tutorial02/
+https://docs.djangoproject.com/en/1.4/intro/tutorial02/
 
 So, our first user story is that the user should be able to log into the Django admin site using an admin username and password, and create a new poll.  Here's a couple of screenshots of what the admin site looks like:
 
@@ -256,7 +256,7 @@ Find settings ``settings.py`` in the root of the new ``mysite`` folder, and open
 
 
 Find out more about projects, apps and ``settings.py`` here:
-https://docs.djangoproject.com/en/1.3/intro/tutorial01/#database-setup
+https://docs.djangoproject.com/en/1.4/intro/tutorial01/#database-setup
 
 Now, because we don't want our functional tests interfering with our normal database, we need to create an *alternative* set of settings for our fts. Create a new file called ``settings_for_fts.py`` next to settings.py, and give it the following contents::
 
@@ -357,7 +357,7 @@ Let's see if it worked!  Try running the functional tests again::
     Validating models...
 
     0 errors found
-    Django version 1.3, using settings 'settings_for_fts'
+    Django version 1.4, using settings 'settings_for_fts'
     Development server is running at http://localhost:8001/
     Quit the server with CONTROL-C.
     [28/Nov/2011 04:00:28] "GET /admin/ HTTP/1.1" 200 2028
@@ -606,7 +606,7 @@ Finally, we call ``save()``, which actually INSERTs the object into the database
 
 Later on, you can also see how we look up existing objects from the database using a special classmethod, ``Poll.objects``, which lets us run queries against the database.  We've used the simplest possible query, ``.all()``, but all sorts of other options are available, and Django's API is very helpful and intuitive.  You can find out more at:
 
-https://docs.djangoproject.com/en/1.3/intro/tutorial01/#playing-with-the-api
+https://docs.djangoproject.com/en/1.4/intro/tutorial01/#playing-with-the-api
 
 The unit-test / code cycle
 --------------------------
