@@ -8,27 +8,9 @@ first at each stage - both "functional tests", in which we actually pretend to
 be a user, and drive a real web browser, as well as "unit tests", which help us
 to design and piece together the individual working parts of the code.
 
-
-Project Status
---------------
-
-This project is still very much under construction.  Any feedback is welcome!
-
-Current progress - 75% of Django tutorial covered
-
-    - most of Django admin view (p. 2 of tutorial)
-
-    - first Django models  (p. 1 of tutorial)
-
-    - first Django views (p. 3 of tutorial)
-
-    - todo: forms (p. 4)
-
-
-So it's *almost* ready for someone to use as a proper tutorial already, but it's not
-quite complete..  If you're impatient and you want to give it a go anyway, feel
-free - and I'd love to hear feedback and suggestions :-)
-
+The tutorial uses the new release of Django (1.4), and covers 95% of what's covered
+in the official Django tutorial.  Suggestions, comments and feedback are gratefully
+received... What should I do next??
 
 Website:
 --------
@@ -128,9 +110,9 @@ USEFUL LINKS
 
 http://harry.pythonanywhere.com/
 
-https://docs.djangoproject.com/en/dev/intro/tutorial02/
+https://docs.djangoproject.com/en/1.4/intro/tutorial02/
 
-http://pypi.python.org/pypi/selenium
+http://seleniumhq.org/docs/03_webdriver.html
 
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
 
