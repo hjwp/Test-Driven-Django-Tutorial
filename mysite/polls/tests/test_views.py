@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.utils import timezone
 from polls.forms import PollVoteForm
 from polls.models import Choice, Poll
 
@@ -9,9 +10,9 @@ class TestHomePageView(TestCase):
 
     def test_root_url_shows_links_to_all_polls(self):
         # set up some polls
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
-        poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
         poll2.save()
 
         client = Client()
@@ -29,9 +30,9 @@ class TestHomePageView(TestCase):
         self.assertIn(poll2.question, response.content)
 
         # check the page also contains the urls to individual polls pages
-        poll1_url = reverse('mysite.polls.views.poll', args=[poll1.id,])
+        poll1_url = reverse('polls.views.poll', args=[poll1.id,])
         self.assertIn(poll1_url, response.content)
-        poll2_url = reverse('mysite.polls.views.poll', args=[poll2.id,])
+        poll2_url = reverse('polls.views.poll', args=[poll2.id,])
         self.assertIn(poll2_url, response.content)
 
 

@@ -1,12 +1,11 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from mysite.polls import views
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    (r'^$', views.home),
-    (r'^poll/(\d+)/$', views.poll),
+    (r'^$', 'polls.views.home'),
+    (r'^poll/(\d+)/$', 'polls.views.poll'),
     (r'^admin/', include(admin.site.urls)),
 )
 
