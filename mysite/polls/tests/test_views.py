@@ -39,24 +39,16 @@ class TestHomePageView(TestCase):
 class TestSinglePollView(TestCase):
 
     def test_page_shows_poll_title_and_no_votes_message(self):
-        # set up two polls, to check the right one gets used
+        # set up two polls, to check the right one is displayed
         poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
         poll1.save()
-        choice1 = Choice(poll=poll1, choice='42', votes=0)
-        choice1.save()
-        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
-        choice2.save()
-        poll2 = Poll(question='time', pub_date='2001-01-01')
+        poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
         poll2.save()
-        choice3 = Choice(poll=poll2, choice='PM', votes=0)
-        choice3.save()
-        choice4 = Choice(poll=poll2, choice="Gardener's", votes=0)
-        choice4.save()
 
         client = Client()
         response = client.get('/poll/%d/' % (poll2.id, ))
 
-        # check we've used the right template
+        # check we've used the poll template
         self.assertTemplateUsed(response, 'poll.html')
 
         # check we've passed the right poll into the context
@@ -68,13 +60,26 @@ class TestSinglePollView(TestCase):
         # check our 'no votes yet' message appears
         self.assertIn('No-one has voted on this poll yet', response.content)
 
+
+    def test_page_shows_choices_using_form(self):
+        # set up a poll with choices
+        poll1 = Poll(question='time', pub_date=timezone.now())
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice="PM", votes=0)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice="Gardener's", votes=0)
+        choice2.save()
+
+        client = Client()
+        response = client.get('/poll/%d/' % (poll1.id, ))
+
         # check we've passed in a form of the right type
         self.assertTrue(isinstance(response.context['form'], PollVoteForm))
 
         # and check the check the form is being used in the template,
         # by checking for the choice text
-        self.assertIn(choice3.choice, response.content)
-        self.assertIn(choice4.choice, response.content.replace('&#39;', "'"))
+        self.assertIn(choice1.choice, response.content)
+        self.assertIn(choice2.choice, response.content.replace('&#39;', "'"))
 
 
     def test_view_shows_percentage_of_votes_and_total_votes(self):

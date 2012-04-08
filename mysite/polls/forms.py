@@ -4,7 +4,7 @@ class PollVoteForm(forms.Form):
     vote = forms.ChoiceField(widget=forms.RadioSelect())
 
     def __init__(self, poll):
-        super(self.__class__, self).__init__()
+        forms.Form.__init__(self)
         self.fields['vote'].choices = [(c.id, c.choice) for c in poll.choice_set.all()]
 
 

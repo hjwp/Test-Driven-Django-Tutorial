@@ -295,7 +295,7 @@ Re-running our tests should show us a different error::
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 92, in test_root_url_shows_all_polls
-        respoviense = client.get('/')
+        response = client.get('/')
       File "/usr/lib/pymodules/python2.7/django/test/client.py", line 445, in get
         response = super(Client, self).get(path, data=data, **extra)
       File "/usr/lib/pymodules/python2.7/django/test/client.py", line 229, in get

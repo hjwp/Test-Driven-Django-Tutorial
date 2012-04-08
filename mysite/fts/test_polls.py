@@ -100,7 +100,7 @@ class TestPolls(FunctionalTest):
         self.assertEquals(len(choice_inputs), 3)
 
         # The buttons have labels to explain them
-        choice_labels = choice_inputs = self.browser.find_elements_by_tag_name('label')
+        choice_labels = self.browser.find_elements_by_tag_name('label')
         choices_text = [c.text for c in choice_labels]
         self.assertEquals(choices_text, [
             'Vote:', # this label is auto-generated for the whole form
