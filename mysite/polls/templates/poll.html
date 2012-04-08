@@ -1,17 +1,14 @@
 <html>
   <body>
     <h1>Poll Results</h1>
-    
     <h2>{{poll.question}}</h2>
-
     <ul>
-    {% for choice in poll.choice_set.all %}
-      <li>{{ choice.percentage|floatformat:0 }} %: {{ choice.choice }}</li>
-    {% endfor %}
+      {% for choice in poll.choice_set.all %}
+        <li>{{ choice.percentage|floatformat:0 }} %: {{ choice.choice }}</li>
+      {% endfor %}
     </ul>
 
-
-    {% if poll.total_votes %}
+    {% if poll.total_votes != 0 %}
       <p>{{ poll.total_votes }} vote{{ poll.total_votes|pluralize }}</p>
     {% else %}
       <p>No-one has voted on this poll yet</p>
@@ -24,6 +21,7 @@
       <input type="submit" />
     </form>
 
-    
+
   </body>
 </html>
+

@@ -1,15 +1,15 @@
 from django.utils import timezone
 from django.test import TestCase
+
 from polls.models import Choice, Poll
 
 
 class TestPollsModel(TestCase):
-
     def test_creating_a_new_poll_and_saving_it_to_the_database(self):
         # start by creating a new Poll object and setting its 'question'
         # and 'pub_date' attributes
         poll = Poll()
-        poll.question="What's up?"
+        poll.question = "What's up?"
         poll.pub_date = timezone.now()
 
         # check we can save it to the database
@@ -39,7 +39,7 @@ class TestPollsModel(TestCase):
 
 
     def test_poll_can_tell_you_its_total_number_of_votes(self):
-        p = Poll(question='where',pub_date='2000-01-02')
+        p = Poll(question='where',pub_date=timezone.now())
         p.save()
         c1 = Choice(poll=p,choice='here',votes=0)
         c1.save()
@@ -55,13 +55,14 @@ class TestPollsModel(TestCase):
         self.assertEquals(p.total_votes(), 1022)
 
 
+
 class TestPollChoicesModel(TestCase):
 
-    def test_creating_a_choices_for_a_poll(self):
+    def test_creating_some_choices_for_a_poll(self):
         # start by creating a new Poll object
         poll = Poll()
         poll.question="What's up?"
-        poll.pub_date = datetime.datetime(2012, 12, 25)
+        poll.pub_date = timezone.now()
         poll.save()
 
         # now create a Choice object
@@ -97,7 +98,7 @@ class TestPollChoicesModel(TestCase):
 
 
     def test_choice_can_calculate_its_own_percentage_of_votes(self):
-        poll = Poll(question='who?', pub_date='1999-01-02')
+        poll = Poll(question='who?', pub_date=timezone.now())
         poll.save()
         choice1 = Choice(poll=poll,choice='me',votes=2)
         choice1.save()

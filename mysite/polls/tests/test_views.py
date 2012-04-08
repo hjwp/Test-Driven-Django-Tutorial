@@ -1,39 +1,41 @@
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 from django.test import TestCase
 from django.test.client import Client
-from django.utils import timezone
-from polls.forms import PollVoteForm
+
 from polls.models import Choice, Poll
+from polls.forms import PollVoteForm
 
 
 class TestHomePageView(TestCase):
 
-    def test_root_url_shows_links_to_all_polls(self):
-        # set up some polls
-        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
-        poll1.save()
-        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
-        poll2.save()
+        def test_root_url_shows_links_to_all_polls(self):
+            # set up some polls
+            poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+            poll1.save()
+            poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+            poll2.save()
 
-        client = Client()
-        response = client.get('/')
+            client = Client()
+            response = client.get('/')
 
-        # check we've used the right template
-        self.assertTemplateUsed(response, 'home.html')
+            # check we've used the right template
+            self.assertTemplateUsed(response, 'home.html')
 
-        # check we've passed the polls to the template
-        polls_in_context = response.context['polls']
-        self.assertEquals(list(polls_in_context), [poll1, poll2])
+            # check we've passed the polls to the template
+            polls_in_context = response.context['polls']
+            self.assertEquals(list(polls_in_context), [poll1, poll2])
 
-        # check the poll names appear on the page
-        self.assertIn(poll1.question, response.content)
-        self.assertIn(poll2.question, response.content)
+            # check the poll names appear on the page
+            self.assertIn(poll1.question, response.content)
+            self.assertIn(poll2.question, response.content)
 
-        # check the page also contains the urls to individual polls pages
-        poll1_url = reverse('polls.views.poll', args=[poll1.id,])
-        self.assertIn(poll1_url, response.content)
-        poll2_url = reverse('polls.views.poll', args=[poll2.id,])
-        self.assertIn(poll2_url, response.content)
+            # check the page also contains the urls to individual polls pages
+            poll1_url = reverse('polls.views.poll', args=[poll1.id,])
+            self.assertIn(poll1_url, response.content)
+            poll2_url = reverse('polls.views.poll', args=[poll2.id,])
+            self.assertIn(poll2_url, response.content)
+
 
 
 class TestSinglePollView(TestCase):
@@ -78,11 +80,11 @@ class TestSinglePollView(TestCase):
 
         # and check the check the form is being used in the template,
         # by checking for the choice text
-        self.assertIn(choice1.choice, response.content)
+        self.assertIn(choice1.choice, response.content.replace('&#39;', "'"))
         self.assertIn(choice2.choice, response.content.replace('&#39;', "'"))
 
 
-    def test_view_shows_percentage_of_votes_and_total_votes(self):
+    def test_view_shows_percentage_of_votes(self):
         # set up a poll with choices
         poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
@@ -97,6 +99,8 @@ class TestSinglePollView(TestCase):
         # check the percentages of votes are shown, sensibly rounded
         self.assertIn('33 %: 42', response.content)
         self.assertIn('67 %: The Ultimate Answer', response.content)
+
+        # and that the 'no-one has voted' message is gone
         self.assertNotIn('No-one has voted', response.content)
 
 

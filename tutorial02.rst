@@ -38,6 +38,11 @@ If you go into the Polls section and try and create a new Poll, you need to clic
         # The second one looks more exciting, so she clicks it
         polls_links[1].click()
 
+        # She is taken to the polls listing page, which shows she has
+        # no polls yet
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('0 polls', body.text)
+
         # She sees a link to 'add' a new poll, so she clicks it
         new_poll_link = self.browser.find_element_by_link_text('Add poll')
         new_poll_link.click()

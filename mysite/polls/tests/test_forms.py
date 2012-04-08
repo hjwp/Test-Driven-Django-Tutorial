@@ -1,8 +1,8 @@
-from django.test import TestCase
 from django.utils import timezone
+from django.test import TestCase
 
-from polls.forms import PollVoteForm
 from polls.models import Choice, Poll
+from polls.forms import PollVoteForm
 
 
 class TestPollsVoteForm(TestCase):
@@ -36,4 +36,3 @@ class TestPollsVoteForm(TestCase):
 
         # check it uses radio inputs to render
         self.assertIn('input type="radio"', form.as_p())
-

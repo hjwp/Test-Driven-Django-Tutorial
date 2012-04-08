@@ -1,6 +1,7 @@
 from functional_tests import FunctionalTest, ROOT
 from selenium.webdriver.common.keys import Keys
 
+
 class TestPollsAdmin(FunctionalTest):
 
     def test_can_create_new_poll_via_admin_site(self):
@@ -40,7 +41,6 @@ class TestPollsAdmin(FunctionalTest):
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Question:', body.text)
         self.assertIn('Date published:', body.text)
-
         # She types in an interesting question for the Poll
         question_field = self.browser.find_element_by_name('question')
         question_field.send_keys("How awesome is Test-Driven Development?")
@@ -69,5 +69,3 @@ class TestPollsAdmin(FunctionalTest):
                 "How awesome is Test-Driven Development?"
         )
         self.assertEquals(len(new_poll_links), 1)
-
-
