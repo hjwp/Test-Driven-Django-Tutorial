@@ -75,7 +75,7 @@ within that also called ``mysite``.  It will also set up a few key django files,
 
     
 
-*(NB - on Django 1.3 and earlier, ``startproject`` would only create a single ``mysite`` folder, which would contain both ``manage.py`` and ``settings.py``. This tutorial is written for 1.4, but if you're stuck with an earlier version, you should find most things work with a little tweaking...)*
+*(NB - on Django 1.3 and earlier, ``startproject`` would only create a single ``mysite`` folder, which would contain both ``manage.py`` and ``settings.py``. This tutorial is written for 1.4 -- bleeding edge FTW! -- but if you're stuck with an earlier version, you should find most things work with a little tweaking...)*
 
 Checking we've succeeded: running the test server
 -------------------------------------------------

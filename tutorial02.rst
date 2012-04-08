@@ -1,4 +1,4 @@
-Welcome to part 2 of the tutorial!  Hope you've had a little break, maybe a nice chocolate biscuit, and are super-excited to do more!
+Welcome to part 2 of the tutorial!  Hope you've had a little break, maybe a `nice chocolate biscuit <http://www.nicecupofteaandasitdown.com/biscuits/previous.php3?item=29>`_, and are super-excited to do more!
 
 Tutorial 2 - Customising the admin site
 =======================================
@@ -20,7 +20,7 @@ Here's an outline of what we're going to do:
 Inspecting the admin site to decide what to test next
 -----------------------------------------------------
 
-Let's fire up the test server, and do a bit of browsing around the admin site - that way we can figure out what we want the "Polls" bit to look like.
+Let's fire up the test server, and do a bit of browsing around the admin site - that way we can figure out what we want the "Polls" bit to look like.::
 
     python manage.py runserver
 
