@@ -923,7 +923,7 @@ Now, how about those functional tests?::
 
 That looks good.  Let's extend the FT to make sure that multiple votes add up the way we want them to:
 
-.. sourcecode:: html+django
+.. sourcecode:: python
     :filename: mysite/fts/test_polls.py
 
         [...]
