@@ -33,7 +33,7 @@ free - and I'd love to hear feedback and suggestions :-)
 Website:
 --------
 
-http://harry.pythonanywhere.com/
+http://tdd-django-tutorial.com/
 
 
 
