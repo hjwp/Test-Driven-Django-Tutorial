@@ -856,29 +856,14 @@ Ah, not quite.  The Django admin site doesn't automatically contain every model 
 
     admin.site.register(Poll)
 
-If you've done everythin right, the directory tree should now look like this::
+If you've done everything right, the polls app folder will look like this::
 
-    .
-    |-- database.sqlite
-    |-- ft_database.sqlite
-    |-- fts
-    |   |-- __init__.py
-    |   `-- tests.py
-    |-- functional_tests.py
-    |-- manage.py
-    |-- mysite
-    |   |-- __init__.py
-    |   |-- settings_for_fts.py
-    |   |-- settings.py
-    |   |-- urls.py
-    |   `-- wsgi.py
     `-- polls
-        |-- __init__.py
         |-- admin.py
+        |-- __init__.py
         |-- models.py
         |-- tests.py
         `-- views.py
-
 
 
 Let's try the FT again...::
@@ -893,17 +878,12 @@ Let's try the FT again...::
 
     ----------------------------------------------------------------------
 
-Hooray! So far so good. Tune in next week, when we get into customising the
-admin site, and using it to create polls!
+Hooray! So far so good. Tune in next week, when we get into customising the admin site, and using it to create polls.  In the meantime, why not take a look around the site using the ``runserver`` command, and try creating some Polls of your own.
 
 
 LINKS
 =====
 
-https://docs.djangoproject.com/en/dev/intro/tutorial02/
+https://docs.djangoproject.com/en/1.4/intro/tutorial02/
 
-http://pypi.python.org/pypi/selenium
-
-http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
-
-http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py
+http://seleniumhq.org/docs/03_webdriver.html
