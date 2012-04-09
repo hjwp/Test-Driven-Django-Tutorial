@@ -669,8 +669,8 @@ The tests for the polls app are in ``polls/tests.py``. Again, you can delete the
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
-    import datetime
     from django.test import TestCase
+    from django.util import timezone
     from polls.models import Poll
 
     class TestPollsModel(TestCase):
@@ -678,7 +678,7 @@ The tests for the polls app are in ``polls/tests.py``. Again, you can delete the
             # start by creating a new Poll object with its "question" set
             poll = Poll()
             poll.question = "What's up?"
-            poll.pub_date = datetime.datetime(2012, 12, 25)
+            poll.pub_date = timezone.now()
 
             # check we can save it to the database
             poll.save()
