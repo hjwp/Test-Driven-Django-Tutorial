@@ -102,13 +102,14 @@ Starting our first functional test: The Django admin site
 
 In this section, we're going to do several things:
 
+      
     * create our first FT
-
-    * install the FT runner
 
     * setup our database using ``settings.py``
 
-    * setup django admin 
+    * switch on django admin 
+
+    * create an admin user account
 
 
 Let's start with the FT. In the test-driven methodology, we tend to group functionality up into bite-size chunks, and write functional tests for each one of them. You can describe the chunks of functionality as "user stories", if you like, and each user story tends to have a set of tests associated with it, and the tests track the potential behaviour of a user.
@@ -128,16 +129,20 @@ So, our first user story is that the user should be able to log into the Django 
 
 We'll add more to this test later, but for now let's just get it to do the absolute minimum:  we want the test to open up the admin site (which we want to be available via the url ``/admin/``), and see that it "looks OK" - for this, we'll check that the page contains the words *Django administration*, which it does by default.
 
-Inside the top level ``mysite``, let's create a directory to keep our FTs in called, um, ``fts``::
+Let's create an app for our functional tests.  It's a matter of preference whether you keep your FTs in a separate app or in the same app as your source code, I like to keep them separate firstly so that FTs and unit tests are easy to run separately, and secondly because FTs are meant to test the whole application, which may well mean that a single FT uses functionality provided by several different apps.
 
-    mkdir fts
-    touch fts/__init__.py
+Run the following command::
 
-Your directory tree should now look like this::
+    python manage.py startapp fts
 
-    .
+Your directory tree will now look like this::
+
+    mysite
     |-- fts
-    |   `-- __init__.py
+    |   |-- __init__.py
+    |   |-- models.py
+    |   |-- tests.py
+    |   `-- views.py
     |-- manage.py
     `-- mysite
         |-- __init__.py
@@ -148,24 +153,28 @@ Your directory tree should now look like this::
 
 
 
-The ``__init__.py`` is an empty file which marks the fts folder out as being a Python module. *(If you're on windows, you may not have the* ``touch`` *command - if so, just use your editor to create an empty file called* ``__init__.py`` *)*
-
-Now, let's create a new file inside the ``fts`` folder called ``test_admin.py``, which will be our first Functional test:
+Now, let's open up the ``tests`` file inside the ``fts`` folder called, and write our first Functional test.  You can delete the example test case that Django have put in there, and replace it with this:
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
+    :filename: mysite/fts/tests.py
 
-    from functional_tests import FunctionalTest, ROOT
+    from django.test import LiveServerTestCase
+    from selenium import webdriver
 
-    class TestPollsAdmin(FunctionalTest):
+    class TestPollsAdmin(LiveServerTestCase):
+
+        def setUp(self):
+            self.browser = webdriver.Firefox()
+
+        def tearDown(self):
+            self.browser.quit()
 
         def test_can_create_new_poll_via_admin_site(self):
-
             # Gertrude opens her web browser, and goes to the admin page
-            self.browser.get(ROOT + '/admin/')
+            self.browser.get(self.live_server_url + '/admin/')
 
             # She sees the familiar 'Django administration' heading
-            body = self.browser.find_element_by_tag_name('body') 
+            body = self.browser.find_element_by_tag_name('body')
             self.assertIn('Django administration', body.text)
 
             # TODO: use the admin site to create a Poll
@@ -175,15 +184,19 @@ Functional tests are grouped into classes, and each test is a method inside the 
 
 Note the nice, descriptive names for the test function, and the comments, which describe in human-readable text the actions that our user will take. Mhhhh, descriptive names.....
 
+We use a ``LiveServerTestCase`` which is a new test case provided by Django 1.4, which starts up a test web server with our Django site on it, in a separate thread, for the tests to run against.
+
+The special methods ``setUp`` and ``tearDown`` are executed before and after each test. We're using them to start up and shut down our Selenium WebDriver browser instance.
+
 Aside from that, there are 3 lines of test code here:
 
 .. sourcecode:: python
 
-    self.browser.get(ROOT + '/admin/')
+    self.browser.get(self.live_server_url + '/admin/')
 
 ``self.browser`` is the selenium object which represents the web browser, aka the ``WebDriver``. 
 
-``.get`` is tells the browser to go to a new page, and we pass it the url, which is made up of ``ROOT``, which we import from ``functional_tests.py`` (basically it's ``http://localhost:8001``, and then we tack on the ``/admin/`` url to get to the admin site.
+``.get`` is tells the browser to go to a new page, and we pass it the url, which is made up of ``self.live_server_url``, which is set up for us by ``LiveServerTestCase``, and then we tack on the ``/admin/`` url to get to the admin site.
 
 
 Next we use
@@ -192,7 +205,7 @@ Next we use
 
     body = self.browser.find_element_by_tag_name('body') 
 
-``find_element_by_tag_name`` tells Selenium to look through the page and find the HTML element for a particular tag - in this case, ``body``, which means the whole of the visible part of the page.  The method returns an ``WebElement`` object, which represents the HTML element.
+``find_element_by_tag_name``, which tells Selenium to look through the page and find the HTML element for a particular tag - in this case, ``body``, which means the whole of the visible part of the page.  The method returns an ``WebElement`` object, which represents the HTML element.
 
 Finally, we get to an assertion - where we say what we expect, and the test should pass or fail at this point:
 
@@ -210,41 +223,106 @@ but we use the ``unittest`` method on ``self.`` because it will give us a more h
 
 The ``body`` WebElement object's ``.text`` attribute essentially gives us all of the visible text on the rendered page - stripping out all the HTML markup.
 
-At the time of writing, the documentation for ``WebDriver`` and ``WebElement`` was sparse, but the source code is very readable, so it's well worth looking through it to see what other methods and attributes are avaiable:
+You can find out more about ``WebDriver`` and ``WebElement`` in the Selenium documentation (choose Python as your language for the examples), or just by looking at the source code:
+http://seleniumhq.org/docs/03_webdriver.html
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
-http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py
 
 At the end, I've left a ``TODO`` - calling ``self.fail()`` means the test will always fail at the end there, so that will be a reminder that we're not quite finished.
 
-Oh, and one las thing: it's always nice to give the user a name... Mine is called Gertrude.
+Oh, and one las thing: it's always nice to give the user a name... Mine is called Gertrude!
 
 
-Setting up the functional test runner
--------------------------------------
+First functional test run
+-------------------------
 
-You'll have noticed that, at the top of ``test_admin.py``, we import from a module called ``functional_test`` - that's a small module I've written, which will take care of running functional tests.  You'll need to download it, and put it in the root of your project (in the top ``mysite`` folder::
+Let's try running our functional tests::
 
-    wget -O functional_tests.py https://raw.github.com/hjwp/Test-Driven-Django-Tutorial/master/mysite/functional_tests.py 
-
-*(Again, if you're on windows, you may not have ``wget``.  Just go ahead and download the file manually from the project on github, by going to the link above and doing a "Save As")*
-
-YOu should now have a file called ``functional_tests.py`` next to ``manage.py`` in the top-level folder. You can try running it now::
-
-    python functional_tests.py
+    python manage.py test fts
 
 And you should see something like this::
 
-    ImportError: cannot import name settings_for_fts
+    python manage.py test fts
+    Traceback (most recent call last):
+      File "manage.py", line 10, in <module>
+        execute_from_command_line(sys.argv)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/__init__.py", line 443, in execute_from_command_line
+        utility.execute()
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/__init__.py", line 382, in execute
+        self.fetch_command(subcommand).run_from_argv(self.argv)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/commands/test.py", line 49, in run_from_argv
+        super(Command, self).run_from_argv(argv)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/base.py", line 196, in run_from_argv
+        self.execute(*args, **options.__dict__)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/base.py", line 232, in execute
+        output = self.handle(*args, **options)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/commands/test.py", line 72, in handle
+        failures = test_runner.run_tests(test_labels)
+      File "/usr/local/lib/python2.7/dist-packages/django/test/simple.py", line 380, in run_tests
+        suite = self.build_suite(test_labels, extra_tests)
+      File "/usr/local/lib/python2.7/dist-packages/django/test/simple.py", line 263, in build_suite
+        app = get_app(label)
+      File "/usr/local/lib/python2.7/dist-packages/django/db/models/loading.py", line 152, in get_app
+        raise ImproperlyConfigured("App with label %s could not be found" % app_label)
+    django.core.exceptions.ImproperlyConfigured: App with label fts could not be found
+
+Whenever you add a new app to your project, you have to tell Django that you really meant it, and that you want this app to be a part of your site.  We do this in ``settings.py``
 
 
-At this point, we'll need to do a bit more Django housekeeping.
+settings.py - adding our fts app and setting up the database
+------------------------------------------------------------
 
-settings.py and database configuration
---------------------------------------
+Django stores project-wide settings in a file called ``settings.py``, and that includes which apps we want to be active.  Let's edit it now, and find the ``INSTALLED_APPS`` part.  We need to add ``'fts',``:
 
-Django stores project-wide settings in a file called ``settings.py``. One of the key settings is what kind of database to use.  We'll use the easiest possible, *SQLite*.
 
-Find settings ``settings.py`` in the root of the new ``mysite`` folder, and open it up in your favourite text editor. Find the lines that mention ``DATABASES``, and change the setting for ``ENGINE`` and ``NAME``, like so
+.. sourcecode:: python
+
+    INSTALLED_APPS = (
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.messages',
+        # Uncomment the next line to enable the admin:
+        # 'django.contrib.admin',
+        # Uncomment the next line to enable admin documentation:
+        # 'django.contrib.admindocs',
+        'fts',
+    )
+
+Let's try running our fts again::
+
+    $ python manage.py test fts
+
+    Creating test database for alias 'default'...
+    Traceback (most recent call last):
+      File "manage.py", line 10, in <module>
+        execute_from_command_line(sys.argv)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/__init__.py", line 443, in execute_from_command_line
+        utility.execute()
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/__init__.py", line 382, in execute
+        self.fetch_command(subcommand).run_from_argv(self.argv)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/commands/test.py", line 49, in run_from_argv
+        super(Command, self).run_from_argv(argv)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/base.py", line 196, in run_from_argv
+        self.execute(*args, **options.__dict__)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/base.py", line 232, in execute
+        output = self.handle(*args, **options)
+      File "/usr/local/lib/python2.7/dist-packages/django/core/management/commands/test.py", line 72, in handle
+        failures = test_runner.run_tests(test_labels)
+      File "/usr/local/lib/python2.7/dist-packages/django/test/simple.py", line 381, in run_tests
+        old_config = self.setup_databases()
+      File "/usr/local/lib/python2.7/dist-packages/django/test/simple.py", line 317, in setup_databases
+        self.verbosity, autoclobber=not self.interactive)
+      File "/usr/local/lib/python2.7/dist-packages/django/db/backends/creation.py", line 256, in create_test_db
+        self._create_test_db(verbosity, autoclobber)
+      File "/usr/local/lib/python2.7/dist-packages/django/db/backends/creation.py", line 321, in _create_test_db
+        cursor = self.connection.cursor()
+      File "/usr/local/lib/python2.7/dist-packages/django/db/backends/dummy/base.py", line 15, in complain
+        raise ImproperlyConfigured("settings.DATABASES is improperly configured. "
+    django.core.exceptions.ImproperlyConfigured: settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.
+
+
+A reasonably helpful error message!  Let's open up ``settings.py`` again, and set up a database. We'll use the easiest possible, *SQLite*. Find the lines that mention ``DATABASES``, and change the setting for ``ENGINE`` and ``NAME``, like so:
 
 .. sourcecode:: python
     :filename: mysite/mysite/settings.py
@@ -255,55 +333,25 @@ Find settings ``settings.py`` in the root of the new ``mysite`` folder, and open
             'NAME': 'database.sqlite',
 
 
-Find out more about projects, apps and ``settings.py`` here:
+You can find out more about projects, apps and ``settings.py`` here:
 https://docs.djangoproject.com/en/1.4/intro/tutorial01/#database-setup
 
-Now, because we don't want our functional tests interfering with our normal database, we need to create an *alternative* set of settings for our fts. Create a new file called ``settings_for_fts.py`` next to settings.py, and give it the following contents::
+Let's see if it worked by trying to run the functional tests again::
 
-    from settings import *
-    DATABASES['default']['NAME'] = 'ft_database.sqlite'
-
-That essentially sets up an exact duplicate of the normal ``settings.py``, except we change the name of the database.
-
-By this point your disk tree should look like this::
-
-    .
-    |-- fts
-    |   |-- __init__.py
-    |   `-- test_admin.py
-    |-- functional_tests.py
-    |-- manage.py
-    `-- mysite
-        |-- __init__.py
-        |-- settings_for_fts.py
-        |-- settings.py
-        |-- urls.py
-        `-- wsgi.py
-
-
-
-
-If there's anything missing, figure out why!
-
-Otherwise, let's see if it worked by trying to run the functional tests again::
-
-    python functional_tests.py
+    python manage.py test fts
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/tmp/mysite/fts/test_admin.py", line 12, in test_can_create_new_poll_via_admin_site
+      File "/home/harry/workspace/mysite/fts/tests.py", line 20, in test_can_create_new_poll_via_admin_site
         self.assertIn('Django administration', body.text)
-    AssertionError: 'Django administration' not found in u"It worked!\nCongratulations on your first Django-powered page.\nOf course, you haven't actually done any work yet. Here's what to do next:\nIf you plan to use a database, edit the DATABASES setting in settings_for_fts/settings.py.\nStart your first app by running python settings_for_fts/manage.py startapp [appname].\nYou're seeing this message because you have DEBUG = True in your Django settings file and you haven't configured any URLs. Get to work!"
+    AssertionError: 'Django administration' not found in u'A server error occurred.  Please contact the administrator.'
 
     ----------------------------------------------------------------------
-    Ran 1 test in 2.532s
+    Ran 1 test in 2.622s
 
-
-Hooray - I know it says "Fail", but that's still better than the last test runner, which just had an error.  In fact, this is what you'd call an "expected failure" - our FT is checking that the url ``/admin/`` produces the django admin page (by looking for the words "Django Administration", but instead it's only finding the default "It worked" Django welcome message, which we saw earlier when we used ``runserver``.
-
-So now we can get on with doing what we need to do to get the test to pass!
+Hooray - I know it says "Fail", but that's still better than the last test runner, which just had an error.  In fact, this is what you'd call an "expected failure" - our FT is checking that the url ``/admin/`` produces the django admin page (by looking for the words "Django Administration", but instead it's just seeing an error.  That' because we haven't finished setting up the admin site yet.
 
 Switching on the admin site
 ---------------------------
@@ -329,6 +377,7 @@ First, in ``settings.py`` we add ``django.contrib.admin`` to ``INSTALLED_APPS``:
         'django.contrib.admin',
         # Uncomment the next line to enable admin documentation:
         # 'django.contrib.admindocs',
+        'fts',
     )
 
 And in ``urls.py``, we uncomment three lines that mention the admin site - two near the top, and one near the bottom
@@ -346,7 +395,7 @@ And in ``urls.py``, we uncomment three lines that mention the admin site - two n
 
 Let's see if it worked!  Try running the functional tests again::
 
-    $ python functional_tests.py
+    $ python manage.py test fts
 
     Creating tables ...
     Installing custom SQL ...
@@ -363,10 +412,10 @@ Let's see if it worked!  Try running the functional tests again::
     [28/Nov/2011 04:00:28] "GET /admin/ HTTP/1.1" 200 2028
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/tmp/mysite/fts/test_admin.py", line 16, in test_can_create_new_poll_via_admin_site
+      File "/tmp/mysite/fts/tests.py", line 16, in test_can_create_new_poll_via_admin_site
         self.fail('finish this test')
     AssertionError: finish this test
 
@@ -399,7 +448,7 @@ Django is telling us that there's a missing table in the database.  The solution
 Setting up the database with ``syncdb``
 ---------------------------------------
 
-If you remember we used the ``settings_for_fts.py`` file to make the FT runner use a different database file to the normal one?  Well, our normal database needs a bit more settting up -- so far we gave it a name in ``settings.py``, but we also need to tell Django to create all the tables it needs. For this we use a command named ``syncdb``.
+Our database needs a bit more settting up -- so far we gave it a name in ``settings.py``, but we also need to tell Django to create all the tables it needs. For this we use a command named ``syncdb``.
 
 In this case, syncdb will notice it's the first run, and proposes that you create a superuser.  Let's go ahead and do that (you may have to hit Ctrl-C to quit the test server first)::
 
@@ -441,19 +490,25 @@ Extending the FT to login and look for Polls
 So, we now want our FT to cover logging into the admin site, and checking that "Polls" is an option on the main page:
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
-
-    from functional_tests import FunctionalTest, ROOT
+    :filename: mysite/fts/tests.py
+    from django.test import LiveServerTestCase
+    from selenium import webdriver
     from selenium.webdriver.common.keys import Keys
 
-    class TestPollsAdmin(FunctionalTest):
+    class TestPollsAdmin(LiveServerTestCase):
+
+        def setUp(self):
+            self.browser = webdriver.Firefox()
+
+        def tearDown(self):
+            self.browser.quit()
 
         def test_can_create_new_poll_via_admin_site(self):
             # Gertrude opens her web browser, and goes to the admin page
-            self.browser.get(ROOT + '/admin/')
+            self.browser.get(self.live_server_url + '/admin/')
 
             # She sees the familiar 'Django administration' heading
-            body = self.browser.find_element_by_tag_name('body') 
+            body = self.browser.find_element_by_tag_name('body')
             self.assertIn('Django administration', body.text)
 
             # She types in her username and passwords and hits return
@@ -464,6 +519,11 @@ So, we now want our FT to cover logging into the admin site, and checking that "
             password_field.send_keys('adm1n')
             password_field.send_keys(Keys.RETURN)
 
+            # her username and password are accepted, and she is taken to
+            # the Site Administration page
+            body = self.browser.find_element_by_tag_name('body')
+            self.assertIn('Site administration', body.text)
+
             # She now sees a couple of hyperlink that says "Polls"
             polls_links = self.browser.find_elements_by_link_text('Polls')
             self.assertEquals(len(polls_links), 2)
@@ -472,7 +532,7 @@ So, we now want our FT to cover logging into the admin site, and checking that "
             self.fail('todo: finish tests')
 
 
-Don't miss the extra ``import`` at the top there.
+Don't miss the extra ``import`` at the top there - we need the special ``Keys`` class to send a carriage return to the password field.
 
 We're using a couple of new test methods here...
 
@@ -485,45 +545,89 @@ We're using a couple of new test methods here...
 
 Let's try running the FT again and seeing how far it gets::
 
-    python functional_tests.py
-
+    python manage.py test fts
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_admin.py", line 25, in test_can_create_new_poll_via_admin_site
-        self.assertEquals(len(polls_links), 2)
-    AssertionError: 0 != 2
+      File "/home/harry/workspace/mysite/fts/tests.py", line 33, in test_can_create_new_poll_via_admin_site
+        self.assertIn('Site administration', body.text)
+    AssertionError: 'Site administration' not found in u'Django administration\nPlease enter the correct username and password for a staff account. Note that both fields are case-sensitive.\nUsername:\nPassword:\n '
 
     ----------------------------------------------------------------------
     Ran 1 test in 10.203s
 
-Well, the test is happy that there's a Django admin site, and it can log in fine, but it can't find a link to administer "Polls".  
+The username and password didn't work - you might think that's strange, because we literally just set them up during the ``syncdb``, but the reason is that the Django test runner actually creates a *separate* database to run tests against - this saves your test runs from interfering with production data.
+
+Creating a test fixture
+-----------------------
+
+So we need a way to set up an admin user account in the test database.  Thankfully, Django has the concept of *fixtures*, which are a way of loading data into the database from text files.
+
+We can save the admin account using the django ``dumpdata`` command, and put them into a folder called ``fixtures`` in our ``fts`` app.::
+
+    mkdir fts/fixtures
+    python manage.py dumpdata auth.User --indent=2 > fts/fixtures/admin_user.json
+
+You can take a look at the file if you like -- it's a JSON representation of the user account.
+
+Now we need to tell our tests to load this fixture. That happens via an attribute called ``fixtures`` on the test class:
+
+.. sourcecode:: python
+    :filename: mysite/fts/tests.py
+    from django.test import LiveServerTestCase
+    from selenium import webdriver
+    from selenium.webdriver.common.keys import Keys
+
+    class TestPollsAdmin(LiveServerTestCase):
+        fixtures = ['admin_user.json']
+
+        def setUp(self):
+            [...]
+
+You can find out more about fixtures here:
+https://docs.djangoproject.com/en/1.4/topics/testing/#fixture-loading
+
+Let's try again::
+
+    ======================================================================
+    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.TestPollsAdmin)
+    ----------------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/home/harry/workspace/mysite/fts/tests.py", line 37, in test_can_create_new_poll_via_admin_site
+        self.assertEquals(len(polls_links), 2)
+    AssertionError: 0 != 2
+
+    ----------------------------------------------------------------------
+    Ran 1 test in 3.069s
+
+    FAILED (failures=1)
+    Destroying test database for alias 'default'...
+
+
+Now the test is happy that there's a Django admin site, and it can log in fine, but it can't find a link to administer "Polls".  
 
 The polls application, our first Django model and unit tests
 ============================================================
 
-In this next section, we're going to create a new Django *"app"* for our Polls, as well as a new ``Poll`` class to represent our poll objects in the database. We'll also be writing our first unit tests.
-
-If you remember form back when we created the ``mysite`` project, I mentioned that Django encourages us to build up our projects out of constituent ``apps`` - pieces of self-contained functionality.
-
-So let's create a new app for our polls.  There's a management command for this::
+In this next section, we're going to create a new Django *"app"* for our Polls, as well as a new ``Poll`` class to represent our poll objects in the database. We'll also be writing our first unit tests.::
 
     python manage.py startapp polls
 
-When that commmand completes, you should see that Django will create a new folder inside ``mysite`` called ``polls``, and in that, several new files::
+Your directory tree should now look like this::
 
-    .
+    mysite
     |-- database.sqlite
-    |-- ft_database.sqlite
     |-- fts
+    |   |-- fixtures
+    |   |   `-- admin_user.json
     |   |-- __init__.py
-    |   `-- test_admin.py
-    |-- functional_tests.py
+    |   |-- models.py
+    |   |-- tests.py
+    |   `-- views.py
     |-- manage.py
     |-- mysite
     |   |-- __init__.py
-    |   |-- settings_for_fts.py
     |   |-- settings.py
     |   |-- urls.py
     |   `-- wsgi.py
@@ -549,17 +653,18 @@ The next thing we need to do is tell Django that, yes, we really meant it, and w
         'django.contrib.admin',
         # Uncomment the next line to enable admin documentation:
         # 'django.contrib.admindocs',
+        'fts',
         'polls',
     )
 
 
-So next we need to create the representation of a Poll inside Django - a *model*, in Django terms.
+Next we need to create the representation of a Poll inside Django - a *model*, in Django terms.
 
 
 Our first unit tests: testing a new "Poll" model
 ================================================
 
-The Django unit test runner will automatically run any tests we put in ``polls/tests.py``.  Later on, we might decide we want to put our tests somewhere else, but for now, let's use that file. You can delete the example test that Django put in there.  In this test, we'll create a Poll and save it to the database, then retrieve it again to check the poll was saved properly.
+The tests for the polls app are in ``polls/tests.py``. Again, you can delete the example test that Django put in there.  In this test, we'll create a Poll and save it to the database, then retrieve it again to check the poll was saved properly.  You'll notice that in this test we don't use Selenium, instead we interact with our application at a much lower level.
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -589,7 +694,7 @@ The Django unit test runner will automatically run any tests we put in ``polls/t
             self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
 
 
-Whereas functional tests are meant to test how the whole system behaves, from the point of view of a user, unit test are meant to check that the individual parts of our code work the way we want them to.  Unit tests work at a much lower level, and they typically test individual functions or classes.
+Whereas functional tests are meant to test how the whole system behaves, from the point of view of a user, unit test are meant to check that the individual parts of our code work the way we want them to.  Unit tests are much more granular, and they typically test individual functions or classes.
 
 Aside from being useful as tests, in the TDD philosophy writing unit tests also helps us because it forces us to do some design before we start to code. That's because when we write test, we have to think about the function or class we're about to write *from the outside* - in terms of its API, and its desired behaviour.  Often when you find yourself struggling to write tests, finding things long winded, it's an indication that the design of your code isn't quite right...
 
@@ -613,9 +718,7 @@ The unit-test / code cycle
 
 Let's run the unit tests.::
 
-    python manage.py test
-
-(when you call ``manage.py test``, Django looks through all the apps in ``INSTALLED_APPS``, finds tests inside them (by looking for a file called ``tests.py``, for example), and runs them.
+    python manage.py test polls
 
 You should see an error like this::
 
@@ -641,12 +744,6 @@ So let's create a minimal Poll class, in ``polls/models.py``
 
 And re-run the tests.  Pretty soon you'll get into the rhythm of TDD - run the tests, change a tiny bit of code, check the tests again, see what tiny bit of code to write next. Run the tests...::
 
-    Creating test database for alias 'default'...
-    ............................................................................
-    ............................................................................
-    ............................................................................
-    ....................................E.......................................
-    ...................
     ======================================================================
     ERROR: test_creating_a_poll (polls.tests.TestPollsModel)
     ----------------------------------------------------------------------
@@ -719,11 +816,7 @@ Let's add that too
 
 And run the tests again::
 
-    ............................................................................
-    ............................................................................
-    ............................................................................
-    ............................................................................
-    ...................
+    .
     ----------------------------------------------------------------------
     Ran 323 tests in 2.402s
 
@@ -740,12 +833,12 @@ Back to the functional tests: registering the model with the admin site
 
 So the unit tests all pass. Does this mean our functional test will pass?::
 
-    python functional_tests.py
+    python manage.py test fts
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_admin.py", line 25, in test_can_create_new_poll_via_admin_site
+      File "/home/harry/workspace/mysite/fts/tests.py", line 25, in test_can_create_new_poll_via_admin_site
         self.assertEquals(len(polls_links), 2)
     AssertionError: 0 != 2
 
@@ -770,7 +863,7 @@ If you've done everythin right, the directory tree should now look like this::
     |-- ft_database.sqlite
     |-- fts
     |   |-- __init__.py
-    |   `-- test_admin.py
+    |   `-- tests.py
     |-- functional_tests.py
     |-- manage.py
     |-- mysite
@@ -791,10 +884,10 @@ If you've done everythin right, the directory tree should now look like this::
 Let's try the FT again...::
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/tmp/mysite/fts/test_admin.py", line 28, in test_can_create_new_poll_via_admin_site
+      File "/tmp/mysite/fts/tests.py", line 28, in test_can_create_new_poll_via_admin_site
         self.fail('todo: finish tests')
     AssertionError: todo: finish tests
 

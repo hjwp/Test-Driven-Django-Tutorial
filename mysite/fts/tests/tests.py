@@ -1,13 +1,20 @@
-from functional_tests import FunctionalTest, ROOT
+from django.test import LiveServerTestCase
+from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 
-class TestPollsAdmin(FunctionalTest):
+class TestPollsAdmin(LiveServerTestCase):
+    #fixtures = ['admin_user.json']
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+
+    def tearDown(self):
+        self.browser.quit()
 
     def test_can_create_new_poll_via_admin_site(self):
-
         # Gertrude opens her web browser, and goes to the admin page
-        self.browser.get(ROOT + '/admin/')
+        self.browser.get(self.live_server_url + '/admin/')
 
         # She sees the familiar 'Django administration' heading
         body = self.browser.find_element_by_tag_name('body')
@@ -20,6 +27,7 @@ class TestPollsAdmin(FunctionalTest):
         password_field = self.browser.find_element_by_name('password')
         password_field.send_keys('adm1n')
         password_field.send_keys(Keys.RETURN)
+        time.sleep(100)
 
         # She now sees a couple of hyperlink that says "Polls"
         polls_links = self.browser.find_elements_by_link_text('Polls')
@@ -27,11 +35,6 @@ class TestPollsAdmin(FunctionalTest):
 
         # The second one looks more exciting, so she clicks it
         polls_links[1].click()
-
-        # She is taken to the polls listing page, which shows she has
-        # no polls yet
-        body = self.browser.find_element_by_tag_name('body')
-        self.assertIn('0 polls', body.text)
 
         # She sees a link to 'add' a new poll, so she clicks it
         new_poll_link = self.browser.find_element_by_link_text('Add poll')

@@ -1,14 +1,14 @@
+# Create your views here.
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from polls.models import Choice, Poll
 from polls.forms import PollVoteForm
 
-
 def home(request):
-    context = {'polls': Poll.objects.all()}
+    context = {'polls' : Poll.objects.all()}
     return render(request, 'home.html', context)
-
 
 def poll(request, poll_id):
     if request.method == 'POST':

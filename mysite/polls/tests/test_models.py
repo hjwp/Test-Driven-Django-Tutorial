@@ -1,13 +1,15 @@
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.test import TestCase
+from django.test.client import Client
 
 from polls.models import Choice, Poll
+from polls.forms import PollVoteForm
 
 
 class TestPollsModel(TestCase):
     def test_creating_a_new_poll_and_saving_it_to_the_database(self):
-        # start by creating a new Poll object and setting its 'question'
-        # and 'pub_date' attributes
+        # start by creating a new Poll object with its "question" set
         poll = Poll()
         poll.question = "What's up?"
         poll.pub_date = timezone.now()
@@ -23,37 +25,18 @@ class TestPollsModel(TestCase):
 
         # and check that it's saved its two attributes: question and pub_date
         self.assertEquals(only_poll_in_database.question, "What's up?")
+        self.assertEquals(only_poll_in_database.pub_date.tzinfo, poll.pub_date.tzinfo)
         self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
-
 
     def test_verbose_name_for_pub_date(self):
         for field in Poll._meta.fields:
             if field.name ==  'pub_date':
                 self.assertEquals(field.verbose_name, 'Date published')
 
-
     def test_poll_objects_are_named_after_their_question(self):
         p = Poll()
         p.question = 'How is babby formed?'
         self.assertEquals(unicode(p), 'How is babby formed?')
-
-
-    def test_poll_can_tell_you_its_total_number_of_votes(self):
-        p = Poll(question='where',pub_date=timezone.now())
-        p.save()
-        c1 = Choice(poll=p,choice='here',votes=0)
-        c1.save()
-        c2 = Choice(poll=p,choice='there',votes=0)
-        c2.save()
-
-        self.assertEquals(p.total_votes(), 0)
-
-        c1.votes = 1000
-        c1.save()
-        c2.votes = 22
-        c2.save()
-        self.assertEquals(p.total_votes(), 1022)
-
 
 
 class TestPollChoicesModel(TestCase):
@@ -116,4 +99,19 @@ class TestPollChoicesModel(TestCase):
         self.assertEquals(choice1.percentage(), 0)
         self.assertEquals(choice2.percentage(), 0)
 
+    def test_poll_can_tell_you_its_total_number_of_votes(self):
+        p = Poll(question='where',pub_date=timezone.now())
+        p.save()
+        c1 = Choice(poll=p,choice='here',votes=0)
+        c1.save()
+        c2 = Choice(poll=p,choice='there',votes=0)
+        c2.save()
+
+        self.assertEquals(p.total_votes(), 0)
+
+        c1.votes = 1000
+        c1.save()
+        c2.votes = 22
+        c2.save()
+        self.assertEquals(p.total_votes(), 1022)
 

@@ -124,7 +124,6 @@ class TestSinglePollView(TestCase):
         self.assertIn('1 vote', response.content)
         self.assertNotIn('1 votes', response.content)
 
-
     def test_view_can_handle_votes_via_POST(self):
         # set up a poll with choices
         poll1 = Poll(question='6 times 7', pub_date=timezone.now())

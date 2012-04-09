@@ -20,7 +20,7 @@ POLL2 = PollInfo(
     ],
 )
 
-class TestPolls(FunctionalTest):
+class TestPolls(object):
     def _setup_polls_via_admin(self):
         # Gertrude logs into the admin site
         self.browser.get(ROOT + '/admin/')
