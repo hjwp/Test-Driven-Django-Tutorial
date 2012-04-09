@@ -15,15 +15,15 @@ Here's the outline of what we're going to do in this tutorial:
 Extending the FT to vote using radio buttons
 --------------------------------------------
 
-Let's start by extending our FT, to show Herbert voting on a poll. In ``fts/test_polls.py``:
+Let's start by extending our FT, to show Herbert voting on a poll. In ``fts/tests.py``:
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
+    :filename: mysite/fts/tests.py
 
         [...] 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
-        self.browser.get(ROOT)
+        self.browser.get(self.live_server_url)
         heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(heading.text, 'Polls')
 
@@ -77,18 +77,9 @@ Let's start by extending our FT, to show Herbert voting on a poll. In ``fts/test
         # Satisfied, he goes back to sleep
 
 
-If you run them, you'll find that they are still telling us about a "TypeError" on
-the individual poll page though::
+If you run them, you'll find that they are still telling us the individual poll page isn't working::
 
-    ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 67, in test_voting_on_a_new_poll
-        self.assertEquals(heading.text, 'Poll Results')
-    AssertionError: u'TypeError at /poll/1/' != 'Poll Results'
-    ----------------------------------------------------------------------
-    Ran 2 tests in 25.927s
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
 
 That because, currently, our ``poll`` view is just a placeholder function.  We need
@@ -109,8 +100,7 @@ in ``polls/tests.py``:
             poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
             poll2.save()
 
-            client = Client()
-            response = client.get('/poll/%d/' % (poll2.id, ))
+            response = self.client.get('/poll/%d/' % (poll2.id, ))
 
             # check we've used the poll template
             self.assertTemplateUsed(response, 'poll.html') 
@@ -214,7 +204,7 @@ In the meantime, what do the tests say::
 We need to get our template to include the poll's question. Let's make it into a page heading:
 
 .. sourcecode:: html+django
-    :filename: mysite/polls/templates/home.html
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>
@@ -255,7 +245,7 @@ Mmmh, `OK`. And doughnuts. Let's see what the FTs think?::
 Ah, we forgot to include a general heading for the page - the FT is checking the ``h1`` and ``h2`` headings:
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
+    :filename: mysite/fts/tests.py
 
         main_heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(main_heading.text, 'Poll Results')
@@ -285,10 +275,10 @@ Using a Django form for poll choices
 Now what does the FT say?::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_polls.py", line 100, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/mysite/fts/tests.py", line 100, in test_voting_on_a_new_poll
         self.assertEquals(len(choice_inputs), 3)
     AssertionError: 0 != 3
 
@@ -464,8 +454,7 @@ Ah yes, we still haven't actually *used* the form yet!  Let's go back to our ``T
             choice2 = Choice(poll=poll1, choice="Gardener's", votes=0)
             choice2.save()
 
-            client = Client()
-            response = client.get('/poll/%d/' % (poll1.id, ))
+            response = self.client.get('/poll/%d/' % (poll1.id, ))
 
             # check we've passed in a form of the right type
             self.assertTrue(isinstance(response.context['form'], PollVoteForm))
@@ -557,10 +546,10 @@ And now we have passination::
 So let's ask the FTs again!::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 84, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 84, in test_voting_on_a_new_poll
         'Moderately awesome',
     AssertionError: Lists differ: [u'Vote:', u'Very awesome', u'... != ['Very awesome', 'Quite awesom...
 
@@ -582,7 +571,7 @@ So let's ask the FTs again!::
 Hm, not quite according to the original plan - our form has auto-generated an extra label which says "Vote:" above the radio buttons - well, since it doesn't do any harm, for now maybe it's easiest to just change the FT:
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
+    :filename: mysite/fts/tests.py
 
         # He also sees a form, which offers him several choices.
         # There are three options with radio buttons
@@ -611,7 +600,7 @@ There's no submit button on our form! When Django generates a form, it only give
 Well, a button is easy enough to add, although it may not do much... In the template:
 
 .. sourcecode:: html+django
-    :filename: mysite/polls/templates/home.html
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>
@@ -633,10 +622,10 @@ Well, a button is easy enough to add, although it may not do much... In the temp
 And now... our tests get to the end!::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 125, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 125, in test_voting_on_a_new_poll
         self.fail('TODO')
     AssertionError: TODO
     ----------------------------------------------------------------------
