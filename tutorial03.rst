@@ -17,15 +17,24 @@ Writing the FT as comments
 
 Let's start by writing out our FT as human-readable comments, which describe the user's actions, and the expected behaviour of the site
 
-Create a new file for it called ``fts/test_polls.py``.  
+Create a new class inside ``fts/tests.py``.  
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
+    :filename: mysite/fts/tests.py
 
-    from functional_tests import FunctionalTest, ROOT
-    from selenium.webdriver.common.keys import Keys
+        [...]
+        self.assertEquals(len(new_poll_links), 1)
 
-    class TestPolls(FunctionalTest):
+        # Satisfied, she goes back to sleep
+
+    class TestPolls(LiveServerTestCase):
+        fixtures = ['admin_user.json']
+
+        def setUp(self):
+            self.browser = webdriver.Firefox()
+
+        def tearDown(self):
+            self.browser.quit()
 
         def test_voting_on_a_new_poll(self):
             # First, Gertrude the administrator logs into the admin site and
@@ -65,10 +74,13 @@ You'll see I've changed things slightly, because in the admin test we entered ju
 http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
+    :filename: mysite/fts/tests.py
 
-    from functional_tests import FunctionalTest, ROOT
-    from selenium.webdriver.common.keys import Keys
+        [...]
+        self.assertEquals(len(new_poll_links), 1)
+
+        # Satisfied, she goes back to sleep
+
     from collections import namedtuple
 
     PollInfo = namedtuple('PollInfo', ['question', 'choices'])
@@ -89,10 +101,18 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
         ],
     )
 
-    class TestPolls(FunctionalTest):
+    class TestPolls(LiveServerTestCase):
+        fixtures = ['admin_user.json']
+
+        def setUp(self):
+            self.browser = webdriver.Firefox()
+
+        def tearDown(self):
+            self.browser.quit()
+
         def _setup_polls_via_admin(self):
             # Gertrude logs into the admin site
-            self.browser.get(ROOT + '/admin/')
+            self.browser.get(self.live_server_url + '/admin/')
             username_field = self.browser.find_element_by_name('username')
             username_field.send_keys('admin')
             password_field = self.browser.find_element_by_name('password')
@@ -130,7 +150,7 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
                 self.assertEquals(len(new_poll_links), 1)
 
                 # She goes back to the root of the admin site
-                self.browser.get(ROOT + '/admin/')
+                self.browser.get(self.live_server_url + '/admin/')
 
             # She logs out of the admin site
             self.browser.find_element_by_link_text('Log out').click()
@@ -142,15 +162,16 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
             self._setup_polls_via_admin()
 
             self.fail('TODO')
+            # Now, Herbert the regular user goes to the homepage of the site. He
 
 
 Now, if you try running that test, you should see selenium run through and enter the two polls, and then exit with the "TODO"::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 76, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 76, in test_voting_on_a_new_poll
         self.fail('TODO')
     AssertionError: TODO
     ----------------------------------------------------------------------
@@ -166,7 +187,7 @@ Let's write the exciting bit of our test, where Herbert the normal user opens up
 
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
+    :filename: mysite/fts/tests.py
 
     def test_voting_on_a_new_poll(self): 
         # First, Gertrude the administrator logs into the admin site and
@@ -175,7 +196,7 @@ Let's write the exciting bit of our test, where Herbert the normal user opens up
 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
-        self.browser.get(ROOT)
+        self.browser.get(self.live_server_url)
         heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(heading.text, 'Polls')
 
@@ -195,26 +216,21 @@ Let's write the exciting bit of our test, where Herbert the normal user opens up
 
         self.fail('TODO')
 
+        # He clicks on the link to the first Poll, which is called
+        [...]
+
 
 We've started with the first bit, where Herbert goes to the main page of the site, we check that he can see a Poll there, and that he can click on it.  Then we look for the default 'no votes yet' message on the next page.
 
 Let's run that, and see where we get::
 
-    ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/Test-Driven-Django-Tutorial/mysite/fts/test_polls.py", line 57, in test_voting_on_a_new_poll
-        self.assertEquals(heading.text, 'Polls')
-    AssertionError: u'Page not found (404)' != 'Polls'
-    ----------------------------------------------------------------------
-    Ran 2 tests in 19.772s
+    AssertionError: u'Page not found (404)' != 'PollsNoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
 
 URLS and view functions, and the Django Test Client
 ---------------------------------------------------
 
-The FT is telling us that going to the `ROOT` url (/) produces a 404. We need to tell Django what kind of web page to return for the root of our site - the home page if you like.
+The FT is telling us that going to the root url (/) produces an error. We need to tell Django what kind of web page to return for the root of our site - the home page if you like.
 
 Django uses a file called ``urls.py``, to route visitors to the python function that will deal with producing a response for them.  These functions are called `views` in Django terminology, and they live in ``views.py``. 
 
@@ -230,7 +246,6 @@ We'll create a new class to test our home page view:
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
-    from django.test.client import Client
     [...]
     class TestHomePageView(TestCase):
 
@@ -241,16 +256,14 @@ We'll create a new class to test our home page view:
             poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
             poll2.save()
 
-            client = Client()
-            response = client.get('/')
+            response = self.client.get('/')
 
             self.assertIn(poll1.question, response.content)
             self.assertIn(poll2.question, response.content)
 
 Don't forget the import at the top!  
 
-Now, our first run of the tests will probably complain of a with ``TemplateDoesNotExist: 404.html``.  Django wants us to create a template for our "404 error" page.  We'll come back to that later.  For now, let's make the
-``/`` url return a real HTTP response.
+Now, our first run of the tests will probably complain of a with ``TemplateDoesNotExist: 404.html``.  Django wants us to create a template for our "404 error" page.  We'll come back to that later.  For now, let's make the ``/`` url return a real HTTP response.
  
 First we'll create a dummy view in ``views.py``:
 
@@ -263,7 +276,7 @@ First we'll create a dummy view in ``views.py``:
 Now let's hook up this view inside ``urls.py``:
 
 .. sourcecode:: python
-    :filename: mysite/polls/urls.py
+    :filename: mysite/mysite/urls.py
 
     from django.conf.urls import patterns, include, url
     from django.contrib import admin
@@ -277,7 +290,7 @@ Now let's hook up this view inside ``urls.py``:
 ``urls.py`` maps urls (specified as regular expressions) to views.  I've used dotted-string notation to specify the name of the view, but you could also use the actual view, like this:
 
 .. sourcecode:: python
-    :filename: mysite/polls/urls.py
+    :filename: mysite/mysite/urls.py
 
     from polls.views import home
     urlpatterns = patterns('',
@@ -365,10 +378,10 @@ So, rather than anticipate what we might want to put in our HttpResponse, let's 
 
     python functional_tests.py
     ======================================================================
-    ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ERROR: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 57, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 57, in test_voting_on_a_new_poll
         heading = self.browser.find_element_by_tag_name('h1')
       File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 306, in find_element_by_tag_name
         return self.find_element(by=By.TAG_NAME, value=name)
@@ -399,8 +412,7 @@ The Django TestCase lets us check whether a response was rendered using a templa
             poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
             poll2.save()
 
-            client = Client()
-            response = client.get('/')
+            response = self.client.get('/')
 
             # check we've used the right template
             self.assertTemplateUsed(response, 'home.html')
@@ -433,27 +445,29 @@ That should give us a folder structure like this::
 
     .
     |-- database.sqlite
-    |-- ft_database.sqlite
     |-- fts
+    |   |-- fixtures
+    |   |   `-- admin_user.json
     |   |-- __init__.py
-    |   |-- test_admin.py
-    |   `-- test_polls.py
-    |-- functional_tests.py
+    |   |-- models.py
+    |   |-- test_polls.py
+    |   |-- tests.py
+    |   `-- views.py
     |-- manage.py
     |-- mysite
     |   |-- __init__.py
-    |   |-- settings_for_fts.py
     |   |-- settings.py
     |   |-- urls.py
     |   `-- wsgi.py
     `-- polls
-        |-- __init__.py
         |-- admin.py
+        |-- __init__.py
         |-- models.py
         |-- templates
         |   `-- home.html
         |-- tests.py
-        `-- views.py
+    `-- views.py
+
 
 Edit ``home.html`` with your favourite editor, 
     
@@ -503,8 +517,7 @@ Looking at the template code, you can see that we want to iterate through a vari
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
-        client = Client()
-        response = client.get('/')
+        response = self.client.get('/')
 
         # check we've used the right template
         self.assertTemplateUsed(response, 'home.html')
@@ -591,10 +604,10 @@ What do the FTs say now?::
 
     python functional_tests.py
     ======================================================================
-    ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ERROR: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 62, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 62, in test_voting_on_a_new_poll
         self.browser.find_element_by_link_text('How awesome is Test-Driven Development?').click()
       File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 234, in find_element_by_link_text
         return self.find_element(by=By.LINK_TEXT, value=link_text)
@@ -668,8 +681,7 @@ Let's use the ``reverse`` function in our tests.  Its first argument is the name
             poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
             poll2.save()
 
-            client = Client()
-            response = client.get('/')
+            response = self.client.get('/')
 
             template_names_used = [t.name for t in response.templates]
             self.assertIn('home.html', template_names_used)
@@ -712,12 +724,12 @@ Capturing parameters from URLs
 In ``urls.py``:
 
 .. sourcecode:: python
-    :filename: mysite/polls/urls.py
+    :filename: mysite/mysite/urls.py
 
     urlpatterns = patterns('',
-        (r'^$', 'polls.views.home'),
-        (r'^poll/(\d+)/$', 'polls.views.poll'),
-        (r'^admin/', include(admin.site.urls)),
+        url(r'^$', 'polls.views.home'),
+        url(r'^poll/(\d+)/$', 'polls.views.poll'),
+        url(r'^admin/', include(admin.site.urls)),
     )
 
 Our new line defines a set of urls that start with `poll/`, then a number made up of one or more digits - the matching group ``(\d+)``. When a url has a matching group, the captured contents are passed to the view as arguments.  So, if you look back at what the unit test was last complaining about, we should have fixed its problem: we've now created a url that references ``'polls.views.poll'`` and which is capable of taking an argument of ``1``. 
@@ -743,7 +755,7 @@ The templates don't include the hyperlinks yet. Let's add them:
       <body>
         <h1>Polls</h1>
         {% for poll in polls %}
-          <p><a href="{% url mysite.polls.views.poll poll.id %}">{{ poll.question }}</a></p>
+          <p><a href="{% url polls.views.poll poll.id %}">{{ poll.question }}</a></p>
         {% endfor %}
       </body>
     </html>
@@ -802,11 +814,12 @@ Notice the call to ``{% url %}``, which works almost exactly like ``reverse``.  
 Phew. A long traceback, but basically all it's saying is that we need at least a placeholder for our new "poll" view in ``views.py``.  Let's add that now:
 
 .. sourcecode:: python
-    :filename: mysite/polls/urls.py
+    :filename: mysite/mysite/urls.py
 
     def home(request):
         context = {'polls': Poll.objects.all()}
         return render(request, 'home.html', context)
+        
 
     def poll():
         pass
@@ -822,14 +835,7 @@ And run the unit tests again::
 
 What about the functional tests?::
 
-    ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 67, in test_voting_on_a_new_poll
-        self.assertEquals(heading.text, 'Poll Results')
-    AssertionError: u'TypeError at /poll/1/' != 'Poll Results'
-    ----------------------------------------------------------------------
-    Ran 2 tests in 25.927s
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
-Looks like it's time to start implementing our `poll` view, which aims to show information about an individual poll...  But for this, you'll have to tune in next week!
+
+Well, they get past the main page, but they fall over when they try to look at an individual poll. Looks like it's time to start implementing our `poll` view, which aims to show information about a particular poll...  But for this, you'll have to tune in next week!
