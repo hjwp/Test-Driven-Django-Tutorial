@@ -26,10 +26,10 @@ Let's fire up the test server, and do a bit of browsing around the admin site - 
 
 Then, open your web browser and go to ``http://localhost:8000/admin/``. Login with the admin username and password (``admin / adm1n``).
 
-If you go into the Polls section and try and create a new Poll, you need to click on a link that says "Add Poll" - let's add that to our FT.  Delete the "TODO", then add the following, in ``fts/test_amin.py``:
+If you go into the Polls section and try and create a new Poll, you need to click on a link that says "Add Poll" - let's add that to our FT.  In ``fts/tests.py``:
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
+    :filename: mysite/fts/tests.py
 
         # She now sees a couple of hyperlink that says "Polls"
         polls_links = self.browser.find_elements_by_link_text('Polls')
@@ -58,7 +58,7 @@ Pretty neat, but `Pub date` isn't a very nice label for our publication date fie
 So that's one thing we'll want to change.  Let's add a test for that to the end of our FT
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
+    :filename: mysite/fts/tests.py
 
         # She sees some input fields for "Question" and "Date published"
         body = self.browser.find_element_by_tag_name('body')
@@ -110,7 +110,7 @@ In our case `by name` is a useful way of finding fields, because the name attrib
 Let's use them in our FT
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
+    :filename: mysite/fts/tests.py
 
         # She sees some input fields for "Question" and "Date published"
         body = self.browser.find_element_by_tag_name('body')
@@ -132,8 +132,9 @@ Let's use them in our FT
 We can also use the CSS selector to pick up the "Save" button
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
+    :filename: mysite/fts/tests.py
 
+        # Gertrude clicks the save button
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         save_button.click()
 
@@ -142,10 +143,10 @@ Then, when you hit 'Save', you'll see that we get taken back to the Polls listin
 
 .. image:: /static/images/django_admin_poll_object_needs_verbose_name.png
 
-Django lets you give them more descriptive names, including any attribute of the object.  So let's say we want our polls listed by their question
+Django lets you give them more descriptive names, including any attribute of the object.  So let's say we want our polls listed by their question... And let's call that the end of our FT - you can get rid of the ``self.fail``.
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
+    :filename: mysite/fts/tests.py
 
         # She is returned to the "Polls" listing, where she can see her
         # new poll, listed as a clickable link
@@ -154,8 +155,10 @@ Django lets you give them more descriptive names, including any attribute of the
         )
         self.assertEquals(len(new_poll_links), 1)
 
+        # Satisfied, she goes back to sleep
+
 That's it for now - if you've lost track in amongst all the copy & pasting, you can compare your version to mine, which is hosted here:
-https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/test_admin.py
+https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/tests.py
 
 
 Human-readable names for models and their attributes
@@ -163,11 +166,13 @@ Human-readable names for models and their attributes
 
 Let's re-run our tests.  Here's our first expected failure, the fact that "Pub date" isn't the label we want for our field ("Date published")::
 
+    python manage.py test fts
+
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_admin.py", line 43, in 
+      File "/home/harry/workspace/mysite/fts/tests.py", line 43, in 
       test_can_create_new_poll_via_admin_site
         self.assertIn('Date published:', body.text)
         django.kill() #TODO: doesn't kill child processes, fix
@@ -196,7 +201,7 @@ Django stores human-readable names for model attributes in a special attribute c
 To write this test, we have to grovel through the ``_meta`` attribute on the Poll class.  That's some Django-voodoo right there, and you may have to take my word for it, but it's a way to get at some of the information about the metadata on the model. There's more info here (James Bennet is one of the original Django developers, and wrote a book about it too)
 http://www.b-list.org/weblog/2007/nov/04/working-models/
 
-Anyway, running our tests with ``python manage.py test`` gives us our expected fail::
+Anyway, running our tests with ``python manage.py test polls`` gives us our expected fail::
 
     AssertionError: 'pub date' != 'Date published'
 
@@ -210,13 +215,24 @@ Now that we have a unit test, we can implement! Let's make a change in ``models.
         question = models.CharField(max_length=200)
         pub_date = models.DateTimeField(verbose_name='Date published')
 
-Re-running our functional tests, things have moved on::
+Run the unit tests again to check that's worked::
+
+    $ python manage.py test polls
+    Creating test database for alias 'default'...
+    ..
+    ----------------------------------------------------------------------
+    Ran 2 tests in 0.001s
+
+Now, re-running our functional tests, things have moved on::
+
+
+    $ python manage.py test fts
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (test_admin.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/mysite/fts/test_admin.py", line 63, in 
+      File "/home/harry/workspace/mysite/fts/tests.py", line 63, in 
       test_can_create_new_poll_via_admin_site
         self.assertEquals(len(new_poll_links), 1)
     AssertionError: 0 != 1
@@ -264,25 +280,18 @@ And the fix is simple too - we define a ``__unicode__`` method on our Poll class
 
 And you should now find that the unit tests pass::
 
-    harry@harry-laptop:~/workspace/mysite:master$ python manage.py test
+    $ python manage.py test polls
     Creating test database for alias 'default'...
-    ............................................................................
-    ............................................................................
-    ............................................................................
-    ............................................................................
-    .....................
-    ----------------------------------------------------------------------
-    Ran 325 tests in 2.526s
+    ...
+    Ran 3 tests in 0.001s
 
 
 And now, our functional tests should get to the end::
 
-    ----------------------------------------------------------------------
-    Ran 1 test in 7.065s
+    AssertionError: todo: finish tests
 
-    OK
 
-Hooray!  Sadly that "OK" won't last for long - we want to add more to our FT
+Let's do just that.
  
 
 Adding Choices to the Poll admin page
@@ -295,7 +304,7 @@ https://docs.djangoproject.com/en/1.4/intro/tutorial02/#adding-related-objects
 So let's add that as an intermediate step in our FT, in between where Florence enters the question, and when she hits save.  
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_admin.py
+    :filename: mysite/fts/tests.py
 
         [...]
         time_field.send_keys('00:00')
@@ -308,6 +317,7 @@ So let's add that as an intermediate step in our FT, in between where Florence e
         choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
         choice_3.send_keys('Moderately awesome')
 
+        # Gertrude clicks the save button
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         [...]
 
@@ -380,6 +390,8 @@ And we may as well give it something to import too - in ``polls/models.py``
 
 And let's do a unit test run::
 
+    python manage.py test polls
+
     ======================================================================
     ERROR: test_creating_some_choices_for_a_poll (polls.tests.TestPollChoicesModel)
     ----------------------------------------------------------------------
@@ -398,33 +410,7 @@ No attribute save - let's make our Choice class into a proper Django model::
     class Choice(models.Model):
         pass
 
-Have you noticed the way it says "326 tests"?  Surely we haven't written that
-many, I hear you ask? That's because ``manage.py test`` runs all the tests for
-all the Django stuff, as well as your own tests.  If you want to, you can tell
-Django to just run the tests for your own app, like this::
-
-    $ python manage.py test polls
-    Creating test database for alias 'default'...
-    E...
-    ======================================================================
-    ERROR: test_creating_some_choices_for_a_poll (polls.tests.TestPollChoicesModel)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/TDDjango/mysite/polls/tests.py", line 66, in test_creating_some_choices_for_a_poll
-        poll_choices = poll.choice_set.all()
-    AttributeError: 'Poll' object has no attribute 'choice_set'
-
-    ----------------------------------------------------------------------
-    Ran 4 tests in 0.002s
-
-    FAILED (errors=1)
-    Destroying test database for alias 'default'...
-
-OK, our tests are complaining that the "poll" object has no attribute
-``choice_set``. This is a special attribute that allows you to retrieve all the
-related Choice objects for a particular poll, and it gets added by Django whenever
-you define a relationship between two models - a foreign key relationship for 
-example. 
+OK, our tests are complaining that the "poll" object has no attribute ``choice_set``. This is a special attribute that allows you to retrieve all the related Choice objects for a particular poll, and it gets added by Django whenever you define a relationship between two models - a foreign key relationship for example. 
 
 You can see some more examples of creating Polls and related Choices here:
 https://docs.djangoproject.com/en/1.4/intro/tutorial01/#playing-with-the-api
@@ -485,6 +471,8 @@ Further customisations of the admin view: related objects inline
 
 Hooray! What's next?  Well, one of the great things about TDD is that, once you've written your tests, you don't really have to keep track of what's next any more.  You can can just run the tests, and they'll tell you what to do. So, what do the tests want?  Let's re-run the FTs::
 
+    python manage.py test fts
+
     ======================================================================
     ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
     ----------------------------------------------------------------------
@@ -539,7 +527,7 @@ Let's run the FT again::
 
     ----------------------------------------------------------------------
 
-You may have noticed, during the run, that the form got all grumpy about the 'votes' field being required (if you don't believe me, why not spin up the test server using ``manage.py runserver`` and check for yourself?  Remember, you may need to ``syncdb``)
+You may have noticed, during the run, that the form got all grumpy about the 'votes' field being required (if you don't believe me, why not spin up the test server using ``manage.py runserver`` and check for yourself?  Remember, you may need to ``syncdb``... Alternatively you can add a ``time.sleep(10)`` to the FT just before the error, and that will let you see what's happening)
 
 Let's make 'votes' default to 0, by adding a new test in ``tests.py``
 
@@ -552,6 +540,8 @@ Let's make 'votes' default to 0, by adding a new test in ``tests.py``
 
 And run it::
 
+    python manage.py test polls
+    [...]
     AssertionError: None != 0
 
 And set the default, in ``polls/models.py``
