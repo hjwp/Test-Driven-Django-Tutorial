@@ -1,13 +1,14 @@
-import datetime
 from django.test import TestCase
+from django.utils import timezone
 from polls.models import Poll
 
 class TestPollsModel(TestCase):
     def test_creating_a_new_poll_and_saving_it_to_the_database(self):
-        # start by creating a new Poll object with its "question" set
+        # start by creating a new Poll object with its "question" and
+        # "pub_date" attributes set
         poll = Poll()
         poll.question = "What's up?"
-        poll.pub_date = datetime.datetime(2012, 12, 25)
+        poll.pub_date = timezone.now()
 
         # check we can save it to the database
         poll.save()
