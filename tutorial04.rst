@@ -428,9 +428,9 @@ And that should get the tests passing!  If you're curious to see what the form H
 
 Right, where where we?  Let's do a quick check of the functional tests.
 
-(*incidentally, are you rather bored of watching the FT run through the admin test each time?  I was, so I've built in a second argument to the FT runner that lets you filter by name of test - just pass in* ``polls`` *and it will only run FTs in files whose names contain the world* ``polls``.):: 
+(*incidentally, are you rather bored of watching the FT run through the admin test each time?  If so, you can temporarily disable it by renaming its test method from* ``test_can_create_new_poll_via_admin_site`` *to* ``DONTtest_can_create_new_poll_via_admin_site`` *that's called "Dontifying"... remember to change it back before the end though!*)
 
-    python functional_tests.py polls
+    python manage.py test fts
     [...]
     AssertionError: 0 != 3
 

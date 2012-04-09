@@ -17,10 +17,10 @@ Here's the outline of what we're going to do in this tutorial:
 Finishing the FT
 ----------------
 
-Let's pick up from the ``TODO`` in our FT, and extend it to include viewing the effects of submitting a vote on a poll. In ``fts/test_polls.py``:
+Let's pick up from the ``TODO`` in our FT, and extend it to include viewing the effects of submitting a vote on a poll. In ``fts/tests.py``:
 
 .. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
+    :filename: mysite/fts/tests.py
 
         [...] 
 
@@ -38,17 +38,43 @@ Let's pick up from the ``TODO`` in our FT, and extend it to include viewing the 
         # The page also says "1 vote"
         self.assertIn('1 vote', body_text)
 
-        self.fail('TODO')
+        # But not "1 votes" -- Herbert is impressed at the attention to detail
+        self.assertNotIn('1 votes', body_text)
 
-We'll leave the "TODO" in, because we'll want to exercise the site a litte further, to make sure other votes update the counters appropriately.  But let's see if we can get a single vote working for now.
+        # Herbert suspects that the website isn't very well protected
+        # against people submitting multiple votes yet, so he tries
+        # to do a little astroturfing
+        self.browser.find_element_by_css_selector("input[value='1']").click()
+        self.browser.find_element_by_css_selector("input[type='submit']").click()
+
+        # The page refreshes, and he sees that his choice has updated the
+        # results.  it still says # "100 %: very awesome".
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('100 %: Very awesome', body_text)
+
+        # But the page now says "2 votes"
+        self.assertIn('2 votes', body_text)
+
+        # Cackling manically over his l33t haxx0ring skills, he tries
+        # voting for a different choice
+        self.browser.find_element_by_css_selector("input[value='2']").click()
+        self.browser.find_element_by_css_selector("input[type='submit']").click()
+
+        # Now, the percentages update, as well as the votes
+        body_text = self.browser.find_element_by_tag_name('body').text
+        self.assertIn('67 %: Very awesome', body_text)
+        self.assertIn('33 %: Quite awesome', body_text)
+        self.assertIn('3 votes', body_text)
+
+        # Satisfied, he goes back to sleep
 
 If you run the FTs, you should see something like this::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 126, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 126, in test_voting_on_a_new_poll
         self.assertIn('100 %: Very awesome', body_text)
     AssertionError: '100 %: Very awesome' not found in u'Poll Results\nHow awesome is Test-Driven Development?\nNo-one has voted on this poll yet\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
 
@@ -219,9 +245,9 @@ Re-running the tests should give us 9 tests again, and we end up with 3 much mor
 At this stage your polls app should look something like this::
 
     `-- polls
+        |-- __init__.py
         |-- admin.py
         |-- forms.py
-        |-- __init__.py
         |-- models.py
         |-- templates
         |   |-- home.html
@@ -265,9 +291,8 @@ The Django Test Client can generate POST requests as easily as GET ones, we just
             post_data = {'vote': str(choice2.id)}
 
             # make our request to the view
-            client = Client()
             poll_url = '/poll/%d/' % (poll1.id,)
-            response = client.post(poll_url, data=post_data)
+            response = self.client.post(poll_url, data=post_data)
 
             # retrieve the updated choice from the database
             choice_in_db = Choice.objects.get(pk=choice2.id)
@@ -401,13 +426,13 @@ Lovely!  let's see that at work::
     Creating test database for alias 'default'...
     .........
     ----------------------------------------------------------------------
-    Ran 9 tests in 0.023s
+    Ran 10 tests in 0.023s
 
     OK
 
 Hooray!  Let's see if it gets the FT any further::
 
-    $ python functional_tests.py polls
+    $ python manage.py test fts
     [...]
 
     AssertionError: '100 %: Very awesome' not found in u'Poll Results\nHow awesome is Test-Driven Development?\nNo-one has voted on this poll yet\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
@@ -427,8 +452,7 @@ a quick test in ``test_views``:
         choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=2)
         choice2.save()
 
-        client = Client()
-        response = client.get('/poll/%d/' % (poll1.id, ))
+        response = self.client.get('/poll/%d/' % (poll1.id, ))
 
         # check the percentages of votes are shown, sensibly rounded
         self.assertIn('33 %: 42', response.content)
@@ -629,7 +653,7 @@ Let's hope this test/code cycle is self-explanatory. Start with ``test_models.py
         [...]
 
         def test_poll_can_tell_you_its_total_number_of_votes(self):
-            p = Poll(question='where',pub_date=tiemzone.now())
+            p = Poll(question='where',pub_date=timezone.now())
             p.save()
             c1 = Choice(poll=p,choice='here',votes=0)
             c1.save()
@@ -742,10 +766,10 @@ And re-run the tests::
 At last!  What about the FT?::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 126, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 126, in test_voting_on_a_new_poll
         self.assertIn('100 %: Very awesome', body_text)
     AssertionError: '100 %: Very awesome' not found in u'Poll Results\nHow awesome is Test-Driven Development?\n0 %: Very awesome\n0 %: Quite awesome\n0 %: Moderately awesome\nNo-one has voted on this poll yet\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
 
@@ -786,7 +810,7 @@ Hmm, not quite.  What is missing?  The "submit" button doesn't seem to be workin
 
 Re-running the FT, we get::
 
-    AssertionError: '100 %: Very awesome' not found in u"Forbidden (403)\nCSRF verification failed. Request aborted.\nHelp\nReason given for failure:\n    CSRF token missing or incorrect.\n    \nIn general, this can occur when there is a genuine Cross Site Request Forgery, or when Django's CSRF mechanism has not been used correctly. For POST forms, you need to ensure:\nThe view function uses RequestContext for the template, instead of Context.\nIn the template, there is a {% csrf_token %} template tag inside each POST form that targets an internal URL.\nIf you are not using CsrfViewMiddleware, then you must use csrf_protect on any views that use the csrf_token template tag, as well as those that accept the POST data.\nYou're seeing the help section of this page because you have DEBUG = True in your Django settings file. Change that to False, and only the initial error message will be displayed.\nYou can customize this page using the CSRF_FAILURE_VIEW setting."
+    AssertionError: '100 %: Very awesome' not found in u'Forbidden (403)\nCSRF verification failed. Request aborted.\nMore information is available with DEBUG=True.'
 
 Pretty helpful, as error messages go.  Let's add an amazing Django voodoo CSRF tag:
 
@@ -820,7 +844,7 @@ https://docs.djangoproject.com/en/1.4/ref/templates/builtins/
 
 Now what?::
 
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     AssertionError: '1 vote' not found in u'Poll Results\nHow awesome is Test-Driven Development?\n100 %: Very awesome\n0 %: Quite awesome\n0 %: Moderately awesome\nAdd your vote\nVote:\nVery awesome\nQuite awesome\nModerately awesome'
 
 Aha, looks like that ``total_votes`` function is going to come in useful again!
@@ -839,14 +863,13 @@ Let's add a tiny test to our ``test_views.py``:
         choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=2)
         choice2.save()
 
-        client = Client()
-        response = client.get('/poll/%d/' % (poll1.id, ))
+        response = self.client.get('/poll/%d/' % (poll1.id, ))
         self.assertIn('3 votes', response.content)
 
         # also check we only pluralise "votes" if necessary. details!
         choice2.votes = 0
         choice2.save()
-        response = client.get('/poll/%d/' % (poll1.id, ))
+        response = self.client.get('/poll/%d/' % (poll1.id, ))
         self.assertIn('1 vote', response.content)
         self.assertNotIn('1 votes', response.content)
 
@@ -916,69 +939,15 @@ Unit tests snow pass::
 
 Now, how about those functional tests?::
 
-    $ python functional_tests.py polls
+    $ python manage.py test fts
 
     AssertionError: TODO
 
 
-That looks good.  Let's extend the FT to make sure that multiple votes add up the way we want them to:
+That looks good. How about our fts?::
 
-.. sourcecode:: python
-    :filename: mysite/fts/test_polls.py
-
-        [...]
-        # The page also says "1 vote"
-        self.assertIn('1 vote', body_text)
-
-        # Harold suspects that the website isn't very well protected
-        # against people submitting multiple votes yet, so he tries
-        # to do a little astroturfing
-        self.browser.find_element_by_css_selector("input[value='1']").click()
-        self.browser.find_element_by_css_selector("input[type='submit']").click()
-
-        # The page refreshes, and he sees that his choice has updated the
-        # results.  it still says # "100 %: very awesome".
-        body_text = self.browser.find_element_by_tag_name('body').text
-        self.assertIn('100 %: Very awesome', body_text)
-
-        # But the page now says "2 votes"
-        self.assertIn('2 votes', body_text)
-
-        # Cackling manically over his l33t haxx0ring skills, he tries
-        # voting for a different choice
-        self.browser.find_element_by_css_selector("input[value='2']").click()
-        self.browser.find_element_by_css_selector("input[type='submit']").click()
-
-        # Now, the percentages update, as well as the votes
-        body_text = self.browser.find_element_by_tag_name('body').text
-        self.assertIn('67 %: Very awesome', body_text)
-        self.assertIn('33 %: Quite awesome', body_text)
-        self.assertIn('3 votes', body_text)
-
-        # Satisfied, he goes back to sleep
-
-
-Let's try that::
-
-    $ python functional_tests.py polls
-    [...]
-    Ran 1 test in 5.674s
-    OK
-
-
-
-Hooray!  Just to be safe, it's worth running **all** the unit tests, and all
-the functional tests too...::
-
-    $ python manage.py test
-    [...]
-    Ran 335 tests in 1.908s
-    OK
-
-
-    $ python functional_tests.py
-    [...]
-    Ran 2 tests in 10.580s
+    $ python manage.py test fts
+    Ran 2 tests in 9.606s
     OK
 
 

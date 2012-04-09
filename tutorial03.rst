@@ -376,7 +376,7 @@ But the point of TDD is to be driven by the tests.  At each stage, we only write
 
 So, rather than anticipate what we might want to put in our HttpResponse, let's go to the FT now to see what to do next.::
 
-    python functional_tests.py
+    python manage.py test fts
     ======================================================================
     ERROR: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
@@ -602,7 +602,7 @@ Ta-da!::
 
 What do the FTs say now?::
 
-    python functional_tests.py
+    python manage.py test fts
     ======================================================================
     ERROR: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
