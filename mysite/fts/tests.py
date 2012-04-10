@@ -1,8 +1,28 @@
+from collections import namedtuple
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
-class TestPollsAdmin(LiveServerTestCase):
+PollInfo = namedtuple('PollInfo', ['question', 'choices'])
+POLL1 = PollInfo(
+    question="How awesome is Test-Driven Development?",
+    choices=[
+        'Very awesome',
+        'Quite awesome',
+        'Moderately awesome',
+    ],
+)
+POLL2 = PollInfo(
+    question="Which workshop treat do you prefer?",
+    choices=[
+        'Beer',
+        'Pizza',
+        'The Acquisition of Knowledge',
+    ],
+)
+
+
+class PollsTest(LiveServerTestCase):
     fixtures = ['admin_user.json']
 
     def setUp(self):
@@ -84,38 +104,6 @@ class TestPollsAdmin(LiveServerTestCase):
 
         # Satisfied, she goes back to sleep
 
-
-
-from collections import namedtuple
-
-PollInfo = namedtuple('PollInfo', ['question', 'choices'])
-POLL1 = PollInfo(
-    question="How awesome is Test-Driven Development?",
-    choices=[
-        'Very awesome',
-        'Quite awesome',
-        'Moderately awesome',
-    ],
-)
-POLL2 = PollInfo(
-    question="Which workshop treat do you prefer?",
-    choices=[
-        'Beer',
-        'Pizza',
-        'The Acquisition of Knowledge',
-    ],
-)
-
-
-
-class TestPolls(LiveServerTestCase):
-    fixtures = ['admin_user.json']
-
-    def setUp(self):
-        self.browser = webdriver.Firefox()
-
-    def tearDown(self):
-        self.browser.quit()
 
     def _setup_polls_via_admin(self):
         # Gertrude logs into the admin site

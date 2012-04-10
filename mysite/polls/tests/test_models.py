@@ -1,9 +1,8 @@
-from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils import timezone
 from polls.models import Choice, Poll
 
-class TestPollsModel(TestCase):
+class PollModelTest(TestCase):
     def test_creating_a_new_poll_and_saving_it_to_the_database(self):
         # start by creating a new Poll object with its "question" and
         # "pub_date" attributes set
@@ -55,7 +54,7 @@ class TestPollsModel(TestCase):
 
 
 
-class TestPollChoicesModel(TestCase):
+class ChoiceModelTest(TestCase):
 
     def test_creating_some_choices_for_a_poll(self):
         # start by creating a new Poll object

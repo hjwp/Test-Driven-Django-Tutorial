@@ -1,7 +1,9 @@
 Part 3 - A normal web page, using Django views and templates
 ============================================================
 
-Welcome to part 3 of the tutorial!  This week we'll finally get into writing our own web pages, rather than using the Django Admin site.  Here's a summary of what we'll get up to:
+Welcome to part 3 of the tutorial!  This week we'll finally get into writing
+our own web pages, rather than using the Django Admin site.  Here's a summary
+of what we'll get up to:
 
 * Write an FT that views and responds to a Poll
 
@@ -10,78 +12,77 @@ Welcome to part 3 of the tutorial!  This week we'll finally get into writing our
 * Use the Django Test Client to write unit tests for the above
 
 
-Let's pick up our FT where we left off - we now have the admin site set up to add Polls, including Choices.  We now want to flesh out what the user sees.
+Let's pick up our FT where we left off - we now have the admin site set up to
+add Polls, including Choices.  We now want to flesh out what the user sees.
 
 Writing the FT as comments
 --------------------------
 
-Let's start by writing out our FT as human-readable comments, which describe the user's actions, and the expected behaviour of the site
+Let's start by writing out our FT as human-readable comments, which describe
+the user's actions, and the expected behaviour of the site
 
-Create a new class inside ``fts/tests.py``.  
+Create a new test method inside ``fts/tests.py``.  
 
 .. sourcecode:: python
     :filename: mysite/fts/tests.py
 
+    def test_can_create_new_poll_via_admin_site(self):
         [...]
         self.assertEquals(len(new_poll_links), 1)
 
         # Satisfied, she goes back to sleep
 
-    class TestPolls(LiveServerTestCase):
-        fixtures = ['admin_user.json']
+    def test_voting_on_a_new_poll(self):
+        # First, Gertrude the administrator logs into the admin site and
+        # creates a couple of new Polls, and their response choices
 
-        def setUp(self):
-            self.browser = webdriver.Firefox()
+        # Now, Herbert the regular user goes to the homepage of the site. He
+        # sees a list of polls.
 
-        def tearDown(self):
-            self.browser.quit()
+        # He clicks on the link to the first Poll, which is called
+        # 'How awesome is test-driven development?'
 
-        def test_voting_on_a_new_poll(self):
-            # First, Gertrude the administrator logs into the admin site and
-            # creates a couple of new Polls, and their response choices
+        # He is taken to a poll 'results' page, which says
+        # "no-one has voted on this poll yet"
 
-            # Now, Herbert the regular user goes to the homepage of the site. He
-            # sees a list of polls.
+        # He also sees a form, which offers him several choices.
+        # He decided to select "very awesome"
 
-            # He clicks on the link to the first Poll, which is called
-            # 'How awesome is test-driven development?'
+        # He clicks 'submit'
 
-            # He is taken to a poll 'results' page, which says
-            # "no-one has voted on this poll yet"
+        # The page refreshes, and he sees that his choice
+        # has updated the results.  they now say
+        # "100 %: very awesome".
 
-            # He also sees a form, which offers him several choices.
-            # He decided to select "very awesome"
+        # The page also says "1 votes"
 
-            # He clicks 'submit'
-
-            # The page refreshes, and he sees that his choice
-            # has updated the results.  they now say
-            # "100 %: very awesome".
-
-            # The page also says "1 votes"
-
-            # Satisfied, he goes back to sleep
+        # Satisfied, he goes back to sleep
 
 
 Setting up data for the test via the admin site
 -----------------------------------------------
 
-A nice little test, but that very first comment rather glosses over a lot. Let's split out the Gertrude bit into its own method, for tidiness, and copy and paste in some code from the admin test.
+A nice little test, but that very first comment rather glosses over a lot.
+Let's split out the Gertrude bit into its own method, for tidiness, and copy
+and paste in some code from the admin test.
 
-You'll see I've changed things slightly, because in the admin test we entered just one poll and one set of choices, whereas here we're doing several - so you'll see there's a little loop, and I'm storing the polls' questions and choices in a couple of namedtuples.  
+You'll see I've changed things slightly, because in the admin test we entered
+just one poll and one set of choices, whereas here we're doing several - so
+you'll see there's a little loop, and I'm storing the polls' questions and
+choices in a couple of namedtuples.  
 
-(*If you've never seen a namedtuple in Python before, you should definitely look them up! They're a neat way of specificying a structured data type - more info here:*
+(*If you've never seen a namedtuple in Python before, you should definitely
+look them up! They're a neat way of specificying a structured data type - more
+info here:*
 http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
 
 .. sourcecode:: python
     :filename: mysite/fts/tests.py
 
-        [...]
-        self.assertEquals(len(new_poll_links), 1)
-
-        # Satisfied, she goes back to sleep
-
     from collections import namedtuple
+    from django.test import LiveServerTestCase
+    from selenium import webdriver
+    from selenium.webdriver.common.keys import Keys
 
     PollInfo = namedtuple('PollInfo', ['question', 'choices'])
     POLL1 = PollInfo(
@@ -101,7 +102,8 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
         ],
     )
 
-    class TestPolls(LiveServerTestCase):
+
+    class PollsTest(LiveServerTestCase):
         fixtures = ['admin_user.json']
 
         def setUp(self):
@@ -109,6 +111,15 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
 
         def tearDown(self):
             self.browser.quit()
+
+        def test_can_create_new_poll_via_admin_site(self):
+            # Gertrude opens her web browser, and goes to the admin page
+            self.browser.get(self.live_server_url + '/admin/')
+
+            [...]
+            self.assertEquals(len(new_poll_links), 1)
+
+            # Satisfied, she goes back to sleep
 
         def _setup_polls_via_admin(self):
             # Gertrude logs into the admin site
@@ -163,9 +174,11 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
 
             self.fail('TODO')
             # Now, Herbert the regular user goes to the homepage of the site. He
+            [...]
 
 
-Now, if you try running that test, you should see selenium run through and enter the two polls, and then exit with the "TODO"::
+Now, if you try running that test, you should see selenium run through and
+enter the two polls, and then exit with the "TODO"::
 
     ======================================================================
     FAIL: test_voting_on_a_new_poll (tests.TestPolls)
@@ -176,14 +189,16 @@ Now, if you try running that test, you should see selenium run through and enter
     AssertionError: TODO
     ----------------------------------------------------------------------
 
-If it fails any earlier than that, you may not have completed the last couple of tutorials in quite the same way I specified.  Figure out what's wrong!
+If it fails any earlier than that, you may not have completed the last couple
+of tutorials in quite the same way I specified.  Figure out what's wrong!
 
 
 
 At last! An FT for a normal page
 --------------------------------
 
-Let's write the exciting bit of our test, where Herbert the normal user opens up our website, sees some polls and votes on them.
+Let's write the exciting bit of our test, where Herbert the normal user opens
+up our website, sees some polls and votes on them.
 
 
 .. sourcecode:: python
@@ -220,7 +235,9 @@ Let's write the exciting bit of our test, where Herbert the normal user opens up
         [...]
 
 
-We've started with the first bit, where Herbert goes to the main page of the site, we check that he can see a Poll there, and that he can click on it.  Then we look for the default 'no votes yet' message on the next page.
+We've started with the first bit, where Herbert goes to the main page of the
+site, we check that he can see a Poll there, and that he can click on it.  Then
+we look for the default 'no votes yet' message on the next page.
 
 Let's run that, and see where we get::
 
@@ -230,14 +247,20 @@ Let's run that, and see where we get::
 URLS and view functions, and the Django Test Client
 ---------------------------------------------------
 
-The FT is telling us that going to the root url (/) produces an error. We need to tell Django what kind of web page to return for the root of our site - the home page if you like.
+The FT is telling us that going to the root url (/) doesn't have any ``<h1>``
+elements in - that's because we haven't created it yet! We need to tell Django
+what kind of web page to return for the root of our site - the home page if you
+like.
 
-Django uses a file called ``urls.py``, to route visitors to the python function that will deal with producing a response for them.  These functions are called `views` in Django terminology, and they live in ``views.py``. 
+Django uses a file called ``urls.py``, to route visitors to the python function
+that will deal with producing a response for them.  These functions are called
+`views` in Django terminology, and they live in ``views.py``. 
 
 (*This is essentially an MVC pattern, there's some discussion of it here:*
 https://docs.djangoproject.com/en/dev/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names) 
 
-Let's add a new test to ``tests.py``.  I'm going to use the Django Test Client, which has some helpful features for testing views.  More info here:
+Let's add a new test to ``tests.py``.  I'm going to use the Django Test Client,
+which has some helpful features for testing views.  More info here:
 
 https://docs.djangoproject.com/en/1.4/topics/testing/
 
@@ -247,7 +270,7 @@ We'll create a new class to test our home page view:
     :filename: mysite/polls/tests.py
 
     [...]
-    class TestHomePageView(TestCase):
+    class HomePageViewTest(TestCase):
 
         def test_root_url_shows_all_polls(self):
             # set up some polls
@@ -263,7 +286,10 @@ We'll create a new class to test our home page view:
 
 Don't forget the import at the top!  
 
-Now, our first run of the tests will probably complain of a with ``TemplateDoesNotExist: 404.html``.  Django wants us to create a template for our "404 error" page.  We'll come back to that later.  For now, let's make the ``/`` url return a real HTTP response.
+Now, our first run of the tests will probably complain of a with
+``TemplateDoesNotExist: 404.html``.  Django wants us to create a template for
+our "404 error" page.  We'll come back to that later.  For now, let's make the
+``/`` url return a real HTTP response.
  
 First we'll create a dummy view in ``views.py``:
 
@@ -287,7 +313,9 @@ Now let's hook up this view inside ``urls.py``:
         url(r'^admin/', include(admin.site.urls)),
     )
 
-``urls.py`` maps urls (specified as regular expressions) to views.  I've used dotted-string notation to specify the name of the view, but you could also use the actual view, like this:
+``urls.py`` maps urls (specified as regular expressions) to views.  I've used
+dotted-string notation to specify the name of the view, but you could also use
+the actual view, like this:
 
 .. sourcecode:: python
     :filename: mysite/mysite/urls.py
@@ -298,13 +326,16 @@ Now let's hook up this view inside ``urls.py``:
         url(r'^admin/', include(admin.site.urls)),
     )
 
-That would have the advantage that it checks that the view exists and imports OK.  It's a personal preference, but the official tutorial uses dot-notation, so I thought we'd stick with that. Read more here:
+That would have the advantage that it checks that the view exists and imports
+OK.  It's a personal preference, but the official tutorial uses dot-notation,
+so I thought we'd stick with that. Read more here:
+
 https://docs.djangoproject.com/en/1.4/intro/tutorial03/#design-your-urls
 
 Re-running our tests should show us a different error::
 
     ======================================================================
-    ERROR: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
+    ERROR: test_root_url_shows_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 92, in test_root_url_shows_all_polls
@@ -331,7 +362,7 @@ Let's get the view to return an HttpResponse:
 The tests are now more instructive::
 
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 96, in test_root_url_shows_all_polls
@@ -342,7 +373,9 @@ The tests are now more instructive::
 The Django Template system
 --------------------------
 
-So far, we're returning a blank page.  Now, to get the tests to pass, it would be simple enough to just return a response that contained the questions of our two polls as "raw" text - like this:
+So far, we're returning a blank page.  Now, to get the tests to pass, it would
+be simple enough to just return a response that contained the questions of our
+two polls as "raw" text - like this:
 
 .. sourcecode:: python
     :filename: mysite/polls/views.py
@@ -370,11 +403,17 @@ Sure enough, that gets our limited unit tests passing::
     Destroying test database for alias 'default'...
 
 
-Now, this probably seems like a slightly artificial situation - for starters, the two polls' names will just be concatenated together, without even a space or a carriage return. We can't possibly leave the situation like this for real users to see!
+Now, this probably seems like a slightly artificial situation - for starters,
+the two polls' names will just be concatenated together, without even a space
+or a carriage return. We can't possibly leave the situation like this for real
+users to see!
 
-But the point of TDD is to be driven by the tests.  At each stage, we only write the code that our tests require, because that makes absolutely sure that we have tests for all of our code.
+But the point of TDD is to be driven by the tests.  At each stage, we only
+write the code that our tests require, because that makes absolutely sure that
+we have tests for all of our code.
 
-So, rather than anticipate what we might want to put in our HttpResponse, let's go to the FT now to see what to do next.::
+So, rather than anticipate what we might want to put in our HttpResponse, let's
+go to the FT now to see what to do next.::
 
     python manage.py test fts
     ======================================================================
@@ -396,14 +435,19 @@ So, rather than anticipate what we might want to put in our HttpResponse, let's 
     Ran 2 tests in 29.119s
 
 
-The FT wants an ``h1`` heading tag on the page.  Now, again, we could hard-code this into view (maybe starting with ``content = <h1>Polls</h1>`` before the ``for`` loop), but at this point it seems sensible to start to use Django's template system - that will provide a much more natural way to write web pages.
+The FT wants an ``h1`` heading tag on the page.  Now, again, we could hard-code
+this into view (maybe starting with ``content = <h1>Polls</h1>`` before the
+``for`` loop), but at this point it seems sensible to start to use Django's
+template system - that will provide a much more natural way to write web pages.
 
-The Django TestCase lets us check whether a response was rendered using a template, by using a special method response called ``assertTemplateUsed``, so let's use that.  In ``tests.py``, add an extra check to our view test:
+The Django TestCase lets us check whether a response was rendered using a
+template, by using a special method response called ``assertTemplateUsed``, so
+let's use that.  In ``tests.py``, add an extra check to our view test:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
-    class TestHomePageView(TestCase):
+    class HomePageViewTest(TestCase):
 
         def test_root_url_shows_links_to_all_polls(self):
             # set up some polls
@@ -425,7 +469,7 @@ The Django TestCase lets us check whether a response was rendered using a templa
 Testing ``python manage.py test polls``::
  
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 94, in test_root_url_shows_all_polls
@@ -436,7 +480,8 @@ Testing ``python manage.py test polls``::
     ----------------------------------------------------------------------
     Ran 6 tests in 0.009s
 
-So let's now create our template. Templates usually live in a subfolder of each app::
+So let's now create our template. Templates usually live in a subfolder of each
+app::
 
     mkdir polls/templates
     touch polls/templates/home.html
@@ -483,11 +528,17 @@ Edit ``home.html`` with your favourite editor,
       </body>
     </html>
 
-You'll probably recognise this as being essentially standard HTML, intermixed with some special django control codes.  These are either surrounded with ``{%`` - ``%}``, for flow control - like a `for` loop in this case, and ``{{`` - ``}}`` for printing variables.  You can find out more about the Django template language here:
+You'll probably recognise this as being essentially standard HTML, intermixed
+with some special django control codes.  These are either surrounded with
+``{%`` - ``%}``, for flow control - like a `for` loop in this case, and ``{{``
+- ``}}`` for printing variables.  You can find out more about the Django
+  template language here:
 
 https://docs.djangoproject.com/en/1.4/topics/templates/ 
 
-Let's rewrite our code to use this template.  For this we can use the Django ``render`` function, which takes the request and the name of the template, back in ``views.py``:
+Let's rewrite our code to use this template.  For this we can use the Django
+``render`` function, which takes the request and the name of the template, back
+in ``views.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/views.py
@@ -498,10 +549,11 @@ Let's rewrite our code to use this template.  For this we can use the Django ``r
     def home(request):
         return render(request, 'home.html')
 
-Our last unit test error was that we weren't using a template - let's see if this fixes it::
+Our last unit test error was that we weren't using a template - let's see if
+this fixes it::
 
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
 
     Traceback (most recent call last):
@@ -510,9 +562,14 @@ Our last unit test error was that we weren't using a template - let's see if thi
     AssertionError: '6 times 7' not found in '<html>\n  <body>\n    <h1>Polls</h1>\n    \n  </body>\n</html>\n'
     ----------------------------------------------------------------------
 
-Sure does!  Unfortunately, we've lost our Poll questions from the response content...
+Sure does!  Unfortunately, we've lost our Poll questions from the response
+content...
 
-Looking at the template code, you can see that we want to iterate through a variable called ``polls``.  The way we pass this into a template is via a dictionary called a `context`.  The Django test client also lets us check on what context objects were used in rendering a response, so we can write a test for that too:
+Looking at the template code, you can see that we want to iterate through a
+variable called ``polls``.  The way we pass this into a template is via a
+dictionary called a `context`.  The Django test client also lets us check on
+what context objects were used in rendering a response, so we can write a test
+for that too:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -538,7 +595,7 @@ they behave like lists, don't quite compare equal like them.
 Now, re-running the tests gives us::
 
     ======================================================================
-    ERROR: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
+    ERROR: test_root_url_shows_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 97, in test_root_url_shows_all_polls
@@ -564,7 +621,7 @@ the test forwards:
 Now the unit tests say::
 
     ======================================================================
-    FAIL: test_root_url_shows_all_polls (polls.tests.TestHomePageView)
+    FAIL: test_root_url_shows_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 98, in test_root_url_shows_all_polls
@@ -624,13 +681,16 @@ What do the FTs say now?::
 Testing philosophy: what to test in templates
 ---------------------------------------------
 
-Ah - although our page may contain the name of our Poll, it's not yet a link we can click.
+Ah - although our page may contain the name of our Poll, it's not yet a link we
+can click. The way we'd fix this is in the ``home.html`` template, by adding an ``<a href=``.
 
-The way we'd fix this is in the ``home.html`` template, by adding an ``<a href=``.
+So is this something we write a unit test for as well?  Some people would tend
+to say that this is one unit test too many...  Since this is a guide to
+**rigorous** TDD, I'm going to say we probably should in this case. 
 
-So is this something we write a unit test for as well?  Some people would tend to say that this is one unit test too many...  Since this is a guide to **rigorous** TDD, I'm going to say we probably should in this case.
-
-On the other hand, if we write a unit test for every single last bit of html that we want to write, every last presentational detail, then making tiny tweaks to the UI is going to be really burdensome.
+On the other hand, if we write a unit test for every single last bit of html
+that we want to write, every last presentational detail, then making tiny
+tweaks to the UI is going to be really burdensome.
 
 At this point, a couple of rules of thumb are useful:
 
@@ -646,33 +706,70 @@ There's no point in writing a test that says::
 
     self.assertEquals(wibble, 3)
 
-Tests are meant to check how our code behaves, not just to repeat every line of it.
+Tests are meant to check how our code behaves, not just to repeat every line of
+it.
 
-The second rule is a related rule, but it's more about how users interact with your software.  We want our functional tests to check that the software allows the user to accomplish certain tasks.  So, we need to check that each screen contains elements that can guide the user towards the choices they need to make (the link text), and also that they function in a way that moves the user towards their goal (our link, when clicked, will take the user to the right page).
+The second rule is a related rule, but it's more about how users interact with
+your software.  We want our functional tests to check that the software allows
+the user to accomplish certain tasks.  So, we need to check that each screen
+contains elements that can guide the user towards the choices they need to make
+(the link text), and also that they function in a way that moves the user
+towards their goal (our link, when clicked, will take the user to the right
+page).
 
-What we definitely don't need to test in our FTs are things like - what specific colour are the links (although the fact that they are a different colour to something else may be relevant).  We don't need to check the particular font they use.  We don't need to check whether they are displayed in a ``ul`` or in a ``table`` - although we may want to check that they are displayed in the correct order.
+What we definitely don't need to test in our FTs are things like - what
+specific colour are the links (although the fact that they are a different
+colour to something else may be relevant).  We don't need to check the
+particular font they use.  We don't need to check whether they are displayed in
+a ``ul`` or in a ``table`` - although we may want to check that they are
+displayed in the correct order.
 
-So, where does that leave us?  The FT currently checks the functionality of the site - it checks the link has the correct text, and later it checks that clicking the link takes us to the right place.  
+So, where does that leave us?  The FT currently checks the functionality of the
+site - it checks the link has the correct text, and later it checks that
+clicking the link takes us to the right place.  
 
-So, what about unit testing the templates?  Well, most of what's in a template is just a constant - we don't want to have to rewrite our unit tests just because we want to correct a typo in a bit of blurb... The parts of a template that aren't "just a constant" are the bits inside ``{{ }}`` or ``{%  %}`` - bits that manipulate some of the ``context`` variables we pass into the ``render`` call.
+So, what about unit testing the templates?  Well, most of what's in a template
+is just a constant - we don't want to have to rewrite our unit tests just
+because we want to correct a typo in a bit of blurb... The parts of a template
+that aren't "just a constant" are the bits inside ``{{ }}`` or ``{%  %}`` -
+bits that manipulate some of the ``context`` variables we pass into the
+``render`` call.
 
-So, in our unit tests, we need to check that the variables we pass in end up being used - that's why we have the ``assertIn`` checks on the ``response.content`` as well as the ``assertEqual`` test on the ``response.context``.
+So, in our unit tests, we need to check that the variables we pass in end up
+being used - that's why we have the ``assertIn`` checks on the
+``response.content`` as well as the ``assertEqual`` test on the
+``response.context``.
 
-So, what about checking that our template contains the correct hyperlinks, ``<a href="/poll/01/``, or whatever they may be?  Well, if we were to hard-code them into the template, then that would be a bit like testing a constant.  But we're not going to hard-code them, because that would violate the programming `DRY` principle - "Don't Repeat Yourself".
+So, what about checking that our template contains the correct hyperlinks, ``<a
+href="/poll/01/``, or whatever they may be?  Well, if we were to hard-code them
+into the template, then that would be a bit like testing a constant.  But we're
+not going to hard-code them, because that would violate the programming `DRY`
+principle - "Don't Repeat Yourself".
 
 If we were to hard-code the URLs for links to individual polls, it would be
-really tedious if we wanted to come back and change them later - say from ``/poll/1/`` to ``/poll_detail/01/`` or whatever it may be.  Django provides a single place to define urls, in ``urls.py``, and it then provides helper tools for retrieving them in other places - a function called ``reverse``, and a template tag called ``{% url %}``.  So we'll use the template tag, which avoids hard-coding the URL in the template, but it also means that the hyperlink is no longer a constant, so we need to test it.
+really tedious if we wanted to come back and change them later - say from
+``/poll/1/`` to ``/poll_detail/01/`` or whatever it may be.  Django provides a
+single place to define urls, in ``urls.py``, and it then provides helper tools
+for retrieving them in other places - a function called ``reverse``, and a
+template tag called ``{% url %}``.  So we'll use the template tag, which avoids
+hard-coding the URL in the template, but it also means that the hyperlink is no
+longer a constant, so we need to test it.
 
-Phew, that was long winded!  Anyway, the upshot is, more tests - but also, we get to learn about Django url helper functions, so it's win-win-win :-)
+Phew, that was long winded!  Anyway, the upshot is, more tests - but also, we
+get to learn about Django url helper functions, so it's win-win-win :-)
 
-Let's use the ``reverse`` function in our tests.  Its first argument is the name of the view that handles the url, and we can also specify some arguments.  We'll be making a view for seeing an individual `Poll` object, so we'll probably find the poll using its ``id``.  Here's what that translates to in ``tests.py``:
+Let's use the ``reverse`` function in our tests.  Its first argument is the
+name of the view that handles the url, and we can also specify some arguments.
+We'll be making a view for seeing an individual `Poll` object, so we'll
+probably find the poll using its ``id``.  Here's what that translates to in
+``tests.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
     from django.core.urlresolvers import reverse
 
-    class TestHomePageView(TestCase):
+    class HomePageViewTest(TestCase):
 
         def test_root_url_shows_links_to_all_polls(self):
             # set up some polls
@@ -703,7 +800,7 @@ Let's use the ``reverse`` function in our tests.  Its first argument is the name
 Running this (``python manage.py test polls``) gives::
 
     ======================================================================
-    ERROR: test_root_url_shows_links_to_all_polls (polls.tests.TestHomePageView)
+    ERROR: test_root_url_shows_links_to_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 107, in test_root_url_shows_links_to_all_polls
@@ -716,7 +813,8 @@ Running this (``python manage.py test polls``) gives::
 
     ----------------------------------------------------------------------
 
-So, the ``reverse`` function can't find a url or a view to match our request - let's add placeholders for them:
+So, the ``reverse`` function can't find a url or a view to match our request -
+let's add placeholders for them:
 
 Capturing parameters from URLs 
 ------------------------------
@@ -732,12 +830,17 @@ In ``urls.py``:
         url(r'^admin/', include(admin.site.urls)),
     )
 
-Our new line defines a set of urls that start with `poll/`, then a number made up of one or more digits - the matching group ``(\d+)``. When a url has a matching group, the captured contents are passed to the view as arguments.  So, if you look back at what the unit test was last complaining about, we should have fixed its problem: we've now created a url that references ``'polls.views.poll'`` and which is capable of taking an argument of ``1``. 
+Our new line defines a set of urls that start with `poll/`, then a number made
+up of one or more digits - the matching group ``(\d+)``. When a url has a
+matching group, the captured contents are passed to the view as arguments.  So,
+if you look back at what the unit test was last complaining about, we should
+have fixed its problem: we've now created a url that references
+``'polls.views.poll'`` and which is capable of taking an argument of ``1``. 
 
 So now our unit tests give a different error::
 
     ======================================================================
-    FAIL: test_root_url_shows_links_to_all_polls (polls.tests.TestHomePageView)
+    FAIL: test_root_url_shows_links_to_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/polls/tests.py", line 108, in test_root_url_shows_links_to_all_polls
@@ -764,7 +867,7 @@ Notice the call to ``{% url %}``, which works almost exactly like ``reverse``.  
 
 
     ======================================================================
-    ERROR: test_root_url_shows_links_to_all_polls (polls.tests.TestHomePageView)
+    ERROR: test_root_url_shows_links_to_all_polls (polls.tests.HomePageViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/polls/tests.py", line 99, in test_root_url_shows_links_to_all_polls
@@ -811,7 +914,8 @@ Notice the call to ``{% url %}``, which works almost exactly like ``reverse``.  
 
     ----------------------------------------------------------------------
 
-Phew. A long traceback, but basically all it's saying is that we need at least a placeholder for our new "poll" view in ``views.py``.  Let's add that now:
+Phew. A long traceback, but basically all it's saying is that we need at least
+a placeholder for our new "poll" view in ``views.py``.  Let's add that now:
 
 .. sourcecode:: python
     :filename: mysite/mysite/urls.py
@@ -838,4 +942,8 @@ What about the functional tests?::
     NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
 
-Well, they get past the main page, but they fall over when they try to look at an individual poll. Looks like it's time to start implementing our `poll` view, which aims to show information about a particular poll...  But for this, you'll have to tune in next week!
+Well, they get past the main page, but they fall over when they try to look at
+an individual poll. Looks like it's time to start implementing our `poll` view,
+which aims to show information about a particular poll...  But for this, you'll
+have to tune in next week!
+

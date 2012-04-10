@@ -223,7 +223,7 @@ Django have put in there, and replace it with this:
     from django.test import LiveServerTestCase
     from selenium import webdriver
 
-    class TestPollsAdmin(LiveServerTestCase):
+    class PollsTest(LiveServerTestCase):
 
         def setUp(self):
             self.browser = webdriver.Firefox()
@@ -434,7 +434,7 @@ Let's see if it worked by trying to run the functional tests again::
     python manage.py test fts
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/tests.py", line 20, in test_can_create_new_poll_via_admin_site
@@ -526,7 +526,7 @@ Let's see if it worked!  Try running the functional tests again::
     [28/Nov/2011 04:00:28] "GET /admin/ HTTP/1.1" 200 2028
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/tmp/mysite/fts/tests.py", line 16, in test_can_create_new_poll_via_admin_site
@@ -639,7 +639,7 @@ So, we now want our FT to cover logging into the admin site, and checking that
     from selenium import webdriver
     from selenium.webdriver.common.keys import Keys
 
-    class TestPollsAdmin(LiveServerTestCase):
+    class PollsTest(LiveServerTestCase):
 
         def setUp(self):
             self.browser = webdriver.Firefox()
@@ -697,7 +697,7 @@ Let's try running the FT again and seeing how far it gets::
 
     python manage.py test fts
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/tests.py", line 33, in test_can_create_new_poll_via_admin_site
@@ -738,7 +738,7 @@ attribute called ``fixtures`` on the test class:
     from selenium import webdriver
     from selenium.webdriver.common.keys import Keys
 
-    class TestPollsAdmin(LiveServerTestCase):
+    class PollsTest(LiveServerTestCase):
         fixtures = ['admin_user.json']
 
         def setUp(self):
@@ -750,7 +750,7 @@ https://docs.djangoproject.com/en/1.4/topics/testing/#fixture-loading
 Let's try again::
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (fts.tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/tests.py", line 37, in test_can_create_new_poll_via_admin_site
@@ -842,7 +842,7 @@ interact with our application at a much lower level.
     from django.util import timezone
     from polls.models import Poll
 
-    class TestPollsModel(TestCase):
+    class PollModelTest(TestCase):
         def test_creating_a_new_poll_and_saving_it_to_the_database(self):
             # start by creating a new Poll object with its "question" set
             poll = Poll()
@@ -940,7 +940,7 @@ tests, change a tiny bit of code, check the tests again, see what tiny bit of
 code to write next. Run the tests...::
 
     ======================================================================
-    ERROR: test_creating_a_poll (polls.tests.TestPollsModel)
+    ERROR: test_creating_a_poll (polls.tests.PollModelTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/polls/tests.py", line 8, in test_creating_a_poll
@@ -968,7 +968,7 @@ Inheriting from Django's ``Model`` class will give us the ``save()`` method.
 Running the tests again, we should see a slight change to the error message::
 
     ======================================================================
-    ERROR: test_creating_a_new_poll_and_saving_it_to_the_database (polls.tests.TestPollsModel)
+    ERROR: test_creating_a_new_poll_and_saving_it_to_the_database (polls.tests.PollModelTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/polls/tests.py", line 26, in test_creating_a_new_poll_and_saving_it_to_the_database
@@ -1004,7 +1004,7 @@ why not come back and write one?  Hint: you'll probably need to use*
 Now our tests get slightly further - they tell us we need to add a pub_date::
 
     ======================================================================
-    ERROR: test_creating_a_new_poll_and_saving_it_to_the_database (polls.tests.TestPollsModel)
+    ERROR: test_creating_a_new_poll_and_saving_it_to_the_database (polls.tests.PollModelTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/polls/tests.py", line 27, in test_creating_a_new_poll_and_saving_it_to_the_database
@@ -1043,7 +1043,7 @@ So the unit tests all pass. Does this mean our functional test will pass?::
 
     python manage.py test fts
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/tests.py", line 25, in test_can_create_new_poll_via_admin_site
@@ -1081,7 +1081,7 @@ If you've done everything right, the polls app folder will look like this::
 Let's try the FT again...::
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/tmp/mysite/fts/tests.py", line 28, in test_can_create_new_poll_via_admin_site

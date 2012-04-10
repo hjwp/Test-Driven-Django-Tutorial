@@ -4,7 +4,7 @@ from django.utils import timezone
 from polls.models import Choice, Poll
 
 
-class TestHomePageView(TestCase):
+class HomePageViewTest(TestCase):
 
     def test_root_url_shows_links_to_all_polls(self):
         # set up some polls
@@ -34,7 +34,7 @@ class TestHomePageView(TestCase):
 
 
 
-class TestSinglePollView(TestCase):
+class SinglePollViewTest(TestCase):
 
     def test_page_shows_poll_title_and_no_votes_message(self):
         # set up two polls, to check the right one is displayed

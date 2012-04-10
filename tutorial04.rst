@@ -91,7 +91,7 @@ in ``polls/tests.py``:
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
-    class TestSinglePollView(TestCase):
+    class SinglePollViewTest(TestCase):
 
         def test_page_shows_poll_title_and_no_votes_message(self):
             # set up two polls, to check the right one is displayed
@@ -296,7 +296,7 @@ But Django can do even better than that - Django's forms system will generate ra
 
     from polls.forms import PollVoteForm
 
-    class TestPollsVoteForm(TestCase):
+    class PollsVoteFormTest(TestCase):
 
         def test_form_renders_poll_choices_as_radio_inputs(self):
             # set up a poll with a couple of choices
@@ -434,12 +434,12 @@ Right, where where we?  Let's do a quick check of the functional tests.
     [...]
     AssertionError: 0 != 3
 
-Ah yes, we still haven't actually *used* the form yet!  Let's go back to our ``TestSinglePollView``, and a new test that checks we use our form)
+Ah yes, we still haven't actually *used* the form yet!  Let's go back to our ``SinglePollViewTest``, and a new test that checks we use our form)
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
-    class TestSinglePollView(TestCase):
+    class SinglePollViewTest(TestCase):
 
         def test_page_shows_poll_title_and_no_votes_message(self):
             [...]

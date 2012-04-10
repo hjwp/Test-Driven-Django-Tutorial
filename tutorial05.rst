@@ -160,9 +160,9 @@ At this point, we should be able to run the tests again. Let's do so, and check 
 
 Hooray!  Now we have our test in a subfolder, we can start moving them out into different files.  Again, we do this step by step.  Let's start by moving all the model tests into a file called ``test_models.py``.  You'll need to move the following classes:
 
-    * ``TestPollsModel``
+    * ``PollModelTest``
 
-    * ``TestPollChoicesModel``
+    * ``ChoiceModelTest``
 
 The way I chose to do it was:
 
@@ -213,9 +213,9 @@ Anyways - next, let's do the views tests. Here's the way I did it:
 
   * Save a copy of ``tests.py`` as ``test_views.py``
 
-  * Delete ``TestPollsVoteForm`` from ``test_views.py``
+  * Delete ``PollsVoteFormTest`` from ``test_views.py``
 
-  * Delete ``TestHomePageView`` and ``TestSinglePollView`` from ``tests.py``
+  * Delete ``HomePageViewTest`` and ``SinglePollViewTest`` from ``tests.py``
 
   * add ``from mysite.polls.tests.test_views import *`` to ``polls/tests/__init__,py``
 
@@ -273,7 +273,7 @@ The Django Test Client can generate POST requests as easily as GET ones, we just
     :filename: mysite/polls/tests/test_views.py
 
 
-    class TestSinglePollView(TestCase):
+    class SinglePollViewTest(TestCase):
 
         def test_page_shows_choices_using_form(self):
             [...]
@@ -307,7 +307,7 @@ The Django Test Client can generate POST requests as easily as GET ones, we just
 Right, let's see how it fails, first::
 
     ======================================================================
-    FAIL: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.TestSinglePollView)
+    FAIL: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.SinglePollViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/../mysite/polls/tests/test_views.py", line 98, in test_view_can_handle_votes_via_POST
@@ -341,7 +341,7 @@ Let's see what the tests think::
     Creating test database for alias 'default'...
     .......EEF
     ======================================================================
-    ERROR: test_page_shows_choices_using_form (polls.tests.test_views.TestSinglePollView)
+    ERROR: test_page_shows_choices_using_form (polls.tests.test_views.SinglePollViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/polls/tests/test_views.py", line 76, in test_page_shows_choices_using_form
@@ -359,7 +359,7 @@ Let's see what the tests think::
     MultiValueDictKeyError: "Key 'vote' not found in <QueryDict: {}>"
 
     ======================================================================
-    ERROR: test_page_shows_poll_title_and_no_votes_message (mysite.polls.tests.test_views.TestSinglePollView)
+    ERROR: test_page_shows_poll_title_and_no_votes_message (mysite.polls.tests.test_views.SinglePollViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/../mysite/polls/tests/test_views.py", line 57, in test_page_shows_poll_title_and_no_votes_message
@@ -367,7 +367,7 @@ Let's see what the tests think::
     MultiValueDictKeyError: "Key 'vote' not found in <QueryDict: {}>"
 
     ======================================================================
-    ERROR: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.TestSinglePollView)
+    ERROR: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.SinglePollViewTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/tddjango_site/source/mysite/../mysite/polls/tests/test_views.py", line 105, in test_view_can_handle_votes_via_POST
@@ -396,7 +396,7 @@ So, Django tells us whether a request was a GET or a POST inside the ``method`` 
 
 And testing...::
 
-    ERROR: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.TestSinglePollView)
+    ERROR: test_view_can_handle_votes_via_POST (mysite.polls.tests.test_views.SinglePollViewTest)
     AssertionError: Response didn't redirect as expected: Response code was 200 (expected 302)
 
 
@@ -638,7 +638,7 @@ Phew.  That takes us down to just one final test error::
 
     ..........F
     ======================================================================
-    FAIL: test_view_shows_percentage_of_votes (mysite.polls.tests.test_views.TestSinglePollView)
+    FAIL: test_view_shows_percentage_of_votes (mysite.polls.tests.test_views.SinglePollViewTest)
     self.assertNotIn('No-one has voted', response.content)
     AssertionError: 'No-one has voted' unexpectedly found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3333333333 %: 42</li>\n    \n      <li>66.6666666667 %: The Ultimate Answer</li>\n    \n    </ul>\n\n    <p>No-one has voted on this poll yet</p>\n\n    <h3>Add your vote</h3>\n    <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n    <input type="submit" />\n\n    \n  </body>\n</html>\n'
 
@@ -649,7 +649,7 @@ Let's hope this test/code cycle is self-explanatory. Start with ``test_models.py
 .. sourcecode:: python
     :filename: mysite/polls/tests/test_models.py
 
-    class TestPollsModel(TestCase):
+    class PollModelTest(TestCase):
         [...]
 
         def test_poll_can_tell_you_its_total_number_of_votes(self):
@@ -876,10 +876,10 @@ Let's add a tiny test to our ``test_views.py``:
 
 Running those tests::
 
-    FAIL: test_view_shows_percentage_of_votes_and_total_votes (mysite.polls.tests.test_views.TestSinglePollView)
+    FAIL: test_view_shows_percentage_of_votes_and_total_votes (mysite.polls.tests.test_views.SinglePollViewTest)
     AssertionError: '33 %: 42' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3 %: 42</li>\n    \n      <li>66.7 %: The Ultimate Answer</li>\n    \n    </ul>\n\n\n    \n\n    <h3>Add your vote</h3>\n    <form method="POST" action="">\n      <div style=\'display:none\'><input type=\'hidden\' name=\'csrfmiddlewaretoken\' value=\'ac03d928c29ccbfe6fd0828aec8ede4e\' /></div>\n      <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n      <input type="submit" />\n    </form>\n\n    \n  </body>\n</html>\n'
 
-    FAIL: test_view_shows_total_votes (mysite.polls.tests.test_views.TestSinglePollView)
+    FAIL: test_view_shows_total_votes (mysite.polls.tests.test_views.SinglePollViewTest)
     AssertionError: '3 votes' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>6 times 7</h2>\n\n    <ul>\n    \n      <li>33.3 %: 42</li>\n    \n      <li>66.7 %: The Ultimate Answer</li>\n    \n    </ul>\n\n\n    \n\n    <h3>Add your vote</h3>\n    <form method="POST" action="">\n      <div style=\'display:none\'><input type=\'hidden\' name=\'csrfmiddlewaretoken\' value=\'d9fd2b61be1299d84b48f4c378b15ec3\' /></div>\n      <p><label for="id_vote_0">Vote:</label> <ul>\n<li><label for="id_vote_0"><input type="radio" id="id_vote_0" value="1" name="vote" /> 42</label></li>\n<li><label for="id_vote_1"><input type="radio" id="id_vote_1" value="2" name="vote" /> The Ultimate Answer</label></li>\n</ul></p>\n      <input type="submit" />\n    </form>\n\n    \n  </body>\n</html>\n'
 
 

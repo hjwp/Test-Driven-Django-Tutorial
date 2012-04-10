@@ -5,7 +5,7 @@ from polls.models import Choice, Poll
 
 
 
-class TestPollsVoteForm(TestCase):
+class PollsVoteFormTest(TestCase):
 
     def test_form_renders_poll_choices_as_radio_inputs(self):
         # set up a poll with a couple of choices

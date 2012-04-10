@@ -200,7 +200,7 @@ date" isn't the label we want for our field ("Date published")::
     python manage.py test fts
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/tests.py", line 43, in 
@@ -268,7 +268,7 @@ Now, re-running our functional tests, things have moved on::
     $ python manage.py test fts
 
     ======================================================================
-    FAIL: test_can_create_new_poll_via_admin_site (tests.TestPollsAdmin)
+    FAIL: test_can_create_new_poll_via_admin_site (tests.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/fts/tests.py", line 63, in 
@@ -298,7 +298,7 @@ case it's a very simple one -
 Running the unit tests shows the following error::
 
     ======================================================================
-    FAIL: test_poll_objects_are_named_after_their_question (polls.tests.TestPollsModel)
+    FAIL: test_poll_objects_are_named_after_their_question (polls.tests.PollModelTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/mysite/polls/tests.py", line 37, in 
@@ -388,7 +388,7 @@ admin page, because there's no such thing yet! Let's go ahead and create our
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
 
-    class TestPollChoicesModel(TestCase):
+    class ChoiceModelTest(TestCase):
 
         def test_creating_some_choices_for_a_poll(self):
             # start by creating a new Poll object
@@ -443,7 +443,7 @@ And let's do a unit test run::
     python manage.py test polls
 
     ======================================================================
-    ERROR: test_creating_some_choices_for_a_poll (polls.tests.TestPollChoicesModel)
+    ERROR: test_creating_some_choices_for_a_poll (polls.tests.ChoiceModelTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/TDDjango/mysite/polls/tests.py", line 62, in test_creating_some_choices_for_a_poll
@@ -481,7 +481,7 @@ Let's add that relationship now
 Re-running the unit tests, we get::
 
     ======================================================================
-    ERROR: test_creating_some_choices_for_a_poll (polls.tests.TestPollChoicesModel)
+    ERROR: test_creating_some_choices_for_a_poll (polls.tests.ChoiceModelTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/TDDjango/mysite/polls/tests.py", line 72, in test_creating_some_choices_for_a_poll
@@ -532,7 +532,7 @@ what do the tests want?  Let's re-run the FTs::
     python manage.py test fts
 
     ======================================================================
-    ERROR: test_voting_on_a_new_poll (test_polls.TestPolls)
+    ERROR: test_voting_on_a_new_poll (test_polls.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 40, in test_voting_on_a_new_poll
@@ -578,7 +578,7 @@ https://docs.djangoproject.com/en/1.4/intro/tutorial02/#adding-related-objects
 Let's run the FT again::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (test_polls.PollsTest)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
       File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 48, in test_voting_on_a_new_poll
