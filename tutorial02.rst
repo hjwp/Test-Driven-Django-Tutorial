@@ -1,9 +1,13 @@
-Welcome to part 2 of the tutorial!  Hope you've had a little break, maybe a `nice chocolate biscuit <http://www.nicecupofteaandasitdown.com/biscuits/previous.php3?item=29>`_, and are super-excited to do more!
+Welcome to part 2 of the tutorial!  Hope you've had a little break, maybe a
+`nice chocolate biscuit <http://www.nicecupofteaandasitdown.com/biscuits/previous.php3?item=29>`_,
+and are super-excited to do more!
 
 Tutorial 2 - Customising the admin site
 =======================================
 
-Last time we managed to get the admin site up and running, this time it's time to actualy get it working the way we want it to, so that we can use it to create new polls for our site.
+Last time we managed to get the admin site up and running, this time it's time
+to actualy get it working the way we want it to, so that we can use it to
+create new polls for our site.
 
 Here's an outline of what we're going to do:
 
@@ -20,13 +24,17 @@ Here's an outline of what we're going to do:
 Inspecting the admin site to decide what to test next
 -----------------------------------------------------
 
-Let's fire up the test server, and do a bit of browsing around the admin site - that way we can figure out what we want the "Polls" bit to look like.::
+Let's fire up the test server, and do a bit of browsing around the admin site -
+that way we can figure out what we want the "Polls" bit to look like.::
 
     python manage.py runserver
 
-Then, open your web browser and go to ``http://localhost:8000/admin/``. Login with the admin username and password (``admin / adm1n``).
+Then, open your web browser and go to ``http://localhost:8000/admin/``. Login
+with the admin username and password (``admin / adm1n``).
 
-If you go into the Polls section and try and create a new Poll, you need to click on a link that says "Add Poll" - let's add that to our FT.  In ``fts/tests.py``:
+If you go into the Polls section and try and create a new Poll, you need to
+click on a link that says "Add Poll" - let's add that to our FT.  In
+``fts/tests.py``:
 
 .. sourcecode:: python
     :filename: mysite/fts/tests.py
@@ -47,15 +55,22 @@ If you go into the Polls section and try and create a new Poll, you need to clic
         new_poll_link = self.browser.find_element_by_link_text('Add poll')
         new_poll_link.click()
 
-``find_element_by_link_text`` is a very useful Selenium function - it's a good combination of the presentation layer (what the user sees when they click a link) and the functionality of the site (hyperlink one of the major ways that users actually interact with a website)
+``find_element_by_link_text`` is a very useful Selenium function - it's a good
+combination of the presentation layer (what the user sees when they click a
+link) and the functionality of the site (hyperlink one of the major ways that
+users actually interact with a website)
 
 Now, when you click the link you should see a menu a bit like this.
 
 .. image:: /static/images/add_poll_need_verbose_name_for_pub_date.png
 
-Pretty neat, but `Pub date` isn't a very nice label for our publication date field.  Django normally generates labels for its admin fields automatically, by just taking the field name and capitalising it, converting underscores to spaces.  So that works well for ``question``, but not so well for ``pub_date``.
+Pretty neat, but `Pub date` isn't a very nice label for our publication date
+field.  Django normally generates labels for its admin fields automatically, by
+just taking the field name and capitalising it, converting underscores to
+spaces.  So that works well for ``question``, but not so well for ``pub_date``.
 
-So that's one thing we'll want to change.  Let's add a test for that to the end of our FT
+So that's one thing we'll want to change.  Let's add a test for that to the end
+of our FT
 
 .. sourcecode:: python
     :filename: mysite/fts/tests.py
@@ -72,9 +87,12 @@ Mmmh, "Date Published", much nicer.
 More ways of finding elements on the page using Selenium
 --------------------------------------------------------
 
-If you try filling in a new Poll, and fill in the 'date' entry but not a 'time'.  You'll find django complains that the field is required. So, in our test, we need to fill in three fields: `question`, `date`, and `time`. 
+If you try filling in a new Poll, and fill in the 'date' entry but not a
+'time'.  You'll find django complains that the field is required. So, in our
+test, we need to fill in three fields: `question`, `date`, and `time`. 
 
-In order to get Selenium to find the text input boxes for those fields, there are several options::
+In order to get Selenium to find the text input boxes for those fields, there
+are several options::
 
     find_element_by_id 
     find_element_by_xpath
@@ -83,11 +101,17 @@ In order to get Selenium to find the text input boxes for those fields, there ar
     find_element_by_tag_name
     find_element_by_css_selector
 
-And several others - find out more in the selenium documentation (choose Python as your language for the examples), or just by looking at the source code:
+And several others - find out more in the selenium documentation (choose Python
+as your language for the examples), or just by looking at the source code:
 http://seleniumhq.org/docs/03_webdriver.html
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
 
-In our case `by name` is a useful way of finding fields, because the name attribute is usually associated with input fields from forms.  If you take a look at the HTML source code for the Django admin page for entering a new poll (either the raw source, or using a tool like Firebug, or developer tools in Google Chrome), you'll find out that the 'name' for our three fields are `question`, `pub_date_0` and `pub_date_1`.:
+In our case `by name` is a useful way of finding fields, because the name
+attribute is usually associated with input fields from forms.  If you take a
+look at the HTML source code for the Django admin page for entering a new poll
+(either the raw source, or using a tool like Firebug, or developer tools in
+Google Chrome), you'll find out that the 'name' for our three fields are
+`question`, `pub_date_0` and `pub_date_1`.:
 
 
 .. sourcecode:: html
@@ -139,11 +163,15 @@ We can also use the CSS selector to pick up the "Save" button
         save_button.click()
 
 
-Then, when you hit 'Save', you'll see that we get taken back to the Polls listings page.  You'll notice that the new poll is just described as "Poll object".  
+Then, when you hit 'Save', you'll see that we get taken back to the Polls
+listings page.  You'll notice that the new poll is just described as "Poll
+object".  
 
 .. image:: /static/images/django_admin_poll_object_needs_verbose_name.png
 
-Django lets you give them more descriptive names, including any attribute of the object.  So let's say we want our polls listed by their question... And let's call that the end of our FT - you can get rid of the ``self.fail``.
+Django lets you give them more descriptive names, including any attribute of
+the object.  So let's say we want our polls listed by their question... And
+let's call that the end of our FT - you can get rid of the ``self.fail``.
 
 .. sourcecode:: python
     :filename: mysite/fts/tests.py
@@ -157,14 +185,17 @@ Django lets you give them more descriptive names, including any attribute of the
 
         # Satisfied, she goes back to sleep
 
-That's it for now - if you've lost track in amongst all the copy & pasting, you can compare your version to mine, which is hosted here:
+That's it for now - if you've lost track in amongst all the copy & pasting, you
+can compare your version to mine, which is hosted here:
+
 https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/tests.py
 
 
 Human-readable names for models and their attributes
 ----------------------------------------------------
 
-Let's re-run our tests.  Here's our first expected failure, the fact that "Pub date" isn't the label we want for our field ("Date published")::
+Let's re-run our tests.  Here's our first expected failure, the fact that "Pub
+date" isn't the label we want for our field ("Date published")::
 
     python manage.py test fts
 
@@ -187,7 +218,9 @@ Let's re-run our tests.  Here's our first expected failure, the fact that "Pub d
 Unit testing the verbose name for pub_date
 ------------------------------------------
 
-Django stores human-readable names for model attributes in a special attribute called `verbose_name`.  Let's write a unit test that checks the verbose name for our ``pub_date`` field.  Add the following method to ``polls/tests.py``
+Django stores human-readable names for model attributes in a special attribute
+called `verbose_name`.  Let's write a unit test that checks the verbose name
+for our ``pub_date`` field.  Add the following method to ``polls/tests.py``
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -198,15 +231,21 @@ Django stores human-readable names for model attributes in a special attribute c
                 self.assertEquals(field.verbose_name, 'Date published')
 
 
-To write this test, we have to grovel through the ``_meta`` attribute on the Poll class.  That's some Django-voodoo right there, and you may have to take my word for it, but it's a way to get at some of the information about the metadata on the model. There's more info here (James Bennet is one of the original Django developers, and wrote a book about it too)
+To write this test, we have to grovel through the ``_meta`` attribute on the
+Poll class.  That's some Django-voodoo right there, and you may have to take my
+word for it, but it's a way to get at some of the information about the
+metadata on the model. There's more info here (James Bennet is one of the
+original Django developers, and wrote a book about it too)
 http://www.b-list.org/weblog/2007/nov/04/working-models/
 
-Anyway, running our tests with ``python manage.py test polls`` gives us our expected fail::
+Anyway, running our tests with ``python manage.py test polls`` gives us our
+expected fail::
 
     AssertionError: 'pub date' != 'Date published'
 
 
-Now that we have a unit test, we can implement! Let's make a change in ``models.py``
+Now that we have a unit test, we can implement! Let's make a change in
+``models.py``
 
 .. sourcecode:: python
     :filename: mysite/polls/models.py
@@ -239,10 +278,14 @@ Now, re-running our functional tests, things have moved on::
 
     ----------------------------------------------------------------------
 
-We're almost there - the FT has managed to create and save the new poll, but when it gets back to the listings page, it can't find a hyperlink whose text is the new question - it's still listed as an unhelpful "Poll object"
+We're almost there - the FT has managed to create and save the new poll, but
+when it gets back to the listings page, it can't find a hyperlink whose text is
+the new question - it's still listed as an unhelpful "Poll object"
 
 
-To make this work, we need to tell Django how to print out a Poll object.  This happens in the ``__unicode__`` method.  As usual, we unit test first, in this case it's a very simple one -
+To make this work, we need to tell Django how to print out a Poll object.  This
+happens in the ``__unicode__`` method.  As usual, we unit test first, in this
+case it's a very simple one -
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -265,7 +308,8 @@ Running the unit tests shows the following error::
 
     ----------------------------------------------------------------------
 
-And the fix is simple too - we define a ``__unicode__`` method on our Poll class, in ``models.py``
+And the fix is simple too - we define a ``__unicode__`` method on our Poll
+class, in ``models.py``
 
 .. sourcecode:: python
     :filename: mysite/polls/models.py
@@ -297,11 +341,17 @@ Let's do just that.
 Adding Choices to the Poll admin page
 =====================================
 
-Now, our polls currently only have a question - we want to give each poll a set of possible answers, or "choices", for the user to pick between. Ideally, we want Gertrude to be able to fill in the choices on the same screen as she defines the question.  Thankfully, Django allows this - you can see it in the Django tutorial, you can have Choices on the same page as the "Add new Poll" page.
+Now, our polls currently only have a question - we want to give each poll a set
+of possible answers, or "choices", for the user to pick between. Ideally, we
+want Gertrude to be able to fill in the choices on the same screen as she
+defines the question.  Thankfully, Django allows this - you can see it in the
+Django tutorial, you can have Choices on the same page as the "Add new Poll"
+page.
 
 https://docs.djangoproject.com/en/1.4/intro/tutorial02/#adding-related-objects
 
-So let's add that as an intermediate step in our FT, in between where Florence enters the question, and when she hits save.  
+So let's add that as an intermediate step in our FT, in between where Florence
+enters the question, and when she hits save.  
 
 .. sourcecode:: python
     :filename: mysite/fts/tests.py
@@ -322,8 +372,8 @@ So let's add that as an intermediate step in our FT, in between where Florence e
         [...]
 
 
-For now you'll have to trust me on those ``choice_set-0-choice`` name attributes!
-Let's try running our fts again::
+For now you'll have to trust me on those ``choice_set-0-choice`` name
+attributes! Let's try running our fts again::
 
     NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' 
 
@@ -410,9 +460,14 @@ No attribute save - let's make our Choice class into a proper Django model::
     class Choice(models.Model):
         pass
 
-OK, our tests are complaining that the "poll" object has no attribute ``choice_set``. This is a special attribute that allows you to retrieve all the related Choice objects for a particular poll, and it gets added by Django whenever you define a relationship between two models - a foreign key relationship for example. 
+OK, our tests are complaining that the "poll" object has no attribute
+``choice_set``. This is a special attribute that allows you to retrieve all the
+related Choice objects for a particular poll, and it gets added by Django
+whenever you define a relationship between two models - a foreign key
+relationship for example. 
 
 You can see some more examples of creating Polls and related Choices here:
+
 https://docs.djangoproject.com/en/1.4/intro/tutorial01/#playing-with-the-api
 
 Let's add that relationship now
@@ -469,7 +524,10 @@ Another test run?::
 Further customisations of the admin view: related objects inline
 ----------------------------------------------------------------
 
-Hooray! What's next?  Well, one of the great things about TDD is that, once you've written your tests, you don't really have to keep track of what's next any more.  You can can just run the tests, and they'll tell you what to do. So, what do the tests want?  Let's re-run the FTs::
+Hooray! What's next?  Well, one of the great things about TDD is that, once
+you've written your tests, you don't really have to keep track of what's next
+any more.  You can can just run the tests, and they'll tell you what to do. So,
+what do the tests want?  Let's re-run the FTs::
 
     python manage.py test fts
 
@@ -493,7 +551,9 @@ Hooray! What's next?  Well, one of the great things about TDD is that, once you'
 
     ----------------------------------------------------------------------
 
-Ah, the FTs want to be able to add "choices" to a poll from the admin view. Django has a way. Let's edit ``polls/admin.py``, and do some customising on the way the Poll admin page works
+That's right, the FTs want to be able to add "choices" to a poll in the admin
+view. Django has a way. Let's edit ``polls/admin.py``, and do some customising
+on the way the Poll admin page works
 
 .. sourcecode:: python
     :filename: mysite/polls/admin.py
@@ -510,7 +570,9 @@ Ah, the FTs want to be able to add "choices" to a poll from the admin view. Djan
 
     admin.site.register(Poll, PollAdmin)
 
-Django has lots of ways of customising the admin site, and I don't want to dwell on them for too long - check out the docs for more info:
+Django has lots of ways of customising the admin site, and I don't want to
+dwell on them for too long - check out the docs for more info:
+
 https://docs.djangoproject.com/en/1.4/intro/tutorial02/#adding-related-objects
 
 Let's run the FT again::
@@ -527,7 +589,11 @@ Let's run the FT again::
 
     ----------------------------------------------------------------------
 
-You may have noticed, during the run, that the form got all grumpy about the 'votes' field being required (if you don't believe me, why not spin up the test server using ``manage.py runserver`` and check for yourself?  Remember, you may need to ``syncdb``... Alternatively you can add a ``time.sleep(10)`` to the FT just before the error, and that will let you see what's happening)
+You may have noticed, during the run, that the form got all grumpy about the
+'votes' field being required (if you don't believe me, why not spin up the test
+server using ``manage.py runserver`` and check for yourself?  Remember, you may
+need to ``syncdb``... Alternatively you can add a ``time.sleep(10)`` to the FT
+just before the error, and that will let you see what's happening)
 
 Let's make 'votes' default to 0, by adding a new test in ``tests.py``
 
