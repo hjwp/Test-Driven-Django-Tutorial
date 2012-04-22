@@ -839,7 +839,7 @@ interact with our application at a much lower level.
     :filename: mysite/polls/tests.py
 
     from django.test import TestCase
-    from django.util import timezone
+    from django.utils import timezone
     from polls.models import Poll
 
     class PollModelTest(TestCase):
