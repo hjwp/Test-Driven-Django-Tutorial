@@ -532,7 +532,7 @@ You'll probably recognise this as being essentially standard HTML, intermixed
 with some special django control codes.  These are either surrounded with
 ``{%`` - ``%}``, for flow control - like a `for` loop in this case, and ``{{``
 - ``}}`` for printing variables.  You can find out more about the Django
-  template language here:
+template language here:
 
 https://docs.djangoproject.com/en/1.4/topics/templates/ 
 
