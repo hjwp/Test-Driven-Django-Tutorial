@@ -108,7 +108,9 @@ http://harry.pythonanywhere.com/tutorial/1/
 USEFUL LINKS
 ------------
 
-http://harry.pythonanywhere.com/
+https://tdd-django-tutorial.com
+
+https://github.com/hjwp/Test-Driven-Django-Tutorial
 
 https://docs.djangoproject.com/en/1.4/intro/tutorial02/
 
@@ -117,3 +119,5 @@ http://seleniumhq.org/docs/03_webdriver.html
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webdriver.py
 
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py
+
+http://www.pythonanywhere.com/
