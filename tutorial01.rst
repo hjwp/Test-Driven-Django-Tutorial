@@ -213,7 +213,7 @@ Your directory tree will now look like this::
         `-- wsgi.py
 
 
-Now, let's open up the ``tests`` file inside the ``fts`` folder called, and
+Now, let's open up the ``tests.py`` file inside the ``fts`` folder called, and
 write our first Functional test.  You can delete the example test case that
 Django have put in there, and replace it with this:
 
