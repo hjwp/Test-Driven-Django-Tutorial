@@ -142,7 +142,7 @@ Some notes:
       - ``django-admin.py startproject mysite`` (note extra .py)
       - ``python manage.py runserver 8001``
 
-Advanced sections:
+Extra practice:
 
     - try to use ``element.click()`` to click submit button instead of pressing
       Enter.  May need to use ``find_element_by_css_selector``.
@@ -162,7 +162,7 @@ PART 2:
 
 Now we follow ``tutorial02.rst`` 
 
-Notes / advanced sections
+Simplifications:
 
     - start by using "Pub date", rather than "Date Published"
 
@@ -180,5 +180,7 @@ Checkout next part::
     git stash
     git checkout workshop_part3
 
-Now we follow ``tutorial03.rst`` 
+Now we follow ``tutorial03.rst`` , starting from the section called
+**At last! An FT for a normal page** (circa line 175)
+
 
