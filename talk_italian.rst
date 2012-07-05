@@ -29,7 +29,7 @@ Introduzione
 
 * l'Italiano
 * l'Inglese, gli Americani
-* lingagio technico
+* linguagio technico
 
 
 
@@ -59,7 +59,7 @@ Io
 --
 
 * Sestri Levante
-* il primio progetto
+* il primo progetto
 * Resolver Systems & PythonAnywhere
 
 
@@ -79,7 +79,7 @@ Io
 Oggi
 ----
 
-* il tutorial officiale di Django
+* il tutorial ufficiale di Django
   - a poll / voting app (come si dice?)
 * col TDD!
 * primo, i "functional test"
@@ -87,7 +87,7 @@ Oggi
 * poi, i "unit test"
   - test unitari? 
 * e solo doppo, il codice applicativo
-* **le domande, per prigiera** 
+* **le domande, per preghiera** 
    - non fare sempre "si"
    - e anche le correzione del' Italiano
 
@@ -132,7 +132,7 @@ PART 1
 ------
 
 =====================================   ==================================
-Ogettivo                                Come si vede
+Obiettivo                               Come si vede
 =====================================   ==================================
 Setup di Django                         Usare il *Django test server* e 
                                         navighiamo al manuale a la pagina
@@ -145,4 +145,12 @@ Il primo Model per gli ogetti "Poll"    Continuamo il primo FT, che deve
                                         creare un "Poll" tramite lo sito 
                                         admin. I primi test unitari 
 =====================================   ==================================
+
+
+
+
+
+
+
+
 
