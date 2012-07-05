@@ -1,5 +1,5 @@
-Welcome to part 4 of the tutorial!  In this part at how we can let
-users vote on our poll, in other words, **web forms!**. Hooray.
+Welcome to part 4 of the tutorial!  In this part at how we can let users vote
+on our poll, in other words, **web forms!**. Hooray.
 
 Tutorial 4: Using a form
 ========================
@@ -17,14 +17,15 @@ Extending the FT to vote using radio buttons
 --------------------------------------------
 
 Let's start by extending our FT, to show Herbert voting on a poll. In
-``fts/test_polls.py``:
+``fts/tests.py``:
 
 .. sourcecode:: python
+    :filename: mysite/fts/tests.py
 
         [...] 
         # Now, Herbert the regular user goes to the homepage of the site. He
         # sees a list of polls.
-        self.browser.get(ROOT)
+        self.browser.get(self.live_server_url)
         heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(heading.text, 'Polls')
 
@@ -44,13 +45,13 @@ Let's start by extending our FT, to show Herbert voting on a poll. In
 
         # He also sees a form, which offers him several choices.
         # There are three options with radio buttons
-        choices = self.browser.find_elements_by_css_selector(
+        choice_inputs = self.browser.find_elements_by_css_selector(
                 "input[type='radio']"
         )
         self.assertEquals(len(choice_inputs), 3)
 
         # The buttons have labels to explain them
-        choice_labels = choice_inputs = self.browser.find_elements_by_tag_name('label')
+        choice_labels = self.browser.find_elements_by_tag_name('label')
         choices_text = [c.text for c in choice_labels]
         self.assertEquals(choices_text, [
             'Very awesome',
@@ -78,39 +79,35 @@ Let's start by extending our FT, to show Herbert voting on a poll. In
         # Satisfied, he goes back to sleep
 
 
-If you run them, you'll find that they are still telling us about a "TypeError" on
-the individual poll page though::
+If you run them, you'll find that they are still telling us the individual poll
+page isn't working::
 
-    ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 67, in test_voting_on_a_new_poll
-        self.assertEquals(heading.text, 'Poll Results')
-    AssertionError: u'TypeError at /poll/1/' != 'Poll Results'
-    ----------------------------------------------------------------------
-    Ran 2 tests in 25.927s
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
 
-That because, currently, our ``poll`` view is just a placeholder function.  We need
-to make into into a real Django view, which returns information about a poll.
+That because, currently, our ``poll`` view is just a placeholder function.  We
+need to make into into a real Django view, which returns information about a
+poll.
 
-Let's work on the unit tests for the ``poll`` view then. Make a new class for them
-in ``polls/tests.py``:
+Let's work on the unit tests for the ``poll`` view then. Make a new class for
+them in ``polls/tests.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
-    class TestSinglePollView(TestCase):
+    class SinglePollViewTest(TestCase):
 
         def test_page_shows_poll_title_and_no_votes_message(self):
             # set up two polls, to check the right one is displayed
-            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1 = Poll(question='6 times 7', pub_date=timezone.now())
             poll1.save()
-            poll2 = Poll(question='life, the universe and everything', pub_date='2001-01-01')
+            poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
             poll2.save()
 
-            client = Client()
-            response = client.get('/poll/%d/' % (poll2.id, ))
+            response = self.client.get('/poll/%d/' % (poll2.id, ))
+
+            # check we've used the poll template
+            self.assertTemplateUsed(response, 'poll.html') 
 
             # check we've passed the right poll into the context
             self.assertEquals(response.context['poll'], poll2)
@@ -121,20 +118,18 @@ in ``polls/tests.py``:
             # check our 'no votes yet' message appears
             self.assertIn('No-one has voted on this poll yet', response.content)
 
-            # check we've passed in a form of the right type
-            self.assertTrue(isinstance(response.context['form'], PollVoteForm))
-
 
 Running the tests gives::
 
     TypeError: poll() takes no arguments (2 given)
 
-(*I'm going to be shortening the test outputs from now on.  You're a grown-up
-now, you can handle it! :-)*
+(*I'm going to be shortening the test outputs from now on.  You're a TDD
+veteran now, you can handle it! :-)*
 
 Let's make our view take two arguments:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         pass
@@ -146,27 +141,28 @@ Now we get::
 Again, a minimal fix:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         return HttpResponse()
 
 Now we get this error::
 
-    self.assertEquals(response.templates[0].name, 'poll.html')
-    IndexError: list index out of range
+    AssertionError: No templates used to render the response
 
-A slightly unhelpful error, but essentially it's telling us that the
-view didn't use a template.  Let's try fixing that - but deliberately
-using the wrong template (just to check we are testing it)
+
+Let's try fixing that - but deliberately using the wrong template (just to
+check we are testing it)
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         return render(request, 'home.html')
 
 Good, looks like we are testiing it properly::
 
-    AssertionError: 'home.html' != 'poll.html'
+    AssertionError: Template 'poll.html' was not a template used to render the response. Actual template(s) used: home.html
 
 And changing it to ``poll.html`` gives us::
 
@@ -176,13 +172,16 @@ Fine and dandy, let's make one::
 
      touch polls/templates/poll.html    
 
-Now the tests want us to pass a ``poll`` variable in the template's context::
+You might argue that an empty file, all 0 bytes of it, is a fairly minimal
+template!  Still, it seems to satisfy the tests. Now they want us to pass a
+``poll`` variable in the template's context::
 
     KeyError: 'poll'
 
 So let's do that, again, the minimum possible change to satisfy the tests:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         return render(request, 'poll.html', {'poll': None})
@@ -194,6 +193,7 @@ And the tests get a little further on::
 And they even tell us what to do next - pass in the right `Poll` object:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         poll = Poll.objects.get(pk=poll_id)
@@ -202,23 +202,24 @@ And they even tell us what to do next - pass in the right `Poll` object:
 This is the first time we've used the Django API to fetch a single database
 object, and ``objects.get`` is the helper function for this - it raises an
 error if it can't find the object, or if it finds more than one. The special
-keyword argument ``pk`` stands for `primary key`. In this case, Django is 
-using the default for primary keys, which is an automatically genereated
-integer ``id`` column.
+keyword argument ``pk`` stands for `primary key`. In this case, Django is using
+the default for primary keys, which is an automatically generated integer
+``id`` column.
 
-That raises the question of what to do if a user types in a url for a poll 
-that doesn't exist - ``/poll/0/`` for example.  We'll come back to this in 
-a later tutorial.
+That raises the question of what to do if a user types in a url for a poll that
+doesn't exist - ``/poll/0/`` for example.  We'll come back to this in a later
+tutorial.
 
 In the meantime, what do the tests say::
 
     self.assertIn(poll2.question, response.content)
     AssertionError: 'life, the universe and everything' not found in ''
 
-We need to get our template to include the poll's question. Let's make it 
-into a page heading:
+We need to get our template to include the poll's question. Let's make it into
+a page heading:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>
@@ -233,6 +234,7 @@ Now the tests want our 'no polls yet' message::
 So let's include that:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -255,9 +257,11 @@ Mmmh, `OK`. And doughnuts. Let's see what the FTs think?::
 
     NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' 
 
-Ah, we forgot to include a general heading for the page - the FT is checking the ``h1`` and ``h2`` headings:
+Ah, we forgot to include a general heading for the page - the FT is checking
+the ``h1`` and ``h2`` headings:
 
 .. sourcecode:: python
+    :filename: mysite/fts/tests.py
 
         main_heading = self.browser.find_element_by_tag_name('h1')
         self.assertEquals(main_heading.text, 'Poll Results')
@@ -267,6 +271,7 @@ Ah, we forgot to include a general heading for the page - the FT is checking the
 So, in our template, let's add an ``h1`` with "Poll Results" in it:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -286,25 +291,19 @@ Using a Django form for poll choices
 Now what does the FT say?::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 82, in test_voting_on_a_new_poll
-        'Moderately awesome',
-    AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...
+      File "/home/harry/workspace/mysite/fts/tests.py", line 100, in test_voting_on_a_new_poll
+        self.assertEquals(len(choice_inputs), 3)
+    AssertionError: 0 != 3
 
-    Second list contains 3 additional elements.
-    First extra element 0:
-    Very awesome
-
-    - []
-    + ['Very awesome', 'Quite awesome', 'Moderately awesome']
     ----------------------------------------------------------------------
 
-Ah, we need to add the poll Choices as a series of radio inputs.  Now the official Django
-tutorial shows you how to hard-code them in HTML:
+Ah, we need to add the poll Choices as a series of radio inputs.  Now the
+official Django tutorial shows you how to hard-code them in HTML:
 
-https://docs.djangoproject.com/en/1.3/intro/tutorial04/
+https://docs.djangoproject.com/en/1.4/intro/tutorial04/
 
 But Django can do even better than that - Django's forms system will generate
 radio buttons for us, if we can just give it the right incantations.  Let's
@@ -312,14 +311,15 @@ create a new test in ``tests.py``:
 
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
     from polls.forms import PollVoteForm
 
-    class TestPollsVoteForm(TestCase):
+    class PollsVoteFormTest(TestCase):
 
         def test_form_renders_poll_choices_as_radio_inputs(self):
             # set up a poll with a couple of choices
-            poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
+            poll1 = Poll(question='6 times 7', pub_date=timezone.now())
             poll1.save()
             choice1 = Choice(poll=poll1, choice='42', votes=0)
             choice1.save()
@@ -327,7 +327,7 @@ create a new test in ``tests.py``:
             choice2.save()
 
             # set up another poll to make sure we only see the right choices
-            poll2 = Poll(question='time', pub_date='2001-01-01')
+            poll2 = Poll(question='time', pub_date=timezone.now())
             poll2.save()
             choice3 = Choice(poll=poll2, choice='PM', votes=0)
             choice3.save()
@@ -349,15 +349,16 @@ create a new test in ``tests.py``:
 
 You might prefer to put the import at the top of the file.  
 
-Looking through the code, you can see we instantiate a form, passing it a poll object.
-We then examine the form's ``fields`` attribute, find the one called ``vote``
-(this will also be the ``name`` of the HTML input element), and we check the
-``choices`` for that field.
+Looking through the code, you can see we instantiate a form, passing it a poll
+object. We then examine the form's ``fields`` attribute, find the one called
+``vote`` (this will also be the ``name`` of the HTML input element), and we
+check the ``choices`` for that field.
 
 For the test to even get off the ground, we may as well create something
 minimal for it to import! Create a file called ``polls/forms.py``.
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(object):
         pass
@@ -373,6 +374,7 @@ And let's start another test/code cycle, woo -::
 We override ``__init__.py`` to change the constructor:
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(object):
         def __init__(self, poll):
@@ -383,73 +385,77 @@ We override ``__init__.py`` to change the constructor:
     self.assertEquals(form.fields.keys(), ['vote'])
     AttributeError: 'PollVoteForm' object has no attribute 'fields'
 
-To give the form a 'fields' attribute, we can make it inherit from
-a real Django form class, and call its parent constructor:
+To give the form a 'fields' attribute, we can make it inherit from a real
+Django form class, and call its parent constructor:
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     from django import forms
 
     class PollVoteForm(forms.Form):
         def __init__(self, poll):
-            super(self.__class__, self).__init__()
+            forms.Form.__init__(self)
 
-One day, Python 3 will make all this ``super`` nonsense much more sensible.
-One day. Anyway, now we get::
+Now we get::
 
     AssertionError: Lists differ: [] != ['vote']
 
-Django form fields are defined a bit like model fields - using inline
-class attributes. There are various types of fields, in this case
-we want one that has `choices` - a ``ChoiceField``.
-You can find out more about form fields here:
+Django form fields are defined a bit like model fields - using inline class
+attributes. There are various types of fields, in this case we want one that
+has `choices` - a ``ChoiceField``. You can find out more about form fields
+here:
 
-https://docs.djangoproject.com/en/1.3/ref/forms/fields/
+https://docs.djangoproject.com/en/1.4/ref/forms/fields/
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(forms.Form):
         vote = forms.ChoiceField()
 
         def __init__(self, poll):
-            super(self.__class__, self).__init__()
+            forms.Form.__init__(self)
 
 Now we get::
 
     AssertionError: Lists differ: [] != [(1, '42'), (2, 'The Ultimate ...
 
-So now let's set the choices from the ``poll`` we passed into the 
-constructor (you can read up on choices in Django here)
-
-https://docs.djangoproject.com/en/1.3/ref/models/fields/#field-choices
+So now let's set the choices from the ``poll`` we passed into the constructor
+(you can read up on choices in Django here
+https://docs.djangoproject.com/en/1.4/ref/models/fields/#field-choices)
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     def __init__(self, poll):
-        super(self.__class__, self).__init__()
+        forms.Form.__init__(self)
         self.fields['vote'].choices = [(c.id, c.choice) for c in poll.choice_set.all()]
 
-Mmmmmh, list comprehensions... 
+Mmmmmh, list comprehensions... That will now get the test almost to the end -
+we can instantiate a form using a poll object, and the form will automatically
+generate the choices based on the poll's ``choice_set.all()`` function, which
+gets related objects.
 
 The final test is to make sure we have radio boxes as the HTML input type.
-
-We're using ``as_p()``, a method provided on all Django forms which renders
-the form to HTML for us - we can see exactly what the HTML looks like in the
-next test output::
+We're using ``as_p()``, a method provided on all Django forms which renders the
+form to HTML for us - we can see exactly what the HTML looks like in the next
+test output::
 
     self.assertIn('input type="radio"', form.as_p())
     AssertionError: 'input type="radio"' not found in u'<p><label for="id_vote">Vote:</label> <select name="vote" id="id_vote">\n<option value="1">42</option>\n<option value="2">The Ultimate Answer</option>\n</select></p>'
 
-Django has defaulted to using a ``select/option`` input form.  We can change 
+Django has defaulted to using a ``select/option`` input form.  We can change
 this using a `widget`, in this case a ``RadioSelect``
 
 .. sourcecode:: python
+    :filename: mysite/polls/forms.py
 
     class PollVoteForm(forms.Form):
         vote = forms.ChoiceField(widget=forms.RadioSelect())
 
         def __init__(self, poll):
-            super(self.__class__, self).__init__()
+            forms.Form.__init__(self)
             self.fields['vote'].choices = [(c.id, c.choice) for c in poll.choice_set.all()]
 
 OK so far?  Django forms have *fields*, some of which may have *choices*, and
@@ -462,58 +468,47 @@ exploratory programming... You could try ``form.as_table()`` too if you like...
 
 Right, where where we?  Let's do a quick check of the functional tests.
 
-(*incidentally, are you rather bored of watching the FT run through the
-admin test each time?  I was, so I've built in a second argument to the FT
-runner that lets you filter by name of test - just pass in* ``polls`` *and
-it will only run FTs in files whose names contain the world* ``polls``.)::
+(*incidentally, are you rather bored of watching the FT run through the admin
+test each time?  If so, you can temporarily disable it by renaming its test
+method from* ``test_can_create_new_poll_via_admin_site`` *to*
+``DONTtest_can_create_new_poll_via_admin_site`` *that's called "Dontifying"...
+you do have to be careful not to forget about your dontified tests though!*)
 
-    python functional_tests.py polls
+    python manage.py test fts
     [...]
-    AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...
+    AssertionError: 0 != 3
 
-Ah yes, we still haven't actually *used* the form yet!  Let's go back to
-our ``TestSinglePollView``, and add some extra code (you can copy and
-paste some of it from the form test)
+Ah yes, we still haven't actually *used* the form yet!  Let's go back to our
+``SinglePollViewTest``, and a new test that checks we use our form)
 
 .. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
-    def test_page_shows_poll_title_and_no_votes_message(self):
-        # set up two polls, to check the right one gets used
-        poll1 = Poll(question='6 times 7', pub_date='2001-01-01')
-        poll1.save()
-        choice1 = Choice(poll=poll1, choice='42', votes=0)
-        choice1.save()
-        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=0)
-        choice2.save()
-        poll2 = Poll(question='time', pub_date='2001-01-01')
-        poll2.save()
-        choice3 = Choice(poll=poll2, choice='PM', votes=0)
-        choice3.save()
-        choice4 = Choice(poll=poll2, choice="Gardener's", votes=0)
-        choice4.save()
+    class SinglePollViewTest(TestCase):
 
-        client = Client()
-        response = client.get('/poll/%d/' % (poll2.id, ))
+        def test_page_shows_poll_title_and_no_votes_message(self):
+            [...]
+ 
 
-        # check we use the right template
-        self.assertEquals(response.templates[0].name, 'poll.html')
+        def test_page_shows_choices_using_form(self):
+            # set up a poll with choices
+            poll1 = Poll(question='time', pub_date=timezone.now())
+            poll1.save()
+            choice1 = Choice(poll=poll1, choice="PM", votes=0)
+            choice1.save()
+            choice2 = Choice(poll=poll1, choice="Gardener's", votes=0)
+            choice2.save()
 
-        # check we've passed the right poll into the context
-        self.assertEquals(response.context['poll'], poll2)
+            response = self.client.get('/poll/%d/' % (poll1.id, ))
 
-        # check the poll's question appears on the page
-        self.assertIn(poll2.question, response.content)
+            # check we've passed in a form of the right type
+            self.assertTrue(isinstance(response.context['form'], PollVoteForm))
 
-        # check our 'no votes yet' message appears
-        self.assertIn('No-one has voted on this poll yet', response.content)
+            # and check the check the form is being used in the template,
+            # by checking for the choice text
+            self.assertIn(choice1.choice, response.content)
+            self.assertIn(choice2.choice, response.content)
 
-        # check we've passed in a form of the right type
-        self.assertTrue(isinstance(response.context['form'], PollVoteForm))
-
-        # and check the check the form is being used in the template,
-        # by checking for the choice text
-        self.assertIn(choice3.choice, response.content)
-        self.assertIn(choice4.choice, response.content)
 
 Now the unit tests give us::
 
@@ -524,6 +519,7 @@ Now the unit tests give us::
 So back in ``views.py``:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         poll = Poll.objects.get(pk=poll_id)
@@ -537,6 +533,7 @@ Now::
 So:
 
 .. sourcecode:: python
+    :filename: mysite/polls/views.py
 
     def poll(request, poll_id):
         poll = Poll.objects.get(pk=poll_id)
@@ -546,11 +543,13 @@ So:
 And::
 
     self.assertIn(choice3.choice, response.content)
-    AssertionError: 'PM' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n    \n    <h2>time</h2>\n\n    <p>No-one has voted on this poll yet</p>\n    \n  </body>\n</html>\n'
+    AssertionError: 'PM' not found in '<html>\n  <body>\n    <h1>Poll Results</h1>\n\n    <h2>6 times 7</h2>\n    <p>No-one has voted on this poll yet</p>\n  </body>\n</html>\n\n'
+
 
 So, in ``polls/templates/poll.html``:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/home.html
 
     <html>
       <body>
@@ -577,9 +576,11 @@ us. I suppose that's my come-uppance for trying to include British in-jokes in
 my tutorial.  Let's implement a minor hack in our test:
 
 
-.. sourcecode:: html+django
+.. sourcecode:: python
+    :filename: mysite/polls/tests.py
 
-        self.assertIn(choice4.choice, response.content.replace('&#39;', "'"))
+        self.assertIn(choice1.choice, response.content.replace('&#39;', "'"))
+        self.assertIn(choice2.choice, response.content.replace('&#39;', "'"))
 
 And now we have passination::
 
@@ -592,10 +593,10 @@ And now we have passination::
 So let's ask the FTs again!::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 84, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 84, in test_voting_on_a_new_poll
         'Moderately awesome',
     AssertionError: Lists differ: [u'Vote:', u'Very awesome', u'... != ['Very awesome', 'Quite awesom...
 
@@ -619,6 +620,7 @@ extra label which says "Vote:" above the radio buttons - well, since it doesn't
 do any harm, for now maybe it's easiest to just change the FT:
 
 .. sourcecode:: python
+    :filename: mysite/fts/tests.py
 
         # He also sees a form, which offers him several choices.
         # There are three options with radio buttons
@@ -646,10 +648,11 @@ There's no submit button on our form! When Django generates a form, it only
 gives you the inputs for the fields you've defined, so no submit button (and no
 ``<form>`` tag either for that matter).
 
-Well, a button is easy enough to add, although it may not do much... In the 
+Well, a button is easy enough to add, although it may not do much... In the
 template:
 
 .. sourcecode:: html+django
+    :filename: mysite/polls/templates/poll.html
 
     <html>
       <body>
@@ -671,10 +674,10 @@ template:
 And now... our tests get to the end!::
 
     ======================================================================
-    FAIL: test_voting_on_a_new_poll (test_polls.TestPolls)
+    FAIL: test_voting_on_a_new_poll (tests.TestPolls)
     ----------------------------------------------------------------------
     Traceback (most recent call last):
-      File "/home/harry/workspace/tddjango_site/source/mysite/fts/test_polls.py", line 125, in test_voting_on_a_new_poll
+      File "/home/harry/workspace/tddjango_site/source/mysite/fts/tests.py", line 125, in test_voting_on_a_new_poll
         self.fail('TODO')
     AssertionError: TODO
     ----------------------------------------------------------------------
