@@ -108,6 +108,7 @@ http://stackoverflow.com/questions/2970608/what-are-named-tuples-in-python)
 
         def setUp(self):
             self.browser = webdriver.Firefox()
+            self.browser.implicitly_wait(3)
 
         def tearDown(self):
             self.browser.quit()
