@@ -227,6 +227,7 @@ Django have put in there, and replace it with this:
 
         def setUp(self):
             self.browser = webdriver.Firefox()
+            self.browser.implicitly_wait(3)
 
         def tearDown(self):
             self.browser.quit()
@@ -256,6 +257,12 @@ separate thread, for the tests to run against.
 The special methods ``setUp`` and ``tearDown`` are executed before and after
 each test. We're using them to start up and shut down our Selenium WebDriver
 browser instance.
+
+The ``implicitly_wait`` call tells webdriver to use a 3-second timeout when
+performing its actions - it doesn't slow things down though, because it's a
+maximum timeout: if Selenium can tell that the page has loaded and any
+javascript processing is done, it will move on before the end..
+
 
 Aside from that, there are 3 lines of test code here:
 
@@ -643,6 +650,7 @@ So, we now want our FT to cover logging into the admin site, and checking that
 
         def setUp(self):
             self.browser = webdriver.Firefox()
+            self.browser.implicitly_wait(3)
 
         def tearDown(self):
             self.browser.quit()
