@@ -781,8 +781,8 @@ probably find the poll using its ``id``.  Here's what that translates to in
 
             response = self.client.get('/')
 
-            template_names_used = [t.name for t in response.templates]
-            self.assertIn('home.html', template_names_used)
+            # check we've used the right template
+            self.assertTemplateUsed(response, 'home.html')
 
             # check we've passed the polls to the template
             polls_in_context = response.context['polls']
