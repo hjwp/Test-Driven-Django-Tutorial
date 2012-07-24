@@ -640,17 +640,17 @@ Let's try re-running our tests now::
     FAILED (failures=1, errors=1)
 
 
- Oh no!  Bad to worse!  Our percentage function really is refusing to make our
- lives easy - it's susceptible to zero-division errors, and it's producing
- floats rather than nice printable percentages... Let's fix that.  (but, again,
- notice the way it's the tests picking up all these little bugs for us, rather
- than us having to try and anticipate them all in advance, or test all the edge
- cases manually...)
+Oh no!  Bad to worse!  Our percentage function really is refusing to make our
+lives easy - it's susceptible to zero-division errors, and it's producing
+floats rather than nice printable percentages... Let's fix that.  (but, again,
+notice the way it's the tests picking up all these little bugs for us, rather
+than us having to try and anticipate them all in advance, or test all the edge
+cases manually...)
 
- So, let's make our percentage function return a proper, accurate float
- representation of the percentage (or as accurate as floating-point arithmetic
- will allow), and we'll handle the presentation issues in the template. We'll
- also make it handle the 0-case
+So, let's make our percentage function return a proper, accurate float
+representation of the percentage (or as accurate as floating-point arithmetic
+will allow), and we'll handle the presentation issues in the template. We'll
+also make it handle the 0-case.
 
 .. sourcecode:: python
     :filename: mysite/polls/tests/test_models.py
