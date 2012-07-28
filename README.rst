@@ -121,3 +121,11 @@ http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remo
 http://code.google.com/p/selenium/source/browse/trunk/py/selenium/webdriver/remote/webelement.py
 
 http://www.pythonanywhere.com/
+
+LICENSE
+-------
+
+Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported.
+
+http://creativecommons.org/licenses/by-nc-sa/3.0/
+
