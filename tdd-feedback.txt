@@ -59,17 +59,12 @@ Part 1
 Part 2
  - i don't think the user was instructed to run syncdb for the new Poll model, at 'Now, when you click the link you should see a menu a bit like this.'  The message, "Remember, you may need to syncdb..." comes late
  - you might want to explain why 'body' is redefined in the test after every click, for a novice user
- - "Tune in next week" is not relevant language anymore, since it's already been released.
 
 
 Part 3
- - "Don't forget the import at the top!" - which one? TestCase, Poll?
- - "That should give us a folder structure like this:" shows a `fts/test_polls.py` (also referred to in stack trace in Part 2) that doesn't exist.  Also, it doesn't show `polls/views.py`, which does
- - is the HomePageViewTest called 'test_root_url_shows_all_polls' or 'test_root_url_shows_links_to_all_polls'?  i see it referred to both ways.
  - 'ViewDoesNotExist: Could not import polls.views.poll. View does not exist in module polls.views.' - i do not get this error when following the instructions, although view does indeed not exist.
 
 Part 4
- - grammar: "# and check the check the form" : remove "the check "
  - show import for PollVoteForm before `return render(request, 'poll.html', {'poll': poll, 'form': form})`
 
 Part 5
