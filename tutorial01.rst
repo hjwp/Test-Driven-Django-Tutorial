@@ -1034,7 +1034,7 @@ And run the tests again::
 
     .
     ----------------------------------------------------------------------
-    Ran 323 tests in 2.402s
+    Ran 1 tests in 0.402s
 
     OK
 
@@ -1071,8 +1071,8 @@ three lines inside the polls app called, ``polls/admin.py``:
 .. sourcecode:: python
     :filename: mysite/polls/admin.py
 
-    from polls.models import Poll
     from django.contrib import admin
+    from polls.models import Poll
 
     admin.site.register(Poll)
 
