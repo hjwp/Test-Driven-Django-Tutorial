@@ -26,6 +26,10 @@ checkout the base repo::
 
 
 
+
+
+
+
 Introduction
 ============
 
@@ -56,6 +60,8 @@ Laptops, tools and working
 
 
 
+
+
 The Plan
 --------
 
@@ -68,12 +74,7 @@ The Plan
         - first unit tests
         - models.py, admin.py
 
-    - PART 2: Customising the admin site
-        - extending the FT
-        - add a second model: Choice
-        - more detailed unit tests
-
-    - PART 3: the site home page
+    - PART 2: the site home page
         - the Django Test Client
         - views.py
         - templates
@@ -85,9 +86,6 @@ The Plan
     - PART 5: form processing
         - POST request
         - refactoring
-
-
-
 
 
 
@@ -115,6 +113,14 @@ How we will work
 
 
 
+
+
+
+
+
+
+
+
 PART 1:
 =======
 
@@ -132,15 +138,12 @@ Now we follow ``tutorial01.rst``
 
 Some notes:
 
-    - in the bit where I suggest a ``wget``, you can just ``mv`` the
-      ``functional_test.py`` from where I've put it in the root of the repo into your
-      ``mysite`` directory...
-
     - notes for windows users:  
       - ``https`` checkout for github
       - ``move`` not ``mv``.
       - ``django-admin.py startproject mysite`` (note extra .py)
       - ``python manage.py runserver 8001``
+
 
 Extra practice:
 
@@ -157,22 +160,17 @@ Extra practice:
 
 
 
+
+
+
+
+
+
+
+
+
+
 PART 2:
-=======
-
-Now we follow ``tutorial02.rst`` 
-
-Simplifications:
-
-    - start by using "Pub date", rather than "Date Published"
-
-    - similarly, just assert we see a link with "Poll object" on next screen
-
-    - never mind unit test for verbose_name
-
-
-
-PART 3:
 =======
 
 Checkout next part::
