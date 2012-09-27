@@ -85,11 +85,11 @@ If you run the FTs, you should see something like this::
 
 What's happening is that clicking the submit button has no effect - we just
 stay on the voting page. So, we'll need to wire up our view so that it deals
-with form submission.  Let's open up ``tests.py``. We need to find the test
+with form submission.  Let's open up ``polls/tests.py``. We need to find the test
 that deals with our view.
 
 At this point, you might find it's getting a little hard to find your way
-around ``tests.py`` - the file is getting a little cluttered.  I think it's
+around ``polls/tests.py`` - the file is getting a little cluttered.  I think it's
 time to do some *refactoring*, and move things around a bit.
 
 
@@ -135,7 +135,7 @@ this:
     * add a ``__init__.py`` file inside the ``tests`` folder, to make it into
       an importable Python module
 
-    * move the current ``tests.py`` into the ``tests`` folder
+    * move the current ``polls/tests.py`` into the ``polls/tests/`` folder
 
     * finally, ``import`` all of the tests from ``tests.py`` into the
       ``__init__.py``

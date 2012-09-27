@@ -3,8 +3,6 @@ Feedback:
 
 General:
  ! Your site's 404 shows that debug=True... https://docs.djangoproject.com/en/dev/ref/settings/#debug
- + references to "test server" should be "development server" like the official Django docs, to reduce ambiguity, particularly since "test" is a new term to the typical viewer
- - references to 'tests.py' are not descriptive enough- there are at least two files of that name. 
  + consider moving the filename accompanying each script box to the top left corner.  i was in Part 3 before i even noticed it, and had been guessing which of the `tests.py` to use.  In the case of smaller resolutions, it might not be visible until until all the code has been read.
  - especially since there is refactoring involved, it might be helpful to have a version of the code that corresponds to the expected results after each lesson (perhaps as a tag, or branch).  This could also help a user jump in at any lesson.
  - i found the fts to be spotty (i suspect a selenium issue); they would often fail early in an unreproducable manner.  After repeatedly hitting the fts, i would be able to power through.  Any word on that? Examples:
@@ -54,7 +52,6 @@ General:
 
 
 Part 1
- + some images in /tutorial/1/ are not rendering, but showing something like  `.. image:: /static/images/django_admin_login.png`
  - don't like the "yes, we really meant it" explanation of INSTALLED_APPS.  Prefer something like the "enabled" language in https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
  - `Ran 323 tests in 2.402s` before "Hooray! The joy of unbroken..." should say `Ran 1 test in ...s`
  - "It's OK to ignore these for now - we'll deal with templates for 500 errors in a later tutorial." ... i didn't find that later tutorial, but nominate Part 3

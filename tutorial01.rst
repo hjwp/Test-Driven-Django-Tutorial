@@ -36,8 +36,8 @@ So here are our objectives for this first tutorial:
 =========================================    ==================================
 Objective                                    How will we know we've succeeded?
 =========================================    ==================================
-Set up Django                                Run the *Django test server* and
-                                             manually browse the default
+Set up Django                                Run the *Django development server* 
+                                             and manually browse the default
                                              "Hello World" page
 -----------------------------------------    ----------------------------------
 Set up the Django admin site                 Write our first *functional test*,
@@ -109,10 +109,10 @@ This tutorial is written for 1.4 -- bleeding edge FTW! -- but if you're stuck
 with an earlier version, you should find most things work with a little
 tweaking, as long as you get yourself a hold of a LiveServerTestCase backport)*
 
-Checking we've succeeded: running the test server
--------------------------------------------------
+Checking we've succeeded: running the development server
+--------------------------------------------------------
 
-Django comes with a built-in test server which you can fire up during
+Django comes with a built-in development server which you can fire up during
 development to take a peek at how things are looking. You can start it up by
 typing::
 
@@ -124,7 +124,7 @@ should see something a bit like this:
 
 .. image:: /static/images/django_it_worked_default_page.png
 
-There's more information about the test server here:
+There's more information about the development server here:
 https://docs.djangoproject.com/en/1.4/intro/tutorial01/#the-development-server
 
 Now, manual tests like the one we've just done are all very well, but in TDD
@@ -133,7 +133,7 @@ automated test.
 
 I did want to introduce ``runserver`` at the outset though - that way, at any
 point during this tutorial, if you want to check what the site actually looks
-like, you can always fire up the test server and have a look around
+like, you can always fire up the development server and have a look around
 
 
 Starting our first functional test: The Django admin site
@@ -213,9 +213,9 @@ Your directory tree will now look like this::
         `-- wsgi.py
 
 
-Now, let's open up the ``tests.py`` file inside the ``fts`` folder, and write
-our first Functional test.  You can delete the example test case that Django
-have put in there, and replace it with this:
+Now, let's open up the ``fts/tests.py`` file (inside the ``fts`` folder), and
+write our first Functional test.  You can delete the example test case that
+Django have put in there, and replace it with this:
 
 .. sourcecode:: python
     :filename: mysite/fts/tests.py
@@ -556,7 +556,7 @@ take for our site.::
     python manage.py runserver
 
 If you take another look at ``http://localhost/``, you will probably see an
-error message like this::
+error message like this:
 
 .. image:: /static/images/page_not_found_debug_error.png
 
@@ -586,7 +586,7 @@ needs. For this we use a command named ``syncdb``.
 
 In this case, syncdb will notice it's the first run, and proposes that you
 create a superuser.  Let's go ahead and do that (you may have to hit Ctrl-C to
-quit the test server first)::
+quit the development server first)::
 
     python manage.py syncdb
 
@@ -601,12 +601,12 @@ password for the superuser.:::
     Superuser created successfully.
      
 
-Let's see if that worked - try firing up the test server again::
+Let's see if that worked - try firing up the development server again::
 
     python manage.py runserver
 
 And if you go back to ``http://localhost/admin/``, you should see the Django
-login screen::
+login screen:
 
 .. image:: /static/images/django_admin_login.png
 

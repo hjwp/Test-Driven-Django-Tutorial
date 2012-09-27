@@ -134,8 +134,8 @@ PART 1
 =====================================   ==================================
 Obiettivo                               Come si vede
 =====================================   ==================================
-Setup di Django                         Usare il *Django test server* e 
-                                        navighiamo al manuale a la pagina
+Setup di Django                         Usare il *Django development server* 
+                                        e navighiamo al manuale a la pagina
                                         "Hello World" 
 -------------------------------------   ----------------------------------
 Setup del' sito admin                   Iniziamo il primo *functional test*,

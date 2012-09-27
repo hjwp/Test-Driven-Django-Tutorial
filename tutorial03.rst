@@ -260,7 +260,7 @@ that will deal with producing a response for them.  These functions are called
 (*This is essentially an MVC pattern, there's some discussion of it here:*
 https://docs.djangoproject.com/en/dev/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names) 
 
-Let's add a new test to ``tests.py``.  I'm going to use the Django Test Client,
+Let's add a new test to ``polls/tests.py``.  I'm going to use the Django Test Client,
 which has some helpful features for testing views.  More info here:
 
 https://docs.djangoproject.com/en/1.4/topics/testing/
@@ -443,7 +443,7 @@ template system - that will provide a much more natural way to write web pages.
 
 The Django TestCase lets us check whether a response was rendered using a
 template, by using a special method response called ``assertTemplateUsed``, so
-let's use that.  In ``tests.py``, add an extra check to our view test:
+let's use that.  In ``polls/tests.py``, add an extra check to our view test:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -763,7 +763,7 @@ Let's use the ``reverse`` function in our tests.  Its first argument is the
 name of the view that handles the url, and we can also specify some arguments.
 We'll be making a view for seeing an individual `Poll` object, so we'll
 probably find the poll using its ``id``.  Here's what that translates to in
-``tests.py``:
+``polls/tests.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py

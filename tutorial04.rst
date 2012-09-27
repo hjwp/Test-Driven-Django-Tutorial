@@ -307,7 +307,7 @@ https://docs.djangoproject.com/en/1.4/intro/tutorial04/
 
 But Django can do even better than that - Django's forms system will generate
 radio buttons for us, if we can just give it the right incantations.  Let's
-create a new test in ``tests.py``:
+create a new test in ``polls/tests.py``:
 
 
 .. sourcecode:: python
