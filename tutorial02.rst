@@ -24,8 +24,8 @@ Here's an outline of what we're going to do:
 Inspecting the admin site to decide what to test next
 -----------------------------------------------------
 
-Let's fire up the test server, and do a bit of browsing around the admin site -
-that way we can figure out what we want the "Polls" bit to look like.::
+Let's fire up the development server, and do a bit of browsing around the admin
+site - that way we can figure out what we want the "Polls" bit to look like.::
 
     python manage.py runserver
 
@@ -188,7 +188,7 @@ let's call that the end of our FT - you can get rid of the ``self.fail``.
 That's it for now - if you've lost track in amongst all the copy & pasting, you
 can compare your version to mine, which is hosted here:
 
-https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/fts/tests.py
+https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/mysite/fts/tests.py`
 
 
 Human-readable names for models and their attributes
@@ -451,7 +451,7 @@ And let's do a unit test run::
     AttributeError: 'Choice' object has no attribute 'save'
 
     ----------------------------------------------------------------------
-    Ran 326 tests in 2.745s
+    Ran 4 tests in 0.745s
 
     FAILED (errors=1)
 
@@ -595,7 +595,7 @@ server using ``manage.py runserver`` and check for yourself?  Remember, you may
 need to ``syncdb``... Alternatively you can add a ``time.sleep(10)`` to the FT
 just before the error, and that will let you see what's happening)
 
-Let's make 'votes' default to 0, by adding a new test in ``tests.py``
+Let's make 'votes' default to 0, by adding a new test in ``polls/tests.py``
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py

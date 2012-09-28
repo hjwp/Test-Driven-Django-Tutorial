@@ -260,7 +260,7 @@ that will deal with producing a response for them.  These functions are called
 (*This is essentially an MVC pattern, there's some discussion of it here:*
 https://docs.djangoproject.com/en/dev/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names) 
 
-Let's add a new test to ``tests.py``.  I'm going to use the Django Test Client,
+Let's add a new test to ``polls/tests.py``.  I'm going to use the Django Test Client,
 which has some helpful features for testing views.  More info here:
 
 https://docs.djangoproject.com/en/1.4/topics/testing/
@@ -285,7 +285,6 @@ We'll create a new class to test our home page view:
             self.assertIn(poll1.question, response.content)
             self.assertIn(poll2.question, response.content)
 
-Don't forget the import at the top!  
 
 Now, our first run of the tests will probably complain of a with
 ``TemplateDoesNotExist: 404.html``.  Django wants us to create a template for
@@ -443,7 +442,7 @@ template system - that will provide a much more natural way to write web pages.
 
 The Django TestCase lets us check whether a response was rendered using a
 template, by using a special method response called ``assertTemplateUsed``, so
-let's use that.  In ``tests.py``, add an extra check to our view test:
+let's use that.  In ``polls/tests.py``, add an extra check to our view test:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -496,7 +495,6 @@ That should give us a folder structure like this::
     |   |   `-- admin_user.json
     |   |-- __init__.py
     |   |-- models.py
-    |   |-- test_polls.py
     |   |-- tests.py
     |   `-- views.py
     |-- manage.py
@@ -512,7 +510,7 @@ That should give us a folder structure like this::
         |-- templates
         |   `-- home.html
         |-- tests.py
-    `-- views.py
+        `-- views.py
 
 
 Edit ``home.html`` with your favourite editor, 
@@ -763,7 +761,7 @@ Let's use the ``reverse`` function in our tests.  Its first argument is the
 name of the view that handles the url, and we can also specify some arguments.
 We'll be making a view for seeing an individual `Poll` object, so we'll
 probably find the poll using its ``id``.  Here's what that translates to in
-``tests.py``:
+``polls/tests.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/tests.py
@@ -781,8 +779,8 @@ probably find the poll using its ``id``.  Here's what that translates to in
 
             response = self.client.get('/')
 
-            template_names_used = [t.name for t in response.templates]
-            self.assertIn('home.html', template_names_used)
+            # check we've used the right template
+            self.assertTemplateUsed(response, 'home.html')
 
             # check we've passed the polls to the template
             polls_in_context = response.context['polls']
@@ -797,6 +795,11 @@ probably find the poll using its ``id``.  Here's what that translates to in
             self.assertIn(poll1_url, response.content)
             poll2_url = reverse('polls.views.poll', args=[poll2.id,])
             self.assertIn(poll2_url, response.content)
+
+
+Note I've also changed the name of the test, from
+`test_root_url_shows_all_polls` to `test_root_url_shows_links_to_all_polls`, which
+is more descriptive of what we're doing now.
 
 Running this (``python manage.py test polls``) gives::
 

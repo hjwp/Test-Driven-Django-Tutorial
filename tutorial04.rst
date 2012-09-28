@@ -307,7 +307,7 @@ https://docs.djangoproject.com/en/1.4/intro/tutorial04/
 
 But Django can do even better than that - Django's forms system will generate
 radio buttons for us, if we can just give it the right incantations.  Let's
-create a new test in ``tests.py``:
+create a new test in ``polls/tests.py``:
 
 
 .. sourcecode:: python
@@ -504,7 +504,7 @@ Ah yes, we still haven't actually *used* the form yet!  Let's go back to our
             # check we've passed in a form of the right type
             self.assertTrue(isinstance(response.context['form'], PollVoteForm))
 
-            # and check the check the form is being used in the template,
+            # and check the form is being used in the template,
             # by checking for the choice text
             self.assertIn(choice1.choice, response.content)
             self.assertIn(choice2.choice, response.content)
