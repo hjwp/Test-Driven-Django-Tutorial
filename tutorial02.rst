@@ -188,7 +188,7 @@ let's call that the end of our FT - you can get rid of the ``self.fail``.
 That's it for now - if you've lost track in amongst all the copy & pasting, you
 can compare your version to mine, which is hosted here:
 
-https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/mysite/fts/tests.py`
+https://github.com/hjwp/Test-Driven-Django-Tutorial/blob/master/mysite/fts/tests.py
 
 
 Human-readable names for models and their attributes
