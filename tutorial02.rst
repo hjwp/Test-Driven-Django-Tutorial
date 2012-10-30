@@ -350,7 +350,7 @@ page.
 
 https://docs.djangoproject.com/en/1.4/intro/tutorial02/#adding-related-objects
 
-So let's add that as an intermediate step in our FT, in between where Florence
+So let's add that as an intermediate step in our FT, in between where Gertrude
 enters the question, and when she hits save.  
 
 .. sourcecode:: python
