@@ -529,27 +529,29 @@ you've written your tests, you don't really have to keep track of what's next
 any more.  You can can just run the tests, and they'll tell you what to do. So,
 what do the tests want?  Let's re-run the FTs::
 
-    python manage.py test fts
-
-    ======================================================================
-    ERROR: test_voting_on_a_new_poll (test_polls.PollsTest)
-    ----------------------------------------------------------------------
-    Traceback (most recent call last):
-      File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 40, in test_voting_on_a_new_poll
-        self._setup_polls_via_admin()
-      File "/home/harry/workspace/TDDjango/mysite/fts/test_polls.py", line 26, in _setup_polls_via_admin
-        choice_1 = self.browser.find_element_by_name('choice_0')
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 244, in find_element_by_name
-        return self.find_element(by=By.NAME, value=name)
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 525, in find_element
-        {'using': by, 'value': value})['value']
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/webdriver.py", line 144, in execute
-        self.error_handler.check_response(response)
-      File "/usr/local/lib/python2.7/dist-packages/selenium/webdriver/remote/errorhandler.py", line 118, in check_response
-        raise exception_class(message, screen, stacktrace)
-    NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' 
-
-    ----------------------------------------------------------------------
+   python manage.py test fts
+   Creating test database for alias 'default'...
+   E
+   ======================================================================
+   ERROR: test_can_create_new_poll_via_admin_site (fts.tests.PollsTest)
+   ----------------------------------------------------------------------
+   Traceback (most recent call last):
+     File "/home/adorilson/workspace/tddjangotutorial/fts/tests.py", line 71, in test_can_create_new_poll_via_admin_site
+       choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
+     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 285, in find_element_by_name
+       return self.find_element(by=By.NAME, value=name)
+     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 671, in find_element
+   {'using': by, 'value': value})['value']
+     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 156, in execute
+       self.error_handler.check_response(response)
+     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 147, in check_response
+       raise exception_class(message, screen, stacktrace)
+   NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' 
+   
+   ----------------------------------------------------------------------
+   Ran 1 test in 14.098s
+   
+   FAILED (errors=1)
 
 That's right, the FTs want to be able to add "choices" to a poll in the admin
 view. Django has a way. Let's edit ``polls/admin.py``, and do some customising
