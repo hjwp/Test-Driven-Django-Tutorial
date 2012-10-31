@@ -536,7 +536,7 @@ what do the tests want?  Let's re-run the FTs::
    ERROR: test_can_create_new_poll_via_admin_site (fts.tests.PollsTest)
    ----------------------------------------------------------------------
    Traceback (most recent call last):
-     File "/home/adorilson/workspace/tddjangotutorial/fts/tests.py", line 71, in test_can_create_new_poll_via_admin_site
+     File "/home/harry/workspace/mysite/fts/tests.py", line 71, in test_can_create_new_poll_via_admin_site
        choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
      File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 285, in find_element_by_name
        return self.find_element(by=By.NAME, value=name)
