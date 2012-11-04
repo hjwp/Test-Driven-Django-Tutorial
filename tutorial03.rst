@@ -291,7 +291,7 @@ Now, our first run of the tests will probably complain of a with
 our "404 error" page.  We'll come back to that later.  For now, let's make the
 ``/`` url return a real HTTP response.
  
-First we'll create a dummy view in ``views.py``:
+First we'll create a dummy view in ``polls/views.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/views.py
@@ -299,7 +299,7 @@ First we'll create a dummy view in ``views.py``:
     def home(request):
         pass
 
-Now let's hook up this view inside ``urls.py``:
+Now let's hook up this view inside ``mysite/urls.py``:
 
 .. sourcecode:: python
     :filename: mysite/mysite/urls.py
@@ -537,7 +537,7 @@ https://docs.djangoproject.com/en/1.4/topics/templates/
 
 Let's rewrite our code to use this template.  For this we can use the Django
 ``render`` function, which takes the request and the name of the template, back
-in ``views.py``:
+in ``polls/views.py``:
 
 .. sourcecode:: python
     :filename: mysite/polls/views.py
@@ -823,7 +823,7 @@ let's add placeholders for them:
 Capturing parameters from URLs 
 ------------------------------
 
-In ``urls.py``:
+In ``mysite/urls.py``:
 
 .. sourcecode:: python
     :filename: mysite/mysite/urls.py
@@ -919,10 +919,10 @@ Notice the call to ``{% url %}``, which works almost exactly like ``reverse``.  
     ----------------------------------------------------------------------
 
 Phew. A long traceback, but basically all it's saying is that we need at least
-a placeholder for our new "poll" view in ``views.py``.  Let's add that now:
+a placeholder for our new "poll" view in ``mysite/views.py``.  Let's add that now:
 
 .. sourcecode:: python
-    :filename: mysite/mysite/urls.py
+    :filename: mysite/mysite/views.py
 
     def home(request):
         context = {'polls': Poll.objects.all()}
