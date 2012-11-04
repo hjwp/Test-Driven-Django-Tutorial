@@ -286,8 +286,11 @@ We'll create a new class to test our home page view:
             self.assertIn(poll2.question, response.content)
 
 
-Now, our first run of the tests will probably complain of a with
-``TemplateDoesNotExist: 404.html``.  Django wants us to create a template for
+Now, our first run of the tests will probably complain of a with::
+
+    TemplateDoesNotExist: 404.html  
+
+Django wants us to create a template for
 our "404 error" page.  We'll come back to that later.  For now, let's make the
 ``/`` url return a real HTTP response.
  
