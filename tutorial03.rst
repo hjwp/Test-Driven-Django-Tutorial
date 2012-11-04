@@ -218,7 +218,7 @@ up our website, sees some polls and votes on them.
 
         # He clicks on the link to the first Poll, which is called
         # 'How awesome is test-driven development?'
-        first_poll_title = 'How awesome is Test-Driven Development?'
+        first_poll_title = POLL1.question
         self.browser.find_element_by_link_text(first_poll_title).click()
 
         # He is taken to a poll 'results' page, which says
