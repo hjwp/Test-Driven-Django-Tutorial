@@ -538,13 +538,13 @@ what do the tests want?  Let's re-run the FTs::
    Traceback (most recent call last):
      File "/home/harry/workspace/mysite/fts/tests.py", line 71, in test_can_create_new_poll_via_admin_site
        choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
-     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 285, in find_element_by_name
+     File "/usr/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 285, in find_element_by_name
        return self.find_element(by=By.NAME, value=name)
-     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 671, in find_element
+     File "/usr/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 671, in find_element
    {'using': by, 'value': value})['value']
-     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 156, in execute
+     File "/usr/lib/python2.7/site-packages/selenium/webdriver/remote/webdriver.py", line 156, in execute
        self.error_handler.check_response(response)
-     File "/home/adorilson/.virtualenvs/dj1.4/lib/python2.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 147, in check_response
+     File "/usr/lib/python2.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 147, in check_response
        raise exception_class(message, screen, stacktrace)
    NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' 
    
