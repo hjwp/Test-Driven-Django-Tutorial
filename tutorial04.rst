@@ -535,6 +535,10 @@ So:
 .. sourcecode:: python
     :filename: mysite/polls/views.py
 
+    from polls.forms import PollVoteForm
+
+    [...]
+
     def poll(request, poll_id):
         poll = Poll.objects.get(pk=poll_id)
         form = PollVoteForm(poll=poll)
