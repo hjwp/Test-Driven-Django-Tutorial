@@ -1,0 +1,524 @@
+Part 1 - Getting Django set up using a Functional Test
+======================================================================
+
+[source,python]
+----
+from selenium import webdriver
+
+browser = webdriver.Firefox()
+browser.get('http://localhost:8000')
+
+assert 'Django' in browser.title
+print 'OK!'
+----
+
+Expected failure:  `AssertionError`
+
+In a separate window:
+
+----
+django-admin.py startproject mysite
+cd mysite
+python manage.py runserver
+----
+
+Expected pass: test prints 'OK!'
+
+NOTE: Ask me about: what is the point of TDD? How did I get into it?
+
+
+Part 2 - `unittest` and looking for our site's home page
+======================================================================
+
+[source,python]
+----
+
+import unittest
+from selenium import webdriver
+
+class NewVisitorTest(unittest.TestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_voting_on_a_poll(self):
+        # Herbert goest to check out a cool new polls site he's heard about
+        self.browser.get('http://localhost:8000')
+
+        # It is obviously all about polls:
+        self.assertIn('Polls', self.browser.title)
+        heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(heading.text, 'Polls')
+
+        # He clicks on the link to the first Poll, which is all about
+        # TDD
+        self.browser.find_element_by_link_text(
+            'How awesome is Test-Driven Development?'
+        ).click()
+
+        # He is taken to a poll 'results' page, which says
+        # "no-one has voted on this poll yet"
+        self.fail('finish this test')
+
+        # He is taken to a poll 'results' page, which says
+        # "no-one has voted on this poll yet"
+
+        # He also sees a form, which offers him several choices.
+        # There are three options with radio buttons
+
+        # The buttons have labels to explain them
+
+        # He decided to select "very awesome", which is answer #1
+
+        # Herbert clicks 'submit'
+
+        # The page refreshes, and he sees that his choice
+        # has updated the results.  they now say
+        # "100 %: very awesome".
+        self.fail('finish writing this test')
+
+----
+
+NOTE: Ask me about: why is unittest helpful?  what is assertIn?
+
+NOTE: self.browser.implicitly_wait()
+
+Expected failure:  
+
+    AssertionError: 'Polls' not found in u'Welcome to Django'
+
+
+Part 3 - Unit tess, a Django app, urls.py and views.py
+======================================================
+
+Create a polls app and run its unit tests
+-----------------------------------------
+
+Run the following command:
+
+    python manage.py startapp polls
+
+Your directory tree will now look like this:
+
+    mysite
+    |-- functional_test.py
+    |-- polls
+    |   |-- __init__.py
+    |   |-- models.py
+    |   |-- tests.py
+    |   `-- views.py
+    |-- manage.py
+    `-- mysite
+        |-- __init__.py
+        |-- settings.py
+        |-- urls.py
+        `-- wsgi.py
+        
+
+Now we deliberately break the unit test at 'polls/tests.py'
+
+[source,python]
+----
+from django.test import TestCase
+
+class SimpleTest(TestCase):
+    def test_basic_addition(self):
+        """
+        Tests that 1 + 1 always equals 2.
+        """
+        self.assertEqual(1 + 1, 2)
+----
+
+To run it: `python manage.py test`
+
+
+Expected Failure 1:
+
+    settings.DATABASES is improperly configured.
+
+
+NOTE: Ask me about: The difference between unit tests and functional tests
+
+Fix in 'mysite/settings.py'
+    
+[source,python]
+----
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', 
+        'NAME': '',                      # Or path to database file if using sqlite3.
+----
+
+....
+$ python manage.py test
+$ python manage.py test polls
+....
+
+Expected Failure:
+
+    ImproperlyConfigured: App with label polls could not be found
+
+NOTE: Ask me about: re-usable apps?
+
+
+[source,python]
+----
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # Uncomment the next line to enable the admin:
+    # 'django.contrib.admin',
+    # Uncomment the next line to enable admin documentation:
+    # 'django.contrib.admindocs',
+    'polls',
+)
+----
+
+Expected failure:
+
+    AssertionError: 2 != 3
+
+
+Django url mapping in urls.py
+-----------------------------
+
+Now change 'polls/tests.py'
+
+[source,python]
+----
+from django.core.urlresolvers import resolve
+from django.test import TestCase
+from polls.views import home_page
+
+class HomePageTest(TestCase):
+
+    def test_root_url_resolves_to_home_page_view(self):
+        found = resolve('/')
+        self.assertEqual(found.func, home_page)
+----
+
+
+Expected failure:
+
+    ImportError: cannot import name home_page
+
+
+
+In 'polls/views.py':
+
+[source,python]
+----
+# Create your views here.
+home_page = None
+----
+
+NOTE: ask me about: that being totally ridiculous!
+
+Expected failure:
+
+    Resolver404: {'path': '', 'tried': []}
+
+
+In 'mysite/urls.py' 
+
+[source,python]
+----
+from django.conf.urls import patterns, include, url
+
+# Uncomment the next two lines to enable the admin:
+# from django.contrib import admin
+# admin.autodiscover()
+
+urlpatterns = patterns('',
+    # Examples:
+    url(r'^$', 'polls.views.home_page', name='home'),
+    # url(r'^polls/', include('polls.foo.urls')),
+
+    # Uncomment the admin/doc line below to enable admin documentation:
+    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+
+    # Uncomment the next line to enable the admin:
+    # url(r'^admin/', include(admin.site.urls)),
+)
+----
+
+Expected failure:
+
+    ViewDoesNotExist: Could not import polls.views.home_page. View is not callable.
+
+NOTE: ask me about: dot-notation vs importing views.
+
+
+So, in 'polls/views.py'
+
+[source,python]
+----
+# Create your views here.
+
+def home_page():
+    pass
+----
+
+Test should pass!
+
+
+A minimal view to return static HTML in views.py
+------------------------------------------------
+
+
+We extend the unit tests in 'polls/tests.py', to say we want our view
+to return some static HTML...
+
+
+[source,python]
+----
+from django.core.urlresolvers import resolve
+from django.test import TestCase
+from django.http import HttpRequest
+from polls.views import home_page
+
+class HomePageTest(TestCase):
+
+    def test_root_url_resolves_to_home_page_view(self):
+        found = resolve('/')
+        self.assertEqual(found.func, home_page)
+
+
+    def test_home_page_returns_correct_html(self):
+        request = HttpRequest()
+        response = home_page(request)
+        self.assertTrue(response.content.startswith('<html>'))
+        self.assertIn('<title>Polls</title>', response.content)
+        self.assertTrue(response.content.endswith('</html>'))
+----
+
+
+Expected failure:
+
+    TypeError: home_page() takes no arguments (1 given)
+
+
+* Minimal code change:
+
+[source,python]
+----
+def home_page(request):
+    pass
+----
+
+* Tests:
+
+....
+    self.assertTrue(response.content.startswith('<html>'))
+AttributeError: 'NoneType' object has no attribute 'content'
+....
+
+* Code - we use `django.http.HttpResponse`, as predicted:
+
+[source,python]
+----
+from django.http import HttpResponse
+
+def home_page(request):
+    return HttpResponse()
+----
+
+* Tests again:
+
+....
+    self.assertTrue(response.content.startswith('<html>'))
+AssertionError: False is not true
+....
+
+* Code again:
+
+[source,python]
+----
+def home_page(request):
+    return HttpResponse('<html>')
+----
+
+* Tests:
+
+....
+AssertionError: '<title>Polls</title>' not found in '<html>'
+....
+
+* Code:
+
+
+[source,python]
+----
+def home_page(request):
+    return HttpResponse('<html><title>Polls</title>')
+----
+
+* Tests -- almost there?
+
+....
+    self.assertTrue(response.content.endswith('</html>'))
+AssertionError: False is not true
+....
+
+* Come on, one last effort:
+
+
+[source,python]
+----
+def home_page(request):
+    return HttpResponse('<html><title>Polls</title></html>')
+----
+
+
+* Surely?
+
+....
+$ python manage.py test polls
+Creating test database for alias 'default'...
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+....
+
+Now we re-run our functional test, and we expect them to pass re: the
+`<title>', but fail on the `<h1>`
+
+
+Part 4 - Switching to templates
+===============================
+
+Expected failure is:
+
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"tag
+
+
+NOTE: Ask me about: ``Don't test constants''
+
+Refactoring
+-----------
+
+We start with passing tests:
+
+----
+python manage.py test polls
+[...]
+OK
+----
+
+----
+mkdir polls/templates
+----
+
+Then open a file at 'polls/templates/home.html', to which we'll transfer our
+HTML:
+
+[source,html]
+----
+<html>
+    <title>Polls</title>
+</html>
+----
+
+Now change 'polls/views.py':
+
+
+[source,python]
+----
+from django.shortcuts import render
+
+def home_page(request):
+    return render(request, 'home.html')
+----
+
+Oops, an expected failure:
+
+----
+    self.assertTrue(response.content.endswith('</html>'))
+AssertionError: False is not true
+----
+
+Add to test:
+
+[source,python]
+----
+    def test_home_page_returns_correct_html(self):
+        request = HttpRequest()
+        response = home_page(request)
+        self.assertTrue(response.content.startswith('<html>'))
+        self.assertIn('<title>Polls</title>', response.content)
+        print repr(response.content)
+        self.assertTrue(response.content.endswith('</html>'))
+----
+
+And fix, in your own way.
+
+
+Now we change the test:
+
+
+[source,python]
+----
+from django.template.loader import render_to_string
+[...]
+
+    def test_home_page_returns_correct_html(self):
+        request = HttpRequest()
+        response = home_page(request)
+        expected_html = render_to_string('home.html')
+        self.assertEqual(response.content, expected_html)
+----
+
+
+NOTE: Ask me about the Django Test Client
+NOTE: Ask me what Kent Beck said -- "do I really expect you to always code like
+    this?"
+
+
+Adding the h1 to our home page:
+-------------------------------
+
+[source,html]
+----
+<html>
+    <head>
+        <title>Polls</title>
+    </head>
+    <body>
+        <h1>Poll ALL The Things!</h1>
+    </body>
+</html>
+----
+
+Expected failure: 
+
+    no element by link text
+
+
+**Hopefully we'll have a break at this point!**
+
+Part 5 - The Django admin site
+===============================
+
+Ask me about: tesing 3rd party components
+
+
+    def test_can_create_new_poll_via_admin_site(self):
+        # Gertrude opens her web browser, and goes to the admin page
+        self.browser.get('http://locahalhost:8000/admin/')
+
+        # She sees the familiar 'Django administration' heading
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Django administration', body.text)
+        self.fail('Finish this test')
+
+Ask me about: the Page pattern
+
