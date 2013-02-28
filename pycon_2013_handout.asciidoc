@@ -1,6 +1,8 @@
 Part 1 - Getting Django set up using a Functional Test
 ======================================================================
 
+Open a new file called 'functional_tests.py'
+
 [source,python]
 ----
 from selenium import webdriver
@@ -14,10 +16,29 @@ print 'OK!'
 
 Expected failure:  `AssertionError`
 
-In a separate window:
+In a separate console window:
 
 ----
 django-admin.py startproject mysite
+----
+
+Should give you a folder structure like this:
+
+----
+mysite
+|-- manage.py
+`-- mysite
+    |-- __init__.py
+    |-- settings.py
+    |-- urls.py
+    `-- wsgi.py
+----
+
+If it doesn't, you're probably on the wrong version of Django. You'll probably
+have to switch to someone else's PC.
+
+
+----
 cd mysite
 python manage.py runserver
 ----
@@ -30,13 +51,17 @@ NOTE: Ask me about: what is the point of TDD? How did I get into it?
 Part 2 - `unittest` and looking for our site's home page
 ======================================================================
 
+We update 'functional_tests.py' to use the `unittest' module.
+
+We'll update it gradually, but eventually it will look like this:
+
 [source,python]
 ----
 
 import unittest
 from selenium import webdriver
 
-class NewVisitorTest(unittest.TestCase):
+class PollsFunctionalTest(unittest.TestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -50,39 +75,18 @@ class NewVisitorTest(unittest.TestCase):
 
         # It is obviously all about polls:
         self.assertIn('Polls', self.browser.title)
-        heading = self.browser.find_element_by_tag_name('h1')
-        self.assertEquals(heading.text, 'Polls')
 
-        # He clicks on the link to the first Poll, which is all about
-        # TDD
-        self.browser.find_element_by_link_text(
-            'How awesome is Test-Driven Development?'
-        ).click()
-
-        # He is taken to a poll 'results' page, which says
-        # "no-one has voted on this poll yet"
         self.fail('finish this test')
 
-        # He is taken to a poll 'results' page, which says
-        # "no-one has voted on this poll yet"
-
-        # He also sees a form, which offers him several choices.
-        # There are three options with radio buttons
-
-        # The buttons have labels to explain them
-
-        # He decided to select "very awesome", which is answer #1
-
-        # Herbert clicks 'submit'
-
-        # The page refreshes, and he sees that his choice
-        # has updated the results.  they now say
-        # "100 %: very awesome".
-        self.fail('finish writing this test')
-
+if __name__ == '__main__':
+    unittest.main()
 ----
 
 NOTE: Ask me about: why is unittest helpful?  what is assertIn?
+
+NOTE: Ask me about: setUp, tearDown
+
+NOTE: __name__ == '__main__' 
 
 NOTE: self.browser.implicitly_wait()
 
@@ -91,7 +95,54 @@ Expected failure:
     AssertionError: 'Polls' not found in u'Welcome to Django'
 
 
-Part 3 - Unit tess, a Django app, urls.py and views.py
+
+Finish writing the FT as comments, adding one more assertion before the
+self fail:
+
+[source,python]
+----
+def test_voting_on_a_poll(self):
+    # Herbert goest to check out a cool new polls site he's heard about
+    self.browser.get('http://localhost:8000')
+
+    # It is obviously all about polls:
+    self.assertIn('Polls', self.browser.title)
+    heading = self.browser.find_element_by_tag_name('h1')
+    self.assertEquals(heading.text, 'Polls')
+
+    # He clicks on the link to the first Poll, which is all about
+    # TDD
+
+    # He is taken to a poll 'results' page, which says
+    # "no-one has voted on this poll yet"
+
+    # He also sees a form, which offers him several choices.
+    # There are three options with radio buttons
+
+    # He decided to select "very awesome", which is answer #1
+
+    # Herbert clicks 'submit'
+
+    # The page refreshes, and he sees that his choice
+    # has updated the results.  they now say
+    # "100 %: very awesome".
+
+    # Herbert decides to vote again (the site is not very clever)
+
+    # He votes for another choice, and the percentages go 50%-50%
+
+    # He votes again, and they go 66% - 33%
+
+    # Satisfied, he goes back to sleep
+
+[...]
+
+----
+
+Finish up by moving 'functional_tests.py' into the 'mysite' folder
+
+
+Part 3 - Unit tests, a Django app, urls.py and views.py
 ======================================================
 
 Create a polls app and run its unit tests
