@@ -46,14 +46,14 @@ python manage.py runserver
 Expected pass: test prints 'OK!'
 
 NOTE: Ask me about: what is the point of TDD? How did I get into it?
+NOTE: If it doesn't work, check the port -- is `runserver` using port 8000, or is 
+it on a different one? 8001?
 
 
 Part 2 - `unittest` and looking for our site's home page
 ======================================================================
 
 We update 'functional_tests.py' to use the `unittest' module.
-
-We'll update it gradually, but eventually it will look like this:
 
 [source,python]
 ----
@@ -70,11 +70,11 @@ class PollsFunctionalTest(unittest.TestCase):
         self.browser.quit()
 
     def test_voting_on_a_poll(self):
-        # Herbert goest to check out a cool new polls site he's heard about
+        # Elspeth goes to check out a cool new polls site she's heard about
         self.browser.get('http://localhost:8000')
 
         # It is obviously all about polls:
-        self.assertIn('Polls', self.browser.title)
+        self.assertIn('Poll, self.browser.title)
 
         self.fail('finish this test')
 
@@ -96,50 +96,51 @@ Expected failure:
 
 
 
-Finish writing the FT as comments, adding one more assertion before the
-self fail:
+Finish writing the FT as comments:
 
 [source,python]
 ----
 def test_voting_on_a_poll(self):
-    # Herbert goest to check out a cool new polls site he's heard about
+    # Elspeth goest to check out a cool new polls site she's heard about
     self.browser.get('http://localhost:8000')
 
     # It is obviously all about polls:
-    self.assertIn('Polls', self.browser.title)
-    heading = self.browser.find_element_by_tag_name('h1')
-    self.assertEquals(heading.text, 'Polls')
+    self.assertIn('Poll', self.browser.title)
 
-    # He clicks on the link to the first Poll, which is all about
-    # TDD
+    # She clicks on the link to the first Poll, which is titled
+    # "How awesome is TDD?"
+    self.fail('finish this test')
 
-    # He is taken to a poll 'results' page, which says
+    # She is taken to a poll 'results' page, which says
     # "no-one has voted on this poll yet"
 
-    # He also sees a form, which offers him several choices.
+    # She also sees a form, which offers her several choices.
     # There are three options with radio buttons
 
-    # He decided to select "very awesome", which is answer #1
+    # She decided to select "very awesome", which is answer #1
 
-    # Herbert clicks 'submit'
+    # Elspeth clicks 'submit'
 
-    # The page refreshes, and he sees that his choice
-    # has updated the results.  they now say
-    # "100 %: very awesome".
+    # The page refreshes, and she sees that her choice
+    # has updated the results.  They now say
+    # "1 vote" and "100 %: very awesome".
 
-    # Herbert decides to vote again (the site is not very clever)
+    # Elspeth decides to try to vote again 
 
-    # He votes for another choice, and the percentages go 50%-50%
+    # The site is not very clever (yet) so it lets her
 
-    # He votes again, and they go 66% - 33%
+    # She votes for another choice, and the percentages go 50%-50%
 
-    # Satisfied, he goes back to sleep
+    # She votes again, and they go 66% - 33%
+
+    # Satisfied, she goes back to sleep
 
 [...]
 
 ----
 
 Finish up by moving 'functional_tests.py' into the 'mysite' folder
+
 
 
 Part 3 - Unit tests, a Django app, urls.py and views.py
@@ -156,17 +157,17 @@ Your directory tree will now look like this:
 
     mysite
     |-- functional_test.py
-    |-- polls
-    |   |-- __init__.py
-    |   |-- models.py
-    |   |-- tests.py
-    |   `-- views.py
     |-- manage.py
-    `-- mysite
+    |-- mysite
+    |   |-- __init__.py
+    |   |-- settings.py
+    |   |-- urls.py
+    |   `-- wsgi.py
+    `-- polls
         |-- __init__.py
-        |-- settings.py
-        |-- urls.py
-        `-- wsgi.py
+        |-- models.py
+        |-- tests.py
+        `-- views.py
         
 
 Now we deliberately break the unit test at 'polls/tests.py'
@@ -240,7 +241,7 @@ Expected failure:
 Django url mapping in urls.py
 -----------------------------
 
-Now change 'polls/tests.py'
+Now change 'polls/tests.py', throwing away almost all the old stuff
 
 [source,python]
 ----
@@ -346,10 +347,11 @@ class HomePageTest(TestCase):
         request = HttpRequest()
         response = home_page(request)
         self.assertTrue(response.content.startswith('<html>'))
-        self.assertIn('<title>Polls</title>', response.content)
+        self.assertIn('<title>Poll ALL The Things</title>', response.content)
         self.assertTrue(response.content.endswith('</html>'))
 ----
 
+Don't forget to import `HttpRequest`
 
 Expected failure:
 
@@ -371,7 +373,7 @@ def home_page(request):
 AttributeError: 'NoneType' object has no attribute 'content'
 ....
 
-* Code - we use `django.http.HttpResponse`, as predicted:
+* Code
 
 [source,python]
 ----
@@ -399,7 +401,7 @@ def home_page(request):
 * Tests:
 
 ....
-AssertionError: '<title>Polls</title>' not found in '<html>'
+AssertionError: '<title>Poll ALL The Things</title>' not found in '<html>'
 ....
 
 * Code:
@@ -408,7 +410,7 @@ AssertionError: '<title>Polls</title>' not found in '<html>'
 [source,python]
 ----
 def home_page(request):
-    return HttpResponse('<html><title>Polls</title>')
+    return HttpResponse('<html><title>Poll ALL The Things</title>')
 ----
 
 * Tests -- almost there?
@@ -424,7 +426,7 @@ AssertionError: False is not true
 [source,python]
 ----
 def home_page(request):
-    return HttpResponse('<html><title>Polls</title></html>')
+    return HttpResponse('<html><title>Poll ALL The Things</title></html>')
 ----
 
 
@@ -440,22 +442,46 @@ Ran 2 tests in 0.001s
 OK
 ....
 
-Now we re-run our functional test, and we expect them to pass re: the
-`<title>', but fail on the `<h1>`
+Now we re-run our functional test, and we expect them to get past the 
+`assertIn` and stop on the `self.fail`
 
 
 Part 4 - Switching to templates
 ===============================
 
+We extend the FT a little:
+
+[source,python]
+----
+    def test_voting_on_a_poll(self):
+        # Elspeth goes to check out a cool new polls site he's heard about
+        self.browser.get('http://localhost:8000')
+
+        # It is obviously all about polls:
+        self.assertIn('Poll', self.browser.title)
+        heading = self.browser.find_element_by_tag_name('h1')
+        self.assertEquals(heading.text, 'Current polls')
+
+        # He clicks on the link to the first Poll, which is titled
+        # "How awesome is TDD?"
+        self.browser.find_element_by_link_text('How awesome is TDD?').click()
+
+        # He is taken to a poll 'results' page, which says
+        # "no-one has voted on this poll yet"
+        self.fail('finish this test')
+----
+
 Expected failure is:
 
-    NoSuchElementException: Message: u'Unable to locate element: {"method":"tag
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"tag name","selector":"h1"}' ; Stacktrace: [...]
 
 
-NOTE: Ask me about: ``Don't test constants''
+NOTE: Ask me about: `find_element_by_tag_name` vs `find_elements_by_tag_name`
 
 Refactoring
 -----------
+
+NOTE: Ask me about: ``Don't test constants''
 
 We start with passing tests:
 
@@ -475,7 +501,7 @@ HTML:
 [source,html]
 ----
 <html>
-    <title>Polls</title>
+    <title>Poll ALL The Things</title>
 </html>
 ----
 
@@ -490,14 +516,14 @@ def home_page(request):
     return render(request, 'home.html')
 ----
 
-Oops, an expected failure:
+Oops, an unexpected failure:
 
 ----
     self.assertTrue(response.content.endswith('</html>'))
 AssertionError: False is not true
 ----
 
-Add to test:
+Add a `print` statement to test to debug:
 
 [source,python]
 ----
@@ -505,7 +531,7 @@ Add to test:
         request = HttpRequest()
         response = home_page(request)
         self.assertTrue(response.content.startswith('<html>'))
-        self.assertIn('<title>Polls</title>', response.content)
+        self.assertIn('<title>Poll ALL The Things</title>', response.content)
         print repr(response.content)
         self.assertTrue(response.content.endswith('</html>'))
 ----
@@ -541,35 +567,45 @@ Adding the h1 to our home page:
 ----
 <html>
     <head>
-        <title>Polls</title>
+        <title>Poll ALL The Things</title>
     </head>
     <body>
-        <h1>Poll ALL The Things!</h1>
+        <h1>Current polls</h1>
     </body>
 </html>
 ----
 
 Expected failure: 
 
-    no element by link text
+    NoSuchElementException: Message: u'Unable to locate element: {"method":"link text","selector":"How awesome is TDD?"}' ; Stacktrace: [...]
 
 
 **Hopefully we'll have a break at this point!**
 
+
 Part 5 - The Django admin site
 ===============================
 
-Ask me about: tesing 3rd party components
+Ask me about: testing 3rd party components
 
+    def test_can_create_a_new_poll_via_admin_site(self):
+        # Mo the administrator goes to the admin page
+        self.browser.get('http://localhost:8000/admin/')
 
-    def test_can_create_new_poll_via_admin_site(self):
-        # Gertrude opens her web browser, and goes to the admin page
-        self.browser.get('http://locahalhost:8000/admin/')
-
-        # She sees the familiar 'Django administration' heading
+        # He sees the familiar 'Django administration' heading
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Django administration', body.text)
         self.fail('Finish this test')
 
-Ask me about: the Page pattern
+
+Ask me about -- DONTifying tests
+
+Expected failure:
+
+    AssertionError: 'Django administration' not found in u"Page not found (404)\nRequest Method: GET\nRequest URL: http://localhost:8000/admin/\nUsing the URLconf defined in mysite.urls, Django tried these URL patterns, in this order:\n^$ [name='home']\nThe current URL, admin/, didn't match any of these.\nYou're seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page."
+
+
+
+(later) Ask me about: the Page pattern
+
 
