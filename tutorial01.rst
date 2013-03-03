@@ -997,7 +997,7 @@ we want polls to have an attribute called "question".
         question = models.CharField(max_length=200)
 
 
-The `question` attribute will be translated into a column in the databse.  We
+The `question` attribute will be translated into a column in the database.  We
 use a type of ``models.CharField`` because we want to store a string of
 characters.  Django has lots more field types for different data types, see the
 full list here:
