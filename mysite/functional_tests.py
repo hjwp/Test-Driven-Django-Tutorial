@@ -68,7 +68,6 @@ class PollsFunctionalTest(unittest.TestCase):
         # He sees a section named "Polls" with a model called "Polls" in it
         polls_links = self.browser.find_elements_by_link_text('Polls')
         self.assertEquals(len(polls_links), 2)
-        self.fail('Use the admin site to create a poll')
 
         # He clicks the second link, which takes him to the polls listing page
         # which shows there are no polls yet
@@ -79,6 +78,29 @@ class PollsFunctionalTest(unittest.TestCase):
         # He clicks the 'Add poll' link
         new_poll_link = self.browser.find_element_by_link_text('Add poll')
         new_poll_link.click()
+
+        # He types in an interesting question for the Poll
+        question_field = self.browser.find_element_by_name('question')
+        question_field.send_keys("How awesome is Test-Driven Development?")
+
+        # He sets the date and time of publication - it'll be a new year's
+        # poll!
+        date_field = self.browser.find_element_by_name('pub_date_0')
+        date_field.send_keys('01/01/12')
+        time_field = self.browser.find_element_by_name('pub_date_1')
+        time_field.send_keys('00:00')
+
+        # Mo clicks the save button
+        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+        save_button.click()
+
+        # He is returned to the "Polls" listing, where he can see his
+        # new poll, listed as a clickable link
+        new_poll_links = self.browser.find_elements_by_link_text(
+                "How awesome is Test-Driven Development?"
+        )
+        self.assertEquals(len(new_poll_links), 1)
+
 
 
 if __name__ == '__main__':
