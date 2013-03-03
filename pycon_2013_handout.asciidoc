@@ -920,8 +920,8 @@ official tutorial for the implementation... but can you find a way to unit test
 it?  Hint: the model `._meta` attribute might work... Is there another way?
 
 
-Part 7 (optional): Adding related choices model and switching to LiveServerTestCase
-================================================
+Part 7 (optional): Adding related Choice model & switching to LiveServerTestCase
+================================================================================
 
 Start by extending the FT to actually create a new poll via the admin site:
 
@@ -953,6 +953,11 @@ Start by extending the FT to actually create a new poll via the admin site:
     )
     self.assertEquals(len(new_poll_links), 1)
 ----
+
+First expected fail - 
+
+    self.assertEquals(len(new_poll_links), 1)
+AssertionError: 0 != 1
 
 
 
