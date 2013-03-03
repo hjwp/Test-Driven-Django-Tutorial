@@ -1,10 +1,12 @@
 import unittest
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 class PollsFunctionalTest(unittest.TestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3)
 
     def tearDown(self):
         self.browser.quit()
@@ -49,7 +51,35 @@ class PollsFunctionalTest(unittest.TestCase):
         # He sees the familiar 'Django administration' heading
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Django administration', body.text)
-        self.fail('Finish this test')
+
+        # He types in his username and passwords and hits return
+        username_field = self.browser.find_element_by_name('username')
+        username_field.send_keys('admin')
+
+        password_field = self.browser.find_element_by_name('password')
+        password_field.send_keys('adm1n')
+        password_field.send_keys(Keys.RETURN)
+
+        # His username and password are accepted, and he is taken to
+        # the Site Administration page
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Site administration', body.text)
+
+        # He sees a section named "Polls" with a model called "Polls" in it
+        polls_links = self.browser.find_elements_by_link_text('Polls')
+        self.assertEquals(len(polls_links), 2)
+        self.fail('Use the admin site to create a poll')
+
+        # He clicks the second link, which takes him to the polls listing page
+        # which shows there are no polls yet
+        polls_links[1].click()
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('0 polls', body.text)
+
+        # He clicks the 'Add poll' link
+        new_poll_link = self.browser.find_element_by_link_text('Add poll')
+        new_poll_link.click()
+
 
 if __name__ == '__main__':
     unittest.main()
