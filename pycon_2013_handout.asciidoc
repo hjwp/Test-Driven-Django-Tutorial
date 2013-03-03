@@ -959,6 +959,26 @@ First expected fail -
     self.assertEquals(len(new_poll_links), 1)
 AssertionError: 0 != 1
 
+Fix by changing the string representation of a poll:
+
+in 'polls/tests.py', add to `PollModelTest`:
+
+
+[source,python]
+----
+    def test_string_representation(self):
+        poll = Poll()
+        poll.question = "Why?"
+        self.assertEqual(unicode(poll), "Why?")
+----
+
+Expected fail:
+
+    AssertionError: u'Poll object' != 'Why?'
+
+'models.py':
+
+
 
 
 Part 8 - Listing polls on the home page template
