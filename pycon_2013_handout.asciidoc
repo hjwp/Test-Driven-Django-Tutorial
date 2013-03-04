@@ -569,10 +569,11 @@ Now we change the test:
 
 [source,python]
 ----
+[...]
 from django.template.loader import render_to_string
 [...]
 
-    def test_home_page_returns_correct_html(self):
+    def test_home_page_renders_correct_template(self):
         request = HttpRequest()
         response = home_page(request)
         expected_html = render_to_string('home.html')
@@ -771,6 +772,7 @@ Unit test for our Poll model:
 ----
 from django.core.urlresolvers import resolve
 from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.test import TestCase
 from django.utils import timezone
 from polls.models import Poll

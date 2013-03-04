@@ -1,5 +1,6 @@
 from django.core.urlresolvers import resolve
 from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.test import TestCase
 from django.utils import timezone
 from polls.models import Choice, Poll
@@ -79,11 +80,10 @@ class HomePageTest(TestCase):
         self.assertEqual(found.func, home_page)
 
 
-    def test_home_page_returns_correct_html(self):
+    def test_home_page_renders_correct_template(self):
         request = HttpRequest()
         response = home_page(request)
-        self.assertTrue(response.content.startswith('<html>'))
-        self.assertIn('<title>Poll ALL The Things</title>', response.content)
-        self.assertTrue(response.content.strip().endswith('</html>'))
+        expected_html = render_to_string('home.html')
+        self.assertEqual(response.content, expected_html)
 
 
