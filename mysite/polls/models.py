@@ -6,3 +6,8 @@ class Poll(models.Model):
 
     def __unicode__(self):
         return self.question
+
+class Choice(models.Model):
+    poll = models.ForeignKey(Poll)
+    choice = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)

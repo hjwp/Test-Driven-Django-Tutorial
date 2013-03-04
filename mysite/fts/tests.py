@@ -92,6 +92,14 @@ class PollsFunctionalTest(LiveServerTestCase):
         time_field = self.browser.find_element_by_name('pub_date_1')
         time_field.send_keys('00:00')
 
+        # He sees he can enter choices for the Poll.  He adds three
+        choice_1 = self.browser.find_element_by_name('choice_set-0-choice')
+        choice_1.send_keys('Very awesome')
+        choice_2 = self.browser.find_element_by_name('choice_set-1-choice')
+        choice_2.send_keys('Quite awesome')
+        choice_3 = self.browser.find_element_by_name('choice_set-2-choice')
+        choice_3.send_keys('Moderately awesome')
+
         # Mo clicks the save button
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         save_button.click()
