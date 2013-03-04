@@ -1617,6 +1617,127 @@ polls\nHow awesome is TDD?\nWhich workshop treat do you prefer?'
 Part 11 - viewing a poll
 ========================
 
+We want individual polls to have their own URL - let's specify that in
+'polls/templates/home.html':
+
+[source,html]
+----
+<html>
+    <head>
+        <title>Poll ALL The Things</title>
+    </head>
+    <body>
+        <h1>Current polls</h1>
+        <ul>
+        {% for poll in current_polls %}
+            <li><a href="/poll/{{ poll.id }}/">{{ poll.question }}</a></li>
+        {% endfor %}
+        </ul>
+    </body>
+</html>
+----
+
+Of course that URL doesn't exist yet - try running the FT and you'll get a
+404 server error
+
+So let's add a test for our new url, in 'polls/tests.py'
+
+[source,python]
+----
+from polls import views
+[...]
+
+class HomePageTest(TestCase):
+    [...]
+
+    def test_url_for_individual_poll(self):
+        # set up some polls
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        found = resolve('/poll/%d/' % (poll1.id,))
+        self.assertEqual(found.func, views.poll)
+        self.assertEqual(found.args, (poll1.id,))
+----
+
+gives 
+
+    Resolver404: {'path': 'poll/1/', 'tried': [[<RegexURLPattern
+
+possible fix in 'mysite/urls.py':
+
+[source,python]
+----
+urlpatterns = patterns('',
+    url(r'^$', 'polls.views.home_page', name='home'),
+    url(r'^poll/(\d+)/$', 'polls.views.poll', name='poll'),
+
+    url(r'^admin/', include(admin.site.urls)),
+)
+----
+
+which gives 
+
+----
+ViewDoesNotExist: Could not import polls.views.poll. View does not exist in
+module polls.views.
+----
+
+So, in 'polls/views.py':
+
+[source,python]
+----
+[...]
+    return render(request, 'home.html', {'current_polls': Poll.objects.all()})
+
+def poll(request):
+    pass
+----
+
+Oh, unexpected fail:
+
+    AssertionError: Tuples differ: ('1',) != (1,)
+
+view args are always strings - we change the test
+
+[source,python]
+----
+    self.assertEqual(found.args, (str(poll.id),))
+----
+
+Now passes.  
+
+url includes
+------------
+
+**Refactor**:
+
+'mysite/urls.py':
+
+[source,python]
+----
+urlpatterns = patterns('',
+    url(r'^$', 'polls.views.home_page', name='home'),
+    url(r'^poll/', include('polls.urls')),
+
+    url(r'^admin/', include(admin.site.urls)),
+)
+----
+
+New file: 'polls/urls.py':
+
+[source,python]
+----
+from django.conf.urls import patterns, url
+from polls import views
+
+urlpatterns = patterns('',
+    url(r'^/(\d+)/', views.poll, name='poll'),
+)
+----
+
+
+
+
 Part 12 - voting on a poll
 ==========================
 

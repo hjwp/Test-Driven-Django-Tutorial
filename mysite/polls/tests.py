@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 from polls.models import Choice, Poll
 from polls.views import home_page
+from polls import views
 
 class PollModelTest(TestCase):
 
@@ -73,6 +74,8 @@ class ChoiceModelTest(TestCase):
         choice = Choice()
         self.assertEquals(choice.votes, 0)
 
+
+
 class HomePageTest(TestCase):
 
     def test_root_url_resolves_to_home_page_view(self):
@@ -91,5 +94,14 @@ class HomePageTest(TestCase):
         # render template with polls
         expected_html = render_to_string('home.html', {'current_polls': [poll1, poll2]})
         self.assertMultiLineEqual(response.content, expected_html)
+
+
+    def test_url_for_individual_poll(self):
+        # set up some polls
+        poll = Poll(question='6 times 7', pub_date=timezone.now())
+        poll.save()
+        found = resolve('/poll/%d/' % (poll.id,))
+        self.assertEqual(found.func, views.poll)
+        self.assertEqual(found.args, (str(poll.id),))
 
 
