@@ -122,6 +122,7 @@ class PollsFunctionalTest(LiveServerTestCase):
 
         # She also sees a form, which offers her several choices.
         # There are three options with radio buttons
+        self.fail('finish this test')
 
         # She decided to select "very awesome", which is answer #1
 
