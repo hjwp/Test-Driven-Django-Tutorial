@@ -46,7 +46,8 @@ python manage.py runserver
 Expected pass: test prints 'OK!'
 
 NOTE: Ask me about: what is the point of TDD? How did I get into it?
-NOTE: If it doesn't work, check the port -- is `runserver` using port 8000, or is 
+
+TIP: If it doesn't work, check the port -- is `runserver` using port 8000, or is 
 it on a different one? 8001?
 
 Advanced task:
@@ -89,20 +90,24 @@ if __name__ == '__main__':
     unittest.main()
 ----
 
-NOTE: Ask me about: why is unittest helpful?  What is assertIn?
-NOTE: Ask me about: setUp, tearDown
-NOTE: __name__ == '__main__' 
-NOTE: self.browser.implicitly_wait()
+[NOTE]
+.Some things to ask about: 
+===================================
+* why is unittest helpful?  
+* What is assertIn?
+* setUp, tearDown
+* `if __name__ == '__main__'`
+* self.browser.implicitly_wait()
+===================================
 
 Expected failure:  
 
     AssertionError: 'Polls' not found in u'Welcome to Django'
 
 
-NB - if you get a message saying ``Problem loading page'' or 
+TIP: If you get a message saying ``Problem loading page'' or 
 ``Unable to connect'', could it be because the dev server isn't running?
 Use `python manage.py runserver` to start it up again...
-
 
 
 Finish writing the FT as comments:
@@ -148,7 +153,7 @@ def test_voting_on_a_poll(self):
 
 ----
 
-Finish up by moving 'functional_tests.py' into the 'mysite' folder
+Finish up by **moving** 'functional_tests.py' into the 'mysite' folder
 
 Advanced task:
 ~~~~~~~~~~~~~~
@@ -1106,6 +1111,33 @@ class PollsFunctionalTest(LiveServerTestCase):
 
 FT should now pass, no matter how many times you run them!
 
+By the end, your folder structure should look like this:
+
+----
+.
+├── fts
+│   ├── __init__.py
+│   ├── models.py
+│   ├── tests.py
+│   └── views.py
+├── manage.py
+├── mysite
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+└── polls
+    ├── admin.py
+    ├── fixtures
+    │   └── admin_user.json
+    ├── __init__.py
+    ├── models.py
+    ├── templates
+    │   └── home.html
+    ├── tests.py
+    └── views.py
+----
+
 
 Part 8 - Add the Choice model
 =============================
@@ -1113,7 +1145,7 @@ Part 8 - Add the Choice model
 Add a bit to the FT ('fts/tests.py'), just before we save the new poll
 
 
-[subs="quotes"]
+[source,python]
 ----
     # He sets the date and time of publication - it'll be a new year's
     # poll!
@@ -1141,7 +1173,7 @@ Expected failure for `manage.py test fts`:
 
 Now in the unit tests - 'polls/tests.py'
 
-[subs="quotes"]
+[source,python]
 ----
 [...]
 from django.utils import timezone
@@ -1189,35 +1221,37 @@ class ChoiceModelTest(TestCase):
 
 ----
 
-expected failure:
+* Expected failure:
 
     ImportError: cannot import name Choice
 
-'polls/models.py':
+* 'polls/models.py':
 
-[subs="quotes"]
+[source,python]
 ----
 class Choice(object):
     pass
 ----
 
-then
+* Then
 
     AttributeError: 'Choice' object has no attribute 'save'
 
+* 'models.py'
 
-[subs="quotes"]
+[source,python]
 ----
 class Choice(models.Model):
     pass
 ----
 
-tests:
+* tests:
 
     AttributeError: 'Poll' object has no attribute 'choice_set'
 
+* 'models.py'
 
-[subs="quotes"]
+[source,python]
 ----
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
@@ -1230,7 +1264,9 @@ class Choice(models.Model):
 AttributeError: 'Choice' object has no attribute 'choice'
 ----
 
-[subs="quotes"]
+* 'models.py'
+
+[source,python]
 ----
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
@@ -1242,7 +1278,9 @@ class Choice(models.Model):
     AttributeError: 'Choice' object has no attribute 'votes'
 
 
-[subs="quotes"]
+* 'models.py'
+
+[source,python]
 ----
 class Choice(models.Model):
     poll = models.ForeignKey(Poll)
@@ -1252,7 +1290,7 @@ class Choice(models.Model):
 
 Now, in 'polls/admin.py'
 
-[subs="quotes"]
+[source,python]
 ----
 from django.contrib import admin
 from polls.models import Choice, Poll
@@ -1278,7 +1316,7 @@ Need to add a default:
 
 in 'polls/tests.py':
 
-[subs="quotes"]
+[source,python]
 ----
 class ChoiceModelTest(TestCase):
 
@@ -1291,6 +1329,16 @@ class ChoiceModelTest(TestCase):
 ----
 
 'polls/models.py':
+
+[source,python]
+----
+class Choice(models.Model):
+    poll = models.ForeignKey(Poll)
+    choice = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)
+----
+
+FT should now pass
 
 NOTE: ask me about: `TemplateDoesNotExist: 500.html` and `settings.DEBUG`
 
