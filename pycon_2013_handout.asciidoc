@@ -1217,7 +1217,7 @@ class ChoiceModelTest(TestCase):
 
         # finally, check its attributes have been saved
         choice_from_db = poll_choices[0]
-        self.assertEquals(choice_from_db, choice)
+        self.assertEquals(choice_from_db.id, choice.id)
         self.assertEquals(choice_from_db.choice, "doin' fine...")
         self.assertEquals(choice_from_db.votes, 3)
 
@@ -1505,6 +1505,114 @@ Expected fail:
 
 Part 10 - Listing polls on the home page template
 ================================================
+
+We can start by editing our template, 'polls/templates/home.html':
+
+
+[source,html]
+----
+<html>
+    <head>
+        <title>Poll ALL The Things</title>
+    </head>
+    <body>
+        <h1>Current polls</h1>
+        <ul>
+        {% for poll in current_polls %}
+            <li><a href="#">{{ poll.question }}</a></li>
+        {% endfor %}
+        </ul>
+    </body>
+</html>
+----
+
+NOTE: ask me about -- Django template syntax. obviously
+
+Tests should still pass.  But where do `current_polls` come from?
+
+in 'polls/tests.py', change `test_home_page_renders_correct_template` inside 
+`HomePageTest`, changing it to:
+
+
+[source,python]
+----
+def test_home_page_renders_home_template_with_current_polls(self):
+    # set up some polls
+    poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+    poll1.save()
+    poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+    poll2.save()
+    request = HttpRequest()
+    response = home_page(request)
+    # render template with polls
+    expected_html = render_to_string('home.html', {'current_polls': [poll1, poll2]})
+    self.assertEqual(response.content, expected_html)
+----
+
+Failure:
+
+----
+AssertionError: '<html>\n    <head>\n        <title>Poll ALL The
+Things</title>\n    </head>\n    <body>\n        <h1>Current polls</h1>\n
+<ul>\n        \n        </ul>\n    </body>\n</html>\n' != u'<html>\n
+<head>\n        <title>Poll ALL The Things</title>\n    </head>\n    <body>\n
+<h1>Current polls</h1>\n        <ul>\n        \n            <li><a href="#">6
+times 7</a></li>\n        \n            <li><a href="#">life, the universe and
+everything</a></li>\n        \n        </ul>\n    </body>\n</html>\n'
+----
+
+Yuk!  Let's try using `assertMultiLineEqual`:
+
+
+[source,python]
+----
+    # render template with polls
+    expected_html = render_to_string('home.html', {'current_polls': [poll1, poll2]})
+    self.assertMultiLineEqual(response.content, expected_html)
+----
+
+Much better:
+
+----
+AssertionError: '<html>\n    <head>\n        <title>Poll ALL The
+Things</title>\n    </head>\n   [truncated]... != u'<html>\n    <head>\n
+<title>Poll ALL The Things</title>\n    </head>\n  [truncated]...
+  <html>
+      <head>
+          <title>Poll ALL The Things</title>
+      </head>
+      <body>
+          <h1>Current polls</h1>
+          <ul>
+          
++             <li><a href="#">6 times 7</a></li>
++         
++             <li><a href="#">life, the universe and everything</a></li>
++         
+          </ul>
+      </body>
+  </html>
+----
+
+Fix in 'polls/views.py':
+
+
+[source,python]
+----
+from django.shortcuts import render
+from polls.models import Poll
+
+def home_page(request):
+    return render(request, 'home.html', {'current_polls': Poll.objects.all()})
+----
+
+Unit tests should now pass - how about FTs? Not quite - but they do get further
+
+----
+AssertionError: 'no-one has voted on this poll yet' not found in u'Current
+polls\nHow awesome is TDD?\nWhich workshop treat do you prefer?'
+----
+
 
 Part 11 - viewing a poll
 ========================

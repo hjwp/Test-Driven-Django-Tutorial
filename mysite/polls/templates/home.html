@@ -4,5 +4,10 @@
     </head>
     <body>
         <h1>Current polls</h1>
+        <ul>
+        {% for poll in current_polls %}
+            <li><a href="#">{{ poll.question }}</a></li>
+        {% endfor %}
+        </ul>
     </body>
 </html>

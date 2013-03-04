@@ -118,7 +118,7 @@ class PollsFunctionalTest(LiveServerTestCase):
         # She is taken to a poll 'results' page, which says
         # "no-one has voted on this poll yet"
         body = self.browser.find_element_by_tag_name('body')
-        self.test.assertIn("no-one has voted on this poll yet", body.text)
+        self.assertIn("no-one has voted on this poll yet", body.text)
 
         # She also sees a form, which offers her several choices.
         # There are three options with radio buttons

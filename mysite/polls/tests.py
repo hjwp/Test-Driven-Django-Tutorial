@@ -65,7 +65,7 @@ class ChoiceModelTest(TestCase):
 
         # finally, check its attributes have been saved
         choice_from_db = poll_choices[0]
-        self.assertEquals(choice_from_db, choice)
+        self.assertEquals(choice_from_db.id, choice.id)
         self.assertEquals(choice_from_db.choice, "doin' fine...")
         self.assertEquals(choice_from_db.votes, 3)
 
@@ -80,10 +80,16 @@ class HomePageTest(TestCase):
         self.assertEqual(found.func, home_page)
 
 
-    def test_home_page_renders_correct_template(self):
+    def test_home_page_renders_home_template_with_current_polls(self):
+        # set up some polls
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+        poll2.save()
         request = HttpRequest()
         response = home_page(request)
-        expected_html = render_to_string('home.html')
-        self.assertEqual(response.content, expected_html)
+        # render template with polls
+        expected_html = render_to_string('home.html', {'current_polls': [poll1, poll2]})
+        self.assertMultiLineEqual(response.content, expected_html)
 
 
