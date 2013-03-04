@@ -513,9 +513,7 @@ python manage.py test polls
 OK
 ----
 
-----
-mkdir polls/templates
-----
+* make a new directory at polls/templates  
 
 Then open a file at 'polls/templates/home.html', to which we'll transfer our
 HTML:
@@ -920,8 +918,8 @@ official tutorial for the implementation... but can you find a way to unit test
 it?  Hint: the model `._meta` attribute might work... Is there another way?
 
 
-Part 7 (optional): Adding related Choice model & switching to LiveServerTestCase
-================================================================================
+Part 7 (optional): LiveServerTestCase and test fixtures
+=======================================================
 
 Start by extending the FT to actually create a new poll via the admin site:
 
@@ -956,8 +954,14 @@ Start by extending the FT to actually create a new poll via the admin site:
 
 First expected fail - 
 
+----
     self.assertEquals(len(new_poll_links), 1)
 AssertionError: 0 != 1
+----
+
+
+`__unicode__`
+~~~~~~~~~~~~~
 
 Fix by changing the string representation of a poll:
 
@@ -979,6 +983,127 @@ Expected fail:
 'models.py':
 
 
+[source,python]
+----
+class Poll(models.Model):
+    question = models.CharField(max_length=200)
+    pub_date = models.DateTimeField()
+
+    def __unicode__(self):
+        return self.question
+----
+
+Unit tests should now pass
+
+LiveServerTestCase and the test database
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Functional tests should pass once... but fail the second time:
+
+----
+AssertionError: '0 polls' not found in u'Django administration\nWelcome, admin.
+Change password / Log out\nHome \u203a Polls \u203a Polls\nSelect poll to
+change\nAdd poll\nAction:\n---------\nDelete selected polls\nGo 0 of 1
+selected\nPoll\nHow awesome is Test-Driven Development?\n1 poll'
+----
+
+change 'functional_tests.py' to being tests inside a new Django app called 'fts':
+
+
+----
+python manage.py startapp fts
+mv functional_tests.py fts/tests.py
+----
+
+then edit 'fts/tests.py' to inherit from `LiveServerTestCase`:
+
+
+[source,python]
+----
+from django.test import LiveServerTestCase
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+class PollsFunctionalTest(LiveServerTestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Firefox()
+        self.browser.implicitly_wait(3)
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_voting_on_a_poll(self):
+        # Elspeth goes to check out a cool new polls site she's heard about
+        self.browser.get(self.live_server_url)
+
+        [...]
+
+    def test_can_create_a_new_poll_via_admin_site(self):
+        # Mo the administrator goes to the admin page
+        self.browser.get(self.live_server_url + '/admin/')
+        [...]
+
+----
+* make sure to use `self.live_server_url` in both test methods
+* also delete the `if __name__ == __main__` block
+
+Add `fts` to 'settings.py':
+
+[source,python]
+----
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # Uncomment the next line to enable the admin:
+    'django.contrib.admin',
+    # Uncomment the next line to enable admin documentation:
+    # 'django.contrib.admindocs',
+    'polls',
+    'fts',
+)
+----
+
+Now run
+
+----
+$ python manage.py test fts
+----
+
+Should see one `self.fail` (can DONTify this test now) and one:
+
+----
+    self.assertIn('Site administration', body.text)
+AssertionError: 'Site administration' not found in u'Django
+administration\nPlease enter the correct username and password for a staff
+account. Note that both fields may be case-sensitive.\nUsername:\nPassword:\n '
+----
+
+Test fixture setup
+
+* make a new directory at 'polls/fixtures'
+
+----
+python manage.py dumpdata auth.user > polls/fixtures/admin_user.json
+----
+
+Add to 'fts/tests.py':
+
+[source,python]
+----
+class PollsFunctionalTest(LiveServerTestCase):
+
+    fixtures = ['admin_user.json']
+
+    def setUp(self):
+        [...]
+----
+
+FT should now pass, no matter how many times you run them!
 
 
 Part 8 - Listing polls on the home page template

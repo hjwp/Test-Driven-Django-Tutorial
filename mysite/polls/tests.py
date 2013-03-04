@@ -26,6 +26,7 @@ class PollModelTest(TestCase):
         self.assertEquals(only_poll_in_database.question, "What's up?")
         self.assertEquals(only_poll_in_database.pub_date, poll.pub_date)
 
+
     def test_string_representation(self):
         poll = Poll()
         poll.question = "Why?"

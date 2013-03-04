@@ -1,8 +1,10 @@
-import unittest
+from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
-class PollsFunctionalTest(unittest.TestCase):
+class PollsFunctionalTest(LiveServerTestCase):
+
+    fixtures = ['admin_user.json']
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -11,9 +13,9 @@ class PollsFunctionalTest(unittest.TestCase):
     def tearDown(self):
         self.browser.quit()
 
-    def DONTtest_voting_on_a_poll(self):
+    def test_voting_on_a_poll(self):
         # Elspeth goes to check out a cool new polls site she's heard about
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
 
         # She clicks on the link to the first Poll, which is titled
         # "How awesome is TDD?"
@@ -46,7 +48,7 @@ class PollsFunctionalTest(unittest.TestCase):
 
     def test_can_create_a_new_poll_via_admin_site(self):
         # Mo the administrator goes to the admin page
-        self.browser.get('http://localhost:8000/admin/')
+        self.browser.get(self.live_server_url + '/admin/')
 
         # He sees the familiar 'Django administration' heading
         body = self.browser.find_element_by_tag_name('body')
@@ -101,8 +103,4 @@ class PollsFunctionalTest(unittest.TestCase):
         )
         self.assertEquals(len(new_poll_links), 1)
 
-
-
-if __name__ == '__main__':
-    unittest.main()
 
