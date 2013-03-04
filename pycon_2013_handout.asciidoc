@@ -1,5 +1,5 @@
 Part 1 - Getting Django set up using a Selenium Functional Test
-===============================================================
+---------------------------------------------------------------
 
 Open a new file called 'functional_tests.py'
 
@@ -45,8 +45,6 @@ python manage.py runserver
 
 Expected pass: test prints 'OK!'
 
-NOTE: Ask me about: what is the point of TDD? How did I get into it?
-
 TIP: If it doesn't work, check the port -- is `runserver` using port 8000, or is 
 it on a different one? 8001?
 
@@ -58,9 +56,9 @@ accordingly?  What about running just at 'http://localhost/', with no `:`?
 
 
 Part 2 - `unittest` and looking for our site's home page
-========================================================
+--------------------------------------------------------
 
-We update 'functional_tests.py' to use the `unittest' module.
+We update 'functional_tests.py' to use the `unittest` module.
 
 [source,python]
 ----
@@ -91,14 +89,14 @@ if __name__ == '__main__':
 ----
 
 [NOTE]
-.Some things to ask about: 
-===================================
-* why is unittest helpful?  
-* What is assertIn?
-* setUp, tearDown
+.Some things to ask me about, in case I don't mention them
+==========================================================
+* why is `unittest` helpful?  
+* What is `assertIn`?
+* `setUp`, `tearDown`
 * `if __name__ == '__main__'`
-* self.browser.implicitly_wait()
-===================================
+* `self.browser.implicitly_wait()`
+==========================================================
 
 Expected failure:  
 
@@ -163,7 +161,7 @@ sense?  What might you use 'assertItemsEqual' for?
 
 
 Part 3 - Unit tests, a Django app, urls.py and views.py
-======================================================
+-------------------------------------------------------
 
 Create a polls app and run its unit tests
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -471,7 +469,7 @@ Now we re-run our functional test, and we expect them to get past the
 
 
 Part 4 - Switching to templates
-===============================
+-------------------------------
 
 We extend the FT a little:
 
@@ -611,7 +609,7 @@ Expected failure:
 
 
 Part 5 - The Django admin site
-===============================
+-------------------------------
 
 Add a new test method to 'functional_tests.py':
 
@@ -744,7 +742,7 @@ Expected failure:
 
 
 Part 6: A model for Polls
-=========================
+-------------------------
 
 Extend the FT:
 
@@ -926,7 +924,7 @@ it?  Hint: the model `._meta` attribute might work... Is there another way?
 
 
 Part 7 (optional): LiveServerTestCase and test fixtures
-=======================================================
+-------------------------------------------------------
 
 Start by extending the FT to actually create a new poll via the admin site:
 
@@ -1142,7 +1140,7 @@ By the end, your folder structure should look like this:
 
 
 Part 8 - Add the Choice model
-=============================
+-----------------------------
 
 Add a bit to the FT ('fts/tests.py'), just before we save the new poll
 
@@ -1344,9 +1342,15 @@ FT should now pass
 
 NOTE: ask me about: `TemplateDoesNotExist: 500.html` and `settings.DEBUG`
 
+Advanced task: 
+~~~~~~~~~~~~~~
+
+Figure out how to fix the `TemplateDoesNotExist: 500.html` issue
+
+
 
 Part 9 - The Page pattern
-=========================
+-------------------------
 
 Start by refactoring the admin ft:
 
@@ -1503,8 +1507,35 @@ Expected fail:
     {"method":"link text","selector":"How awesome is TDD?"}' [...]
 
 
+
+.Fixing that darned 500 template error!
+************************************************
+It's about time we sorted this out!
+
+----
+mkdir mysite/templates
+echo "Unexpected Error (500) :-/" > mysite/templates/500.html
+----
+
+then, in 'mysite/settings.py':
+
+
+[source,python]
+----
+import os
+[...]
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(os.path.dirname(__file__), 'templates').replace('\\', '/'),
+)
+----
+************************************************
+
+
 Part 10 - Listing polls on the home page template
-================================================
+-------------------------------------------------
 
 We can start by editing our template, 'polls/templates/home.html':
 
@@ -1615,7 +1646,7 @@ polls\nHow awesome is TDD?\nWhich workshop treat do you prefer?'
 
 
 Part 11 - viewing a poll
-========================
+------------------------
 
 We want individual polls to have their own URL - let's specify that in
 'polls/templates/home.html':
@@ -1735,9 +1766,10 @@ urlpatterns = patterns('',
 )
 ----
 
-
+Run unit tests again, they should pass
 
 
 Part 12 - voting on a poll
-==========================
+--------------------------
+
 
