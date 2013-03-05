@@ -1804,8 +1804,6 @@ But changing to 'poll.html' gives:
 So we create it! minimally, at 'polls/templates/poll.html':
 
 
-
-
 [source,html]
 ----
 <html>
@@ -1866,7 +1864,12 @@ So improve the template:
 
 And then:
 
-    AssertionError: 'No-one has voted on this poll yet' not found in '<html>\n    <head>\n        <title>life, the universe and everything</title>\n    </head>\n    <body>\n        <h1>life, the universe and everything</h1>\n    </body>\n</html>\n'
+----
+AssertionError: 'No-one has voted on this poll yet' not found in '<html>\n
+<head>\n        <title>life, the universe and everything</title>\n    </head>\n
+<body>\n        <h1>life, the universe and everything</h1>\n
+</body>\n</html>\n'
+----
 
 So, for now:
 
@@ -1881,11 +1884,14 @@ So, for now:
 
 FT should now get to the `self.fail`
 
-Advanced task:
+Advanced tasks:
 ~~~~~~~~~~~~~~
 
-Figure out how to use url includes to put the poll url into 'polls/urls.py'
-instead of 'mysite/urls.py'
+* Figure out how to use **url includes** to put the poll url into
+'polls/urls.py' instead of 'mysite/urls.py'
+
+* DRY! We shouldn't have these URL strings hard-coded all over the place. Find
+out how to remove them from the template
 
 
 
@@ -1893,6 +1899,252 @@ instead of 'mysite/urls.py'
 Part 12 - voting on a poll
 --------------------------
 
-tbc
+We extend the FT
 
+[source,python]
+----
+    self.assertIn("No-one has voted on this poll yet", body.text)
+
+    # She also sees a form, which offers her several choices.
+    # There are three options with radio buttons
+    choice_inputs = self.browser.find_elements_by_css_selector(
+            "input[type='radio']"
+    )
+    self.assertEquals(len(choice_inputs), 3)
+
+    # The buttons have labels to explain them
+    choice_labels = self.browser.find_elements_by_tag_name('label')
+    choices_text = [c.text for c in choice_labels]
+    self.assertEquals(choices_text, [
+        'Very awesome',
+        'Quite awesome',
+        'Moderately awesome',
+    ])
+
+    # She decided to select "very awesome", which is answer #1
+    chosen = self.browser.find_element_by_css_selector(
+            "input[value='1']"
+    )
+    chosen.click()
+
+    # Elspeth clicks 'submit'
+    self.browser.find_element_by_css_selector(
+            "input[type='submit']"
+    ).click()
+
+    # The page refreshes, and she sees that her choice
+    # has updated the results.  They now say
+    # "1 vote" and "100%: very awesome".
+    body = self.browser.find_element_by_tag_name('body')
+    self.ertNotIn("No-one has voted on this poll yet", body.text)
+    self.assertIn("1 vote", body.text)
+    self.assertIn("100%: Very awesome", body.text)
+
+    # Elspeth decides to try to vote again
+    self.fail('second vote')
+----
+
+Expected fail:
+
+----
+    self.assertEquals(len(choice_inputs), 3)
+AssertionError: 0 != 3
+----
+
+Fix in the template:
+
+[source,html]
+----
+    <h1>{{ poll.question }}</h1>
+    <p>No-one has voted on this poll yet</p>
+    <ul>
+    {% for choice in poll.choice_set.all %}
+        <li><input type="radio" name="vote" value="{{ choice.id }}"/></li>
+    {% endfor %}
+    </ul>
+----
+
+NOTE: ask me about - testing template logic
+
+Failure:
+
+    AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...
+
+So
+
+[source,html]
+----
+{% for choice in poll.choice_set.all %}
+    <li>
+        <label>{{ choice.choice }}
+            <input type="radio" value="{{ choice.id }}"/>
+        </label>
+    </li>
+{% endfor %}
+----
+
+And now
+
+----
+NoSuchElementException: Message: u'Unable to locate element: {"method":"css
+selector","selector":"input[type=\'submit\']"}' [...]
+----
+
+But it's a do-nothing submit...
+
+----
+AssertionError: 'No-one has voted on this poll yet' unexpectedly found in u'How
+awesome is TDD?\nNo-one has voted on this poll yet\nVery awesome\nQuite
+awesome\nModerately awesome'
+----
+
+So we wrap it in a form and give it a URL to POST to:
+
+ 
+[source,html]
+----
+<body>
+    <h1>{{ poll.question }}</h1>
+    <p>No-one has voted on this poll yet</p>
+    <form action="/post/{{ post.id }}/vote" method="POST">
+        <ul>
+        {% for choice in poll.choice_set.all %}
+            <li>
+                <label>{{ choice.choice }}
+                    <input type="radio" name="vote" value="{{ choice.id }}"/>
+                </label>
+            </li>
+        {% endfor %}
+        </ul>
+        <input type="submit" />
+    </form>
+</body>
+----
+
+Test the new URL + view with the Django Test Client:
+
+
+[source,python]
+----
+class PollVoteViewTest(TestCase):
+
+    def test_can_vote_via_POST(self):
+        # set up a poll with choices
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=1)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=3)
+        choice2.save()
+
+        # set up our POST data - keys and values are unicode
+        post_data = {u'vote': unicode(choice2.id)}
+
+        # make our request to the view
+        poll_url = '/poll/%d/vote' % (poll1.id,)
+        response = self.client.post(poll_url, data=post_data)
+
+        # check it wasn't a 404
+        self.assertNotEqual(response.status_code, 404)
+
+        # retrieve the updated choice from the database
+        choice_in_db = Choice.objects.get(pk=choice2.id)
+
+        # check it's votes have gone up by 1
+        self.assertEquals(choice_in_db.votes, 4)
+
+        # "always redirect after a POST", in this case, we go back
+        # to the poll page.
+        self.assertRedirects(response, "/poll/%d/" % (poll1.id,))
+----
+
+Gives:
+
+----
+    self.assertNotEqual(response.status_code, 404)
+AssertionError: 404 == 404
+----
+
+So, in 'mysite/urls.py':
+
+
+[source,python]
+----
+    url(r'^poll/(\d+)/vote$', 'polls.views.vote', name='vote'),
+----
+
+Gives 
+
+    ViewDoesNotExist:
+
+So, in 'polls/views.py', follow normal TDD cycle (I managed 4 steps, can you do
+more?) until you get to:
+
+----
+    self.assertEquals(choice_in_db.votes, 4)
+AssertionError: 3 != 4
+----
+
+Now use the POST data:
+
+
+[source,python]
+----
+def vote(request, poll_id):
+    poll = Poll.objects.get(id=poll_id)
+    choice = Choice.objects.get(id=request.POST['vote'])
+    choice.votes += 1
+    choice.save()
+    return render(request, 'poll.html', {'poll': poll})
+----
+
+Then:
+
+----
+AssertionError: Response didn't redirect as expected: Response code was 200
+(expected 302)
+----
+
+Finally:
+
+[source,python]
+----
+    return redirect('/poll/%d/' % (poll.id,))
+----
+Unit tests now pass.  What about the FT?
+
+----
+AssertionError: '1 vote' not found in u'Forbidden (403)\nCSRF verification
+failed. Request aborted.\nMore information is available with DEBUG=True.'
+----
+
+We need to include a CSRF protection tag in our form:
+
+[source,html]
+----
+    <form action="/poll/{{ poll.id }}/vote" method="POST">
+        {% csrf_token %}
+        <ul>
+----
+
+And now? 
+
+----
+AssertionError: 'No-one has voted on this poll yet' unexpectedly found in u'How
+awesome is TDD?\nNo-one has voted on this poll yet\nVery awesome\nQuite
+awesome\nModerately awesome'
+----
+
+TODO: Still need to display results on the page:
+
+
+
+
+Advanced task
+~~~~~~~~~~~~~
+
+Look up the docs for the `redirect` function. What would be a better solution? 
+
+
+TODO: Test the template. I made a hard-to-debug mistake!
 

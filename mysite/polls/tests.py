@@ -120,4 +120,33 @@ class SinglePollViewTest(TestCase):
         self.assertIn('No-one has voted on this poll yet', response.content)
 
 
+class PollVoteViewTest(TestCase):
 
+    def test_can_vote_via_POST(self):
+        # set up a poll with choices
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        choice1 = Choice(poll=poll1, choice='42', votes=1)
+        choice1.save()
+        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=3)
+        choice2.save()
+
+        # set up our POST data - keys and values are unicode
+        post_data = {u'vote': unicode(choice2.id)}
+
+        # make our request to the view
+        poll_url = '/poll/%d/vote' % (poll1.id,)
+        response = self.client.post(poll_url, data=post_data)
+
+        # check it wasn't a 404
+        self.assertNotEqual(response.status_code, 404)
+
+        # retrieve the updated choice from the database
+        choice_in_db = Choice.objects.get(pk=choice2.id)
+
+        # check it's votes have gone up by 1
+        self.assertEquals(choice_in_db.votes, 4)
+
+        # "always redirect after a POST", in this case, we go back
+        # to the poll page.
+        self.assertRedirects(response, "/poll/%d/" % (poll1.id,))

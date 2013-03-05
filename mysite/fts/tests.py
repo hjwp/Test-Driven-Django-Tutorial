@@ -122,17 +122,41 @@ class PollsFunctionalTest(LiveServerTestCase):
 
         # She also sees a form, which offers her several choices.
         # There are three options with radio buttons
-        self.fail('finish this test')
+        choice_inputs = self.browser.find_elements_by_css_selector(
+                "input[type='radio']"
+        )
+        self.assertEquals(len(choice_inputs), 3)
+
+        # The buttons have labels to explain them
+        choice_labels = self.browser.find_elements_by_tag_name('label')
+        choices_text = [c.text for c in choice_labels]
+        self.assertEquals(choices_text, [
+            'Very awesome',
+            'Quite awesome',
+            'Moderately awesome',
+        ])
 
         # She decided to select "very awesome", which is answer #1
+        chosen = self.browser.find_element_by_css_selector(
+                "input[value='1']"
+        )
+        chosen.click()
 
         # Elspeth clicks 'submit'
+        self.browser.find_element_by_css_selector(
+                "input[type='submit']"
+        ).click()
 
         # The page refreshes, and she sees that her choice
         # has updated the results.  They now say
-        # "1 vote" and "100 %: very awesome".
+        # "1 vote" and "100%: very awesome".
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertNotIn("No-one has voted on this poll yet", body.text)
+        self.assertIn("1 vote", body.text)
+        self.assertIn("100%: Very awesome", body.text)
 
         # Elspeth decides to try to vote again
+        self.fail('second vote')
 
         # The site is not very clever (yet) so it lets her
 
