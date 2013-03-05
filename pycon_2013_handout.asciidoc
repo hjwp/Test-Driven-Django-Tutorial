@@ -124,7 +124,7 @@ def test_voting_on_a_poll(self):
     self.fail('finish this test')
 
     # She is taken to a poll 'results' page, which says
-    # "no-one has voted on this poll yet"
+    # "No-one has voted on this poll yet"
 
     # She also sees a form, which offers her several choices.
     # There are three options with radio buttons
@@ -489,7 +489,7 @@ We extend the FT a little:
         self.browser.find_element_by_link_text('How awesome is TDD?').click()
 
         # She is taken to a poll 'results' page, which says
-        # "no-one has voted on this poll yet"
+        # "No-one has voted on this poll yet"
         self.fail('finish this test')
 ----
 
@@ -1115,27 +1115,27 @@ By the end, your folder structure should look like this:
 
 ----
 .
-├── fts
-│   ├── __init__.py
-│   ├── models.py
-│   ├── tests.py
-│   └── views.py
-├── manage.py
-├── mysite
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-└── polls
-    ├── admin.py
-    ├── fixtures
-    │   └── admin_user.json
-    ├── __init__.py
-    ├── models.py
-    ├── templates
-    │   └── home.html
-    ├── tests.py
-    └── views.py
+|-- fts
+|   |-- __init__.py
+|   |-- models.py
+|   |-- tests.py
+|   `-- views.py
+|-- manage.py
+|-- mysite
+|   |-- __init__.py
+|   |-- settings.py
+|   |-- urls.py
+|   `-- wsgi.py
+`-- polls
+    |-- admin.py
+    |-- fixtures
+    |   `-- admin_user.json
+    |-- __init__.py
+    |-- models.py
+    |-- templates
+    |   `-- home.html
+    |-- tests.py
+    `-- views.py
 ----
 
 
@@ -1493,9 +1493,9 @@ Then, use our new AdminPage to pre-populate some polls for our other FT:
         self.browser.find_element_by_link_text('How awesome is TDD?').click()
 
         # She is taken to a poll 'results' page, which says
-        # "no-one has voted on this poll yet"
+        # "No-one has voted on this poll yet"
         body = self.browser.find_element_by_tag_name('body')
-        self.test.assertIn("no-one has voted on this poll yet", body.text)
+        self.test.assertIn("No-one has voted on this poll yet", body.text)
         # She also sees a form, which offers her several choices.
         # There are three options with radio buttons
         self.fail('finish this test')
@@ -1640,13 +1640,13 @@ def home_page(request):
 Unit tests should now pass - how about FTs? Not quite - but they do get further
 
 ----
-AssertionError: 'no-one has voted on this poll yet' not found in u'Current
+AssertionError: 'No-one has voted on this poll yet' not found in u'Current
 polls\nHow awesome is TDD?\nWhich workshop treat do you prefer?'
 ----
 
 
-Part 11 - viewing a poll
-------------------------
+Part 11 - viewing a poll and the Django Test Client
+---------------------------------------------------
 
 We want individual polls to have their own URL - let's specify that in
 'polls/templates/home.html':
@@ -1671,30 +1671,58 @@ We want individual polls to have their own URL - let's specify that in
 Of course that URL doesn't exist yet - try running the FT and you'll get a
 404 server error
 
-So let's add a test for our new url, in 'polls/tests.py'
+So let's add a test for our new url, in 'polls/tests.py'. This time we
+use the "Django Test Client":
 
 [source,python]
 ----
 from polls import views
 [...]
-
 class HomePageTest(TestCase):
     [...]
 
-    def test_url_for_individual_poll(self):
-        # set up some polls
+class SinglePollViewTest(TestCase):
+
+    def test_page_shows_poll_title_and_no_votes_message(self):
+        # set up two polls, to check the right one is displayed
         poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
-        found = resolve('/poll/%d/' % (poll1.id,))
-        self.assertEqual(found.func, views.poll)
-        self.assertEqual(found.args, (poll1.id,))
+        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+        poll2.save()
+
+        response = self.client.get('/poll/%d/' % (poll2.id, ))
+
+        # check we've used the poll template
+        self.assertTemplateUsed(response, 'poll.html')
+
+        # check we've passed the right poll into the context
+        self.assertEquals(response.context['poll'], poll2)
+
+        # check the poll's question appears on the page
+        self.assertIn(poll2.question, response.content)
+
+        # check our 'no votes yet' message appears
+        self.assertIn('No-one has voted on this poll yet', response.content)
 ----
 
-gives 
+gives :
 
-    Resolver404: {'path': 'poll/1/', 'tried': [[<RegexURLPattern
+    TemplateDoesNotExist: 404.html
 
-possible fix in 'mysite/urls.py':
+Let's add a minimal 404 template, just like we did for the 500:
+
+----
+echo "Page not found (404) :-/" > mysite/templates/404.html
+----
+
+Now we get:
+
+----
+AssertionError: Template 'poll.html' was not a template used to render the
+response. Actual template(s) used: 404.html
+----
+
+OK, so let's fix the 404. Here's a possible fix in 'mysite/urls.py':
 
 [source,python]
 ----
@@ -1724,52 +1752,147 @@ def poll(request):
     pass
 ----
 
-Oh, unexpected fail:
+Now we get:
 
-    AssertionError: Tuples differ: ('1',) != (1,)
+    TypeError: poll() takes exactly 1 argument (2 given)
 
-view args are always strings - we change the test
 
-[source,python]
-----
-    self.assertEqual(found.args, (str(poll.id),))
-----
-
-Now passes.  
-
-url includes
-------------
-
-**Refactor**:
-
-'mysite/urls.py':
+Change to:
 
 [source,python]
 ----
-urlpatterns = patterns('',
-    url(r'^$', 'polls.views.home_page', name='home'),
-    url(r'^poll/', include('polls.urls')),
-
-    url(r'^admin/', include(admin.site.urls)),
-)
+def poll(request, poll_id):
+    pass
 ----
 
-New file: 'polls/urls.py':
+Now
+
+    ValueError: The view polls.views.poll didn't return an HttpResponse object.
+
+So
 
 [source,python]
 ----
-from django.conf.urls import patterns, url
-from polls import views
+from django.http import HttpResponse
+[...]
 
-urlpatterns = patterns('',
-    url(r'^/(\d+)/', views.poll, name='poll'),
-)
+def poll(request, poll_id):
+    return HttpResponse()
 ----
 
-Run unit tests again, they should pass
+And:
+
+    AssertionError: No templates used to render the response
+
+
+So (deliberately wrong):
+
+[source,python]
+----
+def poll(request, poll_id):
+    return render(request, 'home.html')
+----
+
+Gives:
+
+    AssertionError: Template 'poll.html' was not a template used to render the response. Actual template(s) used: home.html
+
+But changing to 'poll.html' gives:
+
+    TemplateDoesNotExist: poll.html
+
+So we create it! minimally, at 'polls/templates/poll.html':
+
+
+
+
+[source,html]
+----
+<html>
+</html>
+----
+
+And now:
+
+----
+    self.assertEquals(response.context['poll'], poll2)
+  File "/usr/local/lib/python2.7/dist-packages/django/template/context.py", line 54, in __getitem__
+    raise KeyError(key)
+KeyError: 'poll'
+----
+
+So we pass poll in our context:
+
+[source,python]
+----
+def poll(request, poll_id):
+    return render(request, 'poll.html', {'poll': None})
+----
+
+tests:
+
+    AssertionError: None != <Poll: life, the universe and everything>
+
+So:
+
+
+[source,python]
+----
+def poll(request, poll_id):
+    poll = Poll.objects.get(id=poll_id)
+    return render(request, 'poll.html', {'poll': poll})
+----
+
+gives
+
+----
+AssertionError: 'life, the universe and everything' not found in
+'<html>\n</html>\n'
+----
+
+So improve the template:
+
+[source,html]
+----
+<html>
+    <head>
+        <title>{{ poll.question }}</title>
+    </head>
+    <body>
+        <h1>{{ poll.question }}</h1>
+    </body>
+</html>
+----
+
+And then:
+
+    AssertionError: 'No-one has voted on this poll yet' not found in '<html>\n    <head>\n        <title>life, the universe and everything</title>\n    </head>\n    <body>\n        <h1>life, the universe and everything</h1>\n    </body>\n</html>\n'
+
+So, for now:
+
+
+[source,html]
+----
+    <body>
+        <h1>{{ poll.question }}</h1>
+        <p>No-one has voted on this poll yet</p>
+    </body>
+----
+
+FT should now get to the `self.fail`
+
+Advanced task:
+~~~~~~~~~~~~~~
+
+Figure out how to use url includes to put the poll url into 'polls/urls.py'
+instead of 'mysite/urls.py'
+
+
 
 
 Part 12 - voting on a poll
 --------------------------
+
+tbc
 
 

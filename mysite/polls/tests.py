@@ -96,12 +96,28 @@ class HomePageTest(TestCase):
         self.assertMultiLineEqual(response.content, expected_html)
 
 
-    def test_url_for_individual_poll(self):
-        # set up some polls
-        poll = Poll(question='6 times 7', pub_date=timezone.now())
-        poll.save()
-        found = resolve('/poll/%d/' % (poll.id,))
-        self.assertEqual(found.func, views.poll)
-        self.assertEqual(found.args, (str(poll.id),))
+class SinglePollViewTest(TestCase):
+
+    def test_page_shows_poll_title_and_no_votes_message(self):
+        # set up two polls, to check the right one is displayed
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+        poll2.save()
+
+        response = self.client.get('/poll/%d/' % (poll2.id, ))
+
+        # check we've used the poll template
+        self.assertTemplateUsed(response, 'poll.html')
+
+        # check we've passed the right poll into the context
+        self.assertEquals(response.context['poll'], poll2)
+
+        # check the poll's question appears on the page
+        self.assertIn(poll2.question, response.content)
+
+        # check our 'no votes yet' message appears
+        self.assertIn('No-one has voted on this poll yet', response.content)
+
 
 
