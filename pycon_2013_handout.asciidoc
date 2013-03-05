@@ -1,3 +1,58 @@
+Part 0 - Pre-requisites
+-----------------------
+
+If you haven't got the pre-requisites, you'll have to follow along with someone
+else's PC.  
+
+* Git and my repo checked out (`git clone https://github.com/hjwp/Test-Driven-Django-Tutorial`)
+* Firefox
+* Python 2.7
+* Django 1.4 or 1.5
+* Selenium (latest version)
+
+Testing you have the pre-requisites installed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Git:
+^^^^
+
+cd to wherever you have my repo checked out
+
+----
+git checkout pycon_2013
+ls pycon_2013_handout.asciidoc
+----
+
+Django:
+^^^^^^^
+
+----
+cd /tmp #or wherever
+django-admin.py startproject delete_me
+cd delete_me
+python manage.py runserver
+----
+
+And check you can see the Django "It worked" page on http://localhost:8000
+
+Selenium
+^^^^^^^^
+
+In a script or a Python shell:
+
+[source,python]
+----
+from selenium import webdriver
+browser = webdriver.Firefox()
+browser.get('http://www.google.com')
+print browser.title
+----
+
+should print ``Google''
+
+
+
+
 Part 1 - Getting Django set up using a Selenium Functional Test
 ---------------------------------------------------------------
 
@@ -48,11 +103,16 @@ Expected pass: test prints 'OK!'
 TIP: If it doesn't work, check the port -- is `runserver` using port 8000, or is 
 it on a different one? 8001?
 
-Advanced task:
-~~~~~~~~~~~~~~
+
+[NOTE]
+.Advanced task
+==============================================================================
 
 Can you make the dev server run on a different port?  And adjust the FT
 accordingly?  What about running just at 'http://localhost/', with no `:`?
+
+==============================================================================
+
 
 
 Part 2 - `unittest` and looking for our site's home page
@@ -153,11 +213,13 @@ def test_voting_on_a_poll(self):
 
 Finish up by **moving** 'functional_tests.py' into the 'mysite' folder
 
-Advanced task:
-~~~~~~~~~~~~~~
-
+[NOTE]
+.Advanced task
+==============================================================================
 Look up some of the other assertion methods in unittest.  Do they all make
 sense?  What might you use 'assertItemsEqual' for?
+
+==============================================================================
 
 
 Part 3 - Unit tests, a Django app, urls.py and views.py
@@ -337,12 +399,13 @@ def home_page():
 
 Test should pass!
 
-Advanced task:
-~~~~~~~~~~~~~~
-
+[NOTE]
+.Advanced task
+==============================================================================
 Would a lambda function work? Are there any other Python objects you could use
 that would still get the tests to pass?
 
+==============================================================================
 
 A minimal view to return static HTML in views.py
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -915,12 +978,14 @@ And now we should get our self.fail:
     AssertionError: Use the admin site to create a poll
 
 
-Advanced task:
-~~~~~~~~~~~~~~
-
+[NOTE]
+.Advanced task
+==============================================================================
 Give pub_date a verbose name of 'Date published'. See the
 official tutorial for the implementation... but can you find a way to unit test
 it?  Hint: the model `._meta` attribute might work... Is there another way?
+
+==============================================================================
 
 
 Part 7 (optional): LiveServerTestCase and test fixtures
@@ -1342,10 +1407,13 @@ FT should now pass
 
 NOTE: ask me about: `TemplateDoesNotExist: 500.html` and `settings.DEBUG`
 
-Advanced task: 
-~~~~~~~~~~~~~~
-
+[NOTE]
+.Advanced task
+==============================================================================
 Figure out how to fix the `TemplateDoesNotExist: 500.html` issue
+
+==============================================================================
+
 
 
 
@@ -1884,15 +1952,15 @@ So, for now:
 
 FT should now get to the `self.fail`
 
-Advanced tasks:
-~~~~~~~~~~~~~~
-
+[NOTE]
+.Advanced task
+==============================================================================
 * Figure out how to use **url includes** to put the poll url into
 'polls/urls.py' instead of 'mysite/urls.py'
 
 * DRY! We shouldn't have these URL strings hard-coded all over the place. Find
 out how to remove them from the template
-
+==============================================================================
 
 
 
@@ -2140,10 +2208,12 @@ TODO: Still need to display results on the page:
 
 
 
-Advanced task
-~~~~~~~~~~~~~
-
+[NOTE]
+.Advanced task
+==============================================================================
 Look up the docs for the `redirect` function. What would be a better solution? 
+
+==============================================================================
 
 
 TODO: Test the template. I made a hard-to-debug mistake!
