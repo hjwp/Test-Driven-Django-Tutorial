@@ -100,8 +100,8 @@ python manage.py runserver
 
 Expected pass: test prints 'OK!'
 
-TIP: If it doesn't work, check the port -- is `runserver` using port 8000, or is 
-it on a different one? 8001?
+TIP: If it doesn't work, check the port -- is `runserver` using port 8000, or
+is it on a different one? 8001?
 
 
 [NOTE]
@@ -260,7 +260,7 @@ class SimpleTest(TestCase):
         """
         Tests that 1 + 1 always equals 2.
         """
-        self.assertEqual(1 + 1, 2)
+        self.assertEqual(1 + 1, 3)
 ----
 
 To run it: `python manage.py test`
@@ -402,8 +402,11 @@ Test should pass!
 [NOTE]
 .Advanced task
 ==============================================================================
-Would a lambda function work? Are there any other Python objects you could use
-that would still get the tests to pass?
+* Would a lambda function work? Are there any other Python objects you could
+use that would still get the tests to pass?
+
+* What happens when you use the empty string ('') as the URL you call in the 
+test?  What about two slashes (//)
 
 ==============================================================================
 
@@ -530,6 +533,13 @@ OK
 Now we re-run our functional test, and we expect them to get past the 
 `assertIn` and stop on the `self.fail`
 
+[NOTE]
+.Advanced task
+==============================================================================
+Can you rewrite the view as a one-liner?  Well done.  But don't do that in real
+life!
+
+==============================================================================
 
 Part 4 - Switching to templates
 -------------------------------
@@ -671,6 +681,14 @@ Expected failure:
 **Hopefully we'll have a break at this point!**
 
 
+[NOTE]
+.Advanced task
+==============================================================================
+How would you test that we are returning valid (standards-compliant) HTML?  
+
+==============================================================================
+
+
 Part 5 - The Django admin site
 -------------------------------
 
@@ -765,11 +783,13 @@ Run syncdb
 python manage.py syncdb
 ----
 
-Remember the username and password you use -- I'm using 'admin' and 'adm1n'
+Remember the username and password you use -- I'm using `admin` and `adm1n`
 
 Should now get to:
 
     AssertionError: Finish this test
+
+Now the FT should be able to log into the admin site:
 
 [source,python]
 ----
@@ -803,6 +823,14 @@ Expected failure:
 
     AssertionError: Use the admin site to create a poll
 
+[NOTE]
+.Advanced task
+==============================================================================
+What other methods could we have used, apart from `find_element_by_name`, to
+find the username and password fields?  What about clicking instead of
+pressing RETURN?
+
+==============================================================================
 
 Part 6: A model for Polls
 -------------------------
@@ -988,7 +1016,7 @@ it?  Hint: the model `._meta` attribute might work... Is there another way?
 ==============================================================================
 
 
-Part 7 (optional): LiveServerTestCase and test fixtures
+Part 7: LiveServerTestCase and test fixtures
 -------------------------------------------------------
 
 Start by extending the FT to actually create a new poll via the admin site:
@@ -1233,7 +1261,8 @@ Add a bit to the FT ('fts/tests.py'), just before we save the new poll
 
 Expected failure for `manage.py test fts`:
 
-    NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' ; Stacktrace: [...]
+    NoSuchElementException: Message: u'Unable to locate element:
+    {"method":"name","selector":"choice_set-0-choice"}' ; Stacktrace: [...]
 
 
 Now in the unit tests - 'polls/tests.py'
@@ -1575,9 +1604,17 @@ Expected fail:
     {"method":"link text","selector":"How awesome is TDD?"}' [...]
 
 
+[NOTE]
+.Advanced task
+==============================================================================
+Remove some of the duplicated strings like the poll question, and use some
+constants instead
 
-.Fixing that darned 500 template error!
-************************************************
+==============================================================================
+
+Fixing that darned 500 template error!
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 It's about time we sorted this out!
 
 ----
@@ -1599,7 +1636,6 @@ TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), 'templates').replace('\\', '/'),
 )
 ----
-************************************************
 
 
 Part 10 - Listing polls on the home page template
@@ -2203,8 +2239,6 @@ awesome is TDD?\nNo-one has voted on this poll yet\nVery awesome\nQuite
 awesome\nModerately awesome'
 ----
 
-TODO: Still need to display results on the page:
-
 
 
 
@@ -2216,5 +2250,4 @@ Look up the docs for the `redirect` function. What would be a better solution?
 ==============================================================================
 
 
-TODO: Test the template. I made a hard-to-debug mistake!
 
