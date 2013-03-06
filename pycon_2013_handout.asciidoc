@@ -1,14 +1,15 @@
 Part 0 - Pre-requisites
 -----------------------
 
-If you haven't got the pre-requisites, you'll have to follow along with someone
-else's PC.  
-
 * Git and my repo checked out (`git clone https://github.com/hjwp/Test-Driven-Django-Tutorial`)
 * Firefox
 * Python 2.7
 * Django 1.4 or 1.5
 * Selenium (latest version)
+
+If you haven't got the pre-requisites, you'll have to follow along with someone
+else's PC.  That's OK, my whole tutorial is available online, so you can go
+through the whole thing in your own time later.
 
 Testing you have the pre-requisites installed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -16,7 +17,7 @@ Testing you have the pre-requisites installed
 Git:
 ^^^^
 
-cd to wherever you have my repo checked out
+`cd` to wherever you have my repo checked out
 
 ----
 git checkout pycon_2013
@@ -1613,7 +1614,7 @@ constants instead
 ==============================================================================
 
 Fixing that darned 500 template error!
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It's about time we sorted this out!
 
@@ -1641,7 +1642,66 @@ TEMPLATE_DIRS = (
 Part 10 - Listing polls on the home page template
 -------------------------------------------------
 
-We can start by editing our template, 'polls/templates/home.html':
+
+
+[NOTE]
+.Skipping ahead to this section
+==============================================================================
+
+From the top-level folder of the repo
+
+    git stash # if you want to save what you had so far
+    git checkout PYCON_2013_PART_10 -- mysite
+
+Those two commands will blow away everything in 'mysite' and replace them 
+with versions as if you'd skipped to this part
+
+==============================================================================
+
+`python manage.py test fts` should give:
+
+----
+NoSuchElementException: Message: u'Unable to locate element: {"method":"link
+text","selector":"How awesome is TDD?"}' 
+----
+
+So start by adding check for poll questions to our view unit test. In
+'polls/tests.py', change `test_home_page_renders_correct_template` inside 
+`HomePageTest`, to:
+
+
+[source,python]
+----
+def test_home_page_renders_home_template_with_current_polls(self):
+    # set up some polls
+    poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+    poll1.save()
+    poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+    poll2.save()
+
+    request = HttpRequest()
+    response = home_page(request)
+
+    # check template rendered correctly
+    expected_html = render_to_string('home.html')
+    self.assertEqual(response.content, expected_html)
+
+    # check template includes all polls
+    self.assertIn(poll1.question, response.content)
+    self.assertIn(poll2.question, response.content)
+
+----
+
+Should fail:
+
+----
+AssertionError: '6 times 7' not found in '<html>\n    <head>\n
+<title>Poll ALL The Things</title>\n    </head>\n    <body>\n
+<h1>Current polls</h1>\n    </body>\n</html>\n'
+----
+
+Now add them to our template, 'polls/templates/home.html', using special Django
+template tags -- `{% %}` and `{{ }}`
 
 
 [source,html]
@@ -1654,46 +1714,37 @@ We can start by editing our template, 'polls/templates/home.html':
         <h1>Current polls</h1>
         <ul>
         {% for poll in current_polls %}
-            <li><a href="#">{{ poll.question }}</a></li>
+            <li>{{ poll.question }}</li>
         {% endfor %}
         </ul>
     </body>
 </html>
 ----
 
+Tests still fail - v. slightly different error.
+
 NOTE: ask me about -- Django template syntax. obviously
 
-Tests should still pass.  But where do `current_polls` come from?
-
-in 'polls/tests.py', change `test_home_page_renders_correct_template` inside 
-`HomePageTest`, changing it to:
-
+Where would `current_polls` come from?  They're actually passed into the render
+call - we can test that! In 'polls/tests.py':
 
 [source,python]
 ----
-def test_home_page_renders_home_template_with_current_polls(self):
-    # set up some polls
-    poll1 = Poll(question='6 times 7', pub_date=timezone.now())
-    poll1.save()
-    poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
-    poll2.save()
-    request = HttpRequest()
-    response = home_page(request)
-    # render template with polls
     expected_html = render_to_string('home.html', {'current_polls': [poll1, poll2]})
     self.assertEqual(response.content, expected_html)
 ----
 
-Failure:
+Now test failure happens earlier :
 
 ----
+    self.assertEqual(response.content, expected_html)
 AssertionError: '<html>\n    <head>\n        <title>Poll ALL The
 Things</title>\n    </head>\n    <body>\n        <h1>Current polls</h1>\n
-<ul>\n        \n        </ul>\n    </body>\n</html>\n' != u'<html>\n
-<head>\n        <title>Poll ALL The Things</title>\n    </head>\n    <body>\n
-<h1>Current polls</h1>\n        <ul>\n        \n            <li><a href="#">6
-times 7</a></li>\n        \n            <li><a href="#">life, the universe and
-everything</a></li>\n        \n        </ul>\n    </body>\n</html>\n'
+<ul>\n        \n        </ul>\n    </body>\n</html>\n' != u'<html>\n <head>\n
+<title>Poll ALL The Things</title>\n    </head>\n    <body>\n <h1>Current
+polls</h1>\n        <ul>\n        \n            <li>6 times 7</li>\n        \n
+<li>life, the universe and everything</li>\n        \n        </ul>\n
+</body>\n</html>\n'
 ----
 
 Yuk!  Let's try using `assertMultiLineEqual`:
@@ -1719,10 +1770,9 @@ Things</title>\n    </head>\n   [truncated]... != u'<html>\n    <head>\n
       <body>
           <h1>Current polls</h1>
           <ul>
-          
-+             <li><a href="#">6 times 7</a></li>
++             <li>6 times 7</li>
 +         
-+             <li><a href="#">life, the universe and everything</a></li>
++             <li>life, the universe and everything</li>
 +         
           </ul>
       </body>
@@ -1742,6 +1792,23 @@ def home_page(request):
 ----
 
 Unit tests should now pass - how about FTs? Not quite - but they do get further
+
+----
+NoSuchElementException: Message: u'Unable to locate element: {"method":"link
+text","selector":"How awesome is TDD?"}' ;
+----
+
+Let's make our poll questions into hyperlinks in the template:
+
+
+[source,html]
+----
+    {% for poll in current_polls %}
+        <li><a>{{ poll.question }}</a></li>
+    {% endfor %}
+----
+
+FT gets a little further
 
 ----
 AssertionError: 'No-one has voted on this poll yet' not found in u'Current
@@ -1773,10 +1840,10 @@ We want individual polls to have their own URL - let's specify that in
 ----
 
 Of course that URL doesn't exist yet - try running the FT and you'll get a
-404 server error
+500 server error
 
 So let's add a test for our new url, in 'polls/tests.py'. This time we
-use the "Django Test Client":
+use the 'Django Test Client':
 
 [source,python]
 ----
@@ -1845,63 +1912,23 @@ ViewDoesNotExist: Could not import polls.views.poll. View does not exist in
 module polls.views.
 ----
 
-So, in 'polls/views.py':
-
-[source,python]
-----
-[...]
-    return render(request, 'home.html', {'current_polls': Poll.objects.all()})
-
-def poll(request):
-    pass
-----
-
-Now we get:
+Now enter a TDD/code cycle. I will show just the failures:
 
     TypeError: poll() takes exactly 1 argument (2 given)
 
-
-Change to:
-
-[source,python]
-----
-def poll(request, poll_id):
-    pass
-----
-
-Now
+Then:
 
     ValueError: The view polls.views.poll didn't return an HttpResponse object.
 
-So
-
-[source,python]
-----
-from django.http import HttpResponse
-[...]
-
-def poll(request, poll_id):
-    return HttpResponse()
-----
-
-And:
+Then:
 
     AssertionError: No templates used to render the response
 
-
-So (deliberately wrong):
-
-[source,python]
-----
-def poll(request, poll_id):
-    return render(request, 'home.html')
-----
-
-Gives:
+(deliberate mistake)
 
     AssertionError: Template 'poll.html' was not a template used to render the response. Actual template(s) used: home.html
 
-But changing to 'poll.html' gives:
+Then:
 
     TemplateDoesNotExist: poll.html
 
@@ -1989,13 +2016,16 @@ So, for now:
 FT should now get to the `self.fail`
 
 [NOTE]
-.Advanced task
+.Advanced tasks
 ==============================================================================
-* Figure out how to use **url includes** to put the poll url into
+1. Figure out how to use **url includes** to put the poll url into
 'polls/urls.py' instead of 'mysite/urls.py'
 
-* DRY! We shouldn't have these URL strings hard-coded all over the place. Find
+2. DRY! We shouldn't have these URL strings hard-coded all over the place. Find
 out how to remove them from the template
+
+3. Look up how template inheritance works in Django.  Make 'poll.html' and
+'home.html' inherit from a common base template.
 ==============================================================================
 
 
@@ -2048,6 +2078,13 @@ We extend the FT
     self.fail('second vote')
 ----
 
+[TIP]
+==============================================================================
+Shortcut to typing all that in:
+
+    git checkout PYCON_2013_PART_12_FT -- polls/fts/tests.py
+
+==============================================================================
 Expected fail:
 
 ----
@@ -2055,7 +2092,64 @@ Expected fail:
 AssertionError: 0 != 3
 ----
 
-Fix in the template:
+
+Unit testing template logic
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Choice inputs can be a bit tricky. Better have a unit test for them. In
+'polls/tests.py', change the test method in `SinglePollViewTest`:
+
+
+[source,python]
+----
+class SinglePollViewTest(TestCase):
+
+    def test_template_rendered_with_poll_and_choice_radio_buttons_and_no_votes(
+            self
+    ):
+        # set up two polls, to check the right one is displayed
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+        poll2.save()
+
+        # add a couple of choices
+        choice1 = Choice(poll=poll2, choice="42")
+        choice1.save()
+        choice2 = Choice(poll=poll2, choice="the Spice")
+        choice2.save()
+
+        response = self.client.get('/poll/%d/' % (poll2.id, ))
+
+        # check we've used the poll template
+        self.assertTemplateUsed(response, 'poll.html')
+
+        # check we've passed the right poll into the context
+        self.assertEquals(response.context['poll'], poll2)
+
+        # check the poll's question appears on the page
+        self.assertIn(poll2.question, response.content)
+
+        # check our 'no votes yet' message appears
+        self.assertIn('No-one has voted on this poll yet', response.content)
+
+        # check the choices appear as radio buttons, with the
+        # correct 'name' and 'value'
+        self.assertIn(
+            '<input type="radio" name="vote" value="%d" />' % (choice1.id,),
+            response.content
+        )
+        self.assertIn(
+            '<input type="radio" name="vote" value="%d" />' % (choice2.id,),
+            response.content
+        )
+        # check there are labels too
+        self.assertIn('<label>%s' % (choice1.choice,), response.content)
+        self.assertIn('<label>%s' % (choice2.choice,), response.content)
+----
+
+Now the tests drive what we add to the template:
+
 
 [source,html]
 ----
@@ -2068,78 +2162,108 @@ Fix in the template:
     </ul>
 ----
 
-NOTE: ask me about - testing template logic
+Gets past the `<input>` tests:
 
-Failure:
+----
+AssertionError: '<label>42' not found in '<html>\n    <head>\n
+<title>life, the universe and everything</title>\n    </head>\n    <body>\n
+<h1>life, the universe and everything</h1>\n        <p>No-one has voted on this
+poll yet</p>\n        \n            <input type="radio" name="vote" value="1"
+/>\n        \n            <input type="radio" name="vote" value="2" />\n
+\n    </body>\n</html>\n'
+----
 
-    AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...
+Let's add a `<label>` or two:
 
-So
 
 [source,html]
 ----
-{% for choice in poll.choice_set.all %}
-    <li>
+    {% for choice in poll.choice_set.all %}
         <label>{{ choice.choice }}
-            <input type="radio" value="{{ choice.id }}"/>
+            <input type="radio" name="vote" value="{{ choice.id }}" />
         </label>
-    </li>
-{% endfor %}
+    {% endfor %}
 ----
 
-And now
+And unit tests should now pass.  The FTs want a submit input:
 
 ----
-NoSuchElementException: Message: u'Unable to locate element: {"method":"css
-selector","selector":"input[type=\'submit\']"}' [...]
+NoSuchElementException: Message: u'Unable to locate element: {"method":"css selector","selector":"input[type=\'submit\']"}' ;
 ----
 
-But it's a do-nothing submit...
+Now that we're asking for a submit button, we should probably have a real form
+that sends a POST to a real URL.  Let's do that. Maybe in a new test:
 
+[source,python]
 ----
-AssertionError: 'No-one has voted on this poll yet' unexpectedly found in u'How
-awesome is TDD?\nNo-one has voted on this poll yet\nVery awesome\nQuite
-awesome\nModerately awesome'
+    def test_poll_has_vote_form_which_posts_to_correct_url(self):
+        poll = Poll.objects.create(question='question', pub_date=timezone.now())
+
+        response = self.client.get('/poll/%d/' % (poll.id, ))
+
+        self.assertIn(
+            '<form method="POST" action="/poll/%d/vote">' % (poll.id,),
+            response.content
+        )
+        self.assertIn(
+            '<input type="submit"',
+            response.content
+        )
 ----
 
-So we wrap it in a form and give it a URL to POST to:
+AssertionError: '<form method="POST" action="/poll/1/vote">' not found in '<html>\n    <head>\n        <title>question</title>\n    </head>\n    <body>\n        <h1>question</h1>\n        <p>No-one has voted on this poll yet</p>\n        \n    </body>\n</html>\n'
 
- 
+So we fix that:
+
 [source,html]
 ----
-<body>
-    <h1>{{ poll.question }}</h1>
     <p>No-one has voted on this poll yet</p>
-    <form action="/post/{{ post.id }}/vote" method="POST">
-        <ul>
+    <form method="POST" action="/poll/{{ poll.id }}/vote">
         {% for choice in poll.choice_set.all %}
-            <li>
-                <label>{{ choice.choice }}
-                    <input type="radio" name="vote" value="{{ choice.id }}"/>
-                </label>
-            </li>
-        {% endfor %}
-        </ul>
-        <input type="submit" />
-    </form>
-</body>
 ----
 
-Test the new URL + view with the Django Test Client:
+And the next fail is about the input, so we add that:
+
+[source,html]
+----
+        {% endfor %}
+        <input type="submit" value="Vote" />
+    </form>
+----
+
+And now the FT should get to this:
+
+    AssertionError: '1 vote' not found in u'Page not found (404) :-/'
+
+Because we don't yet have a URL and view to submit votes to.
+
+[NOTE]
+.Advanced task
+==============================================================================
+Remove any hard-coded references to urls as strings - we should have these
+defined in one place only.  Hint: find the `reverse` function.
+
+==============================================================================
+
+A new URL + view for POST submissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Test the new URL + view with the Django Test Client. In 'polls/tests.py':
 
 
 [source,python]
 ----
+class SinglePollViewTest(TestCase):
+    [...]
+
 class PollVoteViewTest(TestCase):
 
     def test_can_vote_via_POST(self):
         # set up a poll with choices
-        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
-        poll1.save()
-        choice1 = Choice(poll=poll1, choice='42', votes=1)
-        choice1.save()
-        choice2 = Choice(poll=poll1, choice='The Ultimate Answer', votes=3)
-        choice2.save()
+        poll = Poll.objects.create(question='who?', pub_date=timezone.now())
+        poll.save()
+        choice1 = Choice.objects.create(poll=poll, choice='me', votes=1)
+        choice2 = Choice.objects.create(poll=poll, choice='you', votes=3)
 
         # set up our POST data - keys and values are unicode
         post_data = {u'vote': unicode(choice2.id)}
@@ -2157,7 +2281,7 @@ class PollVoteViewTest(TestCase):
         # check it's votes have gone up by 1
         self.assertEquals(choice_in_db.votes, 4)
 
-        # "always redirect after a POST", in this case, we go back
+        # "always redirect after a POST". In this case, we go back
         # to the poll page.
         self.assertRedirects(response, "/poll/%d/" % (poll1.id,))
 ----
@@ -2194,6 +2318,10 @@ Now use the POST data:
 
 [source,python]
 ----
+from polls.models import Choice, Poll
+
+[...]
+
 def vote(request, poll_id):
     poll = Poll.objects.get(id=poll_id)
     choice = Choice.objects.get(id=request.POST['vote'])
@@ -2213,6 +2341,11 @@ Finally:
 
 [source,python]
 ----
+from django.shortcuts import redirect, render
+
+[...]
+
+    choice.save()
     return redirect('/poll/%d/' % (poll.id,))
 ----
 Unit tests now pass.  What about the FT?
@@ -2240,14 +2373,37 @@ awesome\nModerately awesome'
 ----
 
 
+Next would be printing the votes... But that's up to you!
 
 
 [NOTE]
-.Advanced task
+.Advanced tasks
 ==============================================================================
-Look up the docs for the `redirect` function. What would be a better solution? 
+1. Find out how CSRF protection works
+2. Look up the docs for the `redirect` function. What would be a better
+solution? 
+==============================================================================
 
-==============================================================================
+
+
+THE END.... for now?
+--------------------
+
+Thanks for coming along!  I hope you enjoyed it, and I hope you found it
+useful.
+
+Let me have your feedback!  What went well, what could I improve?  Let me
+know via harry.percival@gmail.com
+
+This doesn't need to be the end of your TDD journey -- there's **loads** more
+content in my tutorial, at http://www.tdd-django-tutorial.com/
+
+You can find me on Twitter via **@hjwp**
+
+Finally, watch out for my book, due later this year on O'Reilly!  It should
+be in the Early Release Program by the time PyCon comes around, so check it
+out and let me know what you think!
+
 
 
 
