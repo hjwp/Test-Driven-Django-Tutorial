@@ -143,7 +143,7 @@ class PollsFunctionalTest(LiveServerTestCase):
         # Satisfied, she goes back to sleep
 
 
-    def test_can_create_a_new_poll_via_admin_site(self):
+    def DONTtest_can_create_a_new_poll_via_admin_site(self):
         # Mo the administrator goes to the admin page
         # and creates a new poll, with 3 choices
         admin_page = AdminPage(self, self.browser)

@@ -83,10 +83,23 @@ class HomePageTest(TestCase):
         self.assertEqual(found.func, home_page)
 
 
-    def test_home_page_renders_correct_template(self):
+    def test_home_page_renders_home_template_with_polls(self):
+        # set up some polls
+        poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+        poll1.save()
+        poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+        poll2.save()
         request = HttpRequest()
+
         response = home_page(request)
         expected_html = render_to_string('home.html')
-        self.assertEqual(response.content, expected_html)
+
+        # check template rendered correctly
+        expected_html = render_to_string('home.html', {'current_polls': [poll1, poll2]})
+        self.assertMultiLineEqual(response.content, expected_html)
+
+        # check template includes all polls
+        self.assertIn(poll1.question, response.content)
+        self.assertIn(poll2.question, response.content)
 
 
