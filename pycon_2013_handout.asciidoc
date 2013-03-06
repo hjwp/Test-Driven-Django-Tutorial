@@ -57,6 +57,10 @@ should print ``Google''
 Part 1 - Getting Django set up using a Selenium Functional Test
 ---------------------------------------------------------------
 
+NOTE: **You should use my repo (which is fairly empty) as the base directory for
+all your work.  That will let you do the occasional `checkout` to get files we 
+need for later stages**
+
 Open a new file called 'functional_tests.py'
 
 [source,python]
@@ -81,17 +85,25 @@ django-admin.py startproject mysite
 Should give you a folder structure like this:
 
 ----
-mysite
-|-- manage.py
-`-- mysite
-    |-- __init__.py
-    |-- settings.py
-    |-- urls.py
-    `-- wsgi.py
+ tree --charset=ascii -I *.pyc
+.
+|-- mysite
+|   |-- manage.py
+|   `-- mysite
+|       |-- __init__.py
+|       |-- settings.py
+|       |-- urls.py
+|       `-- wsgi.py
+|-- old_tutorial/
+|-- pycon_2013_handout.asciidoc
+|-- pycon_2013_handout.html
+|-- reference_project/
+`-- workshop.rst
 ----
 
-If it doesn't, you're probably on the wrong version of Django. You'll probably
-have to switch to someone else's PC.
+If your folder structure doesn't look like that -- particularly if you don't
+have the double 'mysite/mysite' folder -- that means you're on the wrong
+version of Django. Switch to someone else's PC.
 
 
 ----
@@ -211,6 +223,15 @@ def test_voting_on_a_poll(self):
 [...]
 
 ----
+
+
+[TIP]
+==============================================================================
+Shortcut to typing all that in:
+
+    git checkout PYCON_2013_PART_2_FT -- functional_tests.py
+
+==============================================================================
 
 Finish up by **moving** 'functional_tests.py' into the 'mysite' folder
 
