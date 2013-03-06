@@ -1641,6 +1641,23 @@ TEMPLATE_DIRS = (
 Part 10 - Listing polls on the home page template
 -------------------------------------------------
 
+
+[NOTE]
+.Skipping ahead to this section
+==============================================================================
+
+From the top-level folder of the repo
+
+    git stash # if you want to save what you had so far
+    git checkout pycon_2013_part_10 -- mysite
+
+Those two commands will blow away everything in 'mysite' and replace them 
+with versions as if you'd skipped to this part
+
+==============================================================================
+
+TODO: unit tests for key bits of template content
+
 We can start by editing our template, 'polls/templates/home.html':
 
 
