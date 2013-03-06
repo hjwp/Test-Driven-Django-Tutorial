@@ -1642,6 +1642,7 @@ Part 10 - Listing polls on the home page template
 -------------------------------------------------
 
 
+
 [NOTE]
 .Skipping ahead to this section
 ==============================================================================
@@ -1649,16 +1650,57 @@ Part 10 - Listing polls on the home page template
 From the top-level folder of the repo
 
     git stash # if you want to save what you had so far
-    git checkout pycon_2013_part_10 -- mysite
+    git checkout PYCON_2013_PART_10 -- mysite
 
 Those two commands will blow away everything in 'mysite' and replace them 
 with versions as if you'd skipped to this part
 
 ==============================================================================
 
-TODO: unit tests for key bits of template content
+`python manage.py test fts` should give:
 
-We can start by editing our template, 'polls/templates/home.html':
+----
+NoSuchElementException: Message: u'Unable to locate element: {"method":"link
+text","selector":"How awesome is TDD?"}' 
+----
+
+So start by adding check for poll questions to our view unit test. In
+'polls/tests.py', change `test_home_page_renders_correct_template` inside 
+`HomePageTest`, to:
+
+
+[source,python]
+----
+def test_home_page_renders_home_template_with_current_polls(self):
+    # set up some polls
+    poll1 = Poll(question='6 times 7', pub_date=timezone.now())
+    poll1.save()
+    poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
+    poll2.save()
+
+    request = HttpRequest()
+    response = home_page(request)
+
+    # check template rendered correctly
+    expected_html = render_to_string('home.html')
+    self.assertEqual(response.content, expected_html)
+
+    # check template includes all polls
+    self.assertIn(poll1.question, response.content)
+    self.assertIn(poll2.question, response.content)
+
+----
+
+Should fail:
+
+----
+AssertionError: '6 times 7' not found in '<html>\n    <head>\n
+<title>Poll ALL The Things</title>\n    </head>\n    <body>\n
+<h1>Current polls</h1>\n    </body>\n</html>\n'
+----
+
+Now add them to our template, 'polls/templates/home.html', using special Django
+template tags -- `{% %}` and `{{ }}`
 
 
 [source,html]
@@ -1671,46 +1713,37 @@ We can start by editing our template, 'polls/templates/home.html':
         <h1>Current polls</h1>
         <ul>
         {% for poll in current_polls %}
-            <li><a href="#">{{ poll.question }}</a></li>
+            <li>{{ poll.question }}</li>
         {% endfor %}
         </ul>
     </body>
 </html>
 ----
 
+Tests still fail - v. slightly different error.
+
 NOTE: ask me about -- Django template syntax. obviously
 
-Tests should still pass.  But where do `current_polls` come from?
-
-in 'polls/tests.py', change `test_home_page_renders_correct_template` inside 
-`HomePageTest`, changing it to:
-
+Where would `current_polls` come from?  They're actually passed into the render
+call - we can test that! In 'polls/tests.py':
 
 [source,python]
 ----
-def test_home_page_renders_home_template_with_current_polls(self):
-    # set up some polls
-    poll1 = Poll(question='6 times 7', pub_date=timezone.now())
-    poll1.save()
-    poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
-    poll2.save()
-    request = HttpRequest()
-    response = home_page(request)
-    # render template with polls
     expected_html = render_to_string('home.html', {'current_polls': [poll1, poll2]})
     self.assertEqual(response.content, expected_html)
 ----
 
-Failure:
+Now test failure happens earlier :
 
 ----
+    self.assertEqual(response.content, expected_html)
 AssertionError: '<html>\n    <head>\n        <title>Poll ALL The
 Things</title>\n    </head>\n    <body>\n        <h1>Current polls</h1>\n
-<ul>\n        \n        </ul>\n    </body>\n</html>\n' != u'<html>\n
-<head>\n        <title>Poll ALL The Things</title>\n    </head>\n    <body>\n
-<h1>Current polls</h1>\n        <ul>\n        \n            <li><a href="#">6
-times 7</a></li>\n        \n            <li><a href="#">life, the universe and
-everything</a></li>\n        \n        </ul>\n    </body>\n</html>\n'
+<ul>\n        \n        </ul>\n    </body>\n</html>\n' != u'<html>\n <head>\n
+<title>Poll ALL The Things</title>\n    </head>\n    <body>\n <h1>Current
+polls</h1>\n        <ul>\n        \n            <li>6 times 7</li>\n        \n
+<li>life, the universe and everything</li>\n        \n        </ul>\n
+</body>\n</html>\n'
 ----
 
 Yuk!  Let's try using `assertMultiLineEqual`:
@@ -1736,10 +1769,9 @@ Things</title>\n    </head>\n   [truncated]... != u'<html>\n    <head>\n
       <body>
           <h1>Current polls</h1>
           <ul>
-          
-+             <li><a href="#">6 times 7</a></li>
++             <li>6 times 7</li>
 +         
-+             <li><a href="#">life, the universe and everything</a></li>
++             <li>life, the universe and everything</li>
 +         
           </ul>
       </body>
@@ -1759,6 +1791,23 @@ def home_page(request):
 ----
 
 Unit tests should now pass - how about FTs? Not quite - but they do get further
+
+----
+NoSuchElementException: Message: u'Unable to locate element: {"method":"link
+text","selector":"How awesome is TDD?"}' ;
+----
+
+Let's make our poll questions into hyperlinks in the template:
+
+
+[source,html]
+----
+    {% for poll in current_polls %}
+        <li><a>{{ poll.question }}</a></li>
+    {% endfor %}
+----
+
+FT gets a little further
 
 ----
 AssertionError: 'No-one has voted on this poll yet' not found in u'Current
@@ -1790,10 +1839,10 @@ We want individual polls to have their own URL - let's specify that in
 ----
 
 Of course that URL doesn't exist yet - try running the FT and you'll get a
-404 server error
+500 server error
 
 So let's add a test for our new url, in 'polls/tests.py'. This time we
-use the "Django Test Client":
+use the 'Django Test Client':
 
 [source,python]
 ----
@@ -1862,63 +1911,23 @@ ViewDoesNotExist: Could not import polls.views.poll. View does not exist in
 module polls.views.
 ----
 
-So, in 'polls/views.py':
-
-[source,python]
-----
-[...]
-    return render(request, 'home.html', {'current_polls': Poll.objects.all()})
-
-def poll(request):
-    pass
-----
-
-Now we get:
+Now enter a TDD/code cycle. I will show just the failures:
 
     TypeError: poll() takes exactly 1 argument (2 given)
 
-
-Change to:
-
-[source,python]
-----
-def poll(request, poll_id):
-    pass
-----
-
-Now
+Then:
 
     ValueError: The view polls.views.poll didn't return an HttpResponse object.
 
-So
-
-[source,python]
-----
-from django.http import HttpResponse
-[...]
-
-def poll(request, poll_id):
-    return HttpResponse()
-----
-
-And:
+Then:
 
     AssertionError: No templates used to render the response
 
-
-So (deliberately wrong):
-
-[source,python]
-----
-def poll(request, poll_id):
-    return render(request, 'home.html')
-----
-
-Gives:
+(deliberate mistake)
 
     AssertionError: Template 'poll.html' was not a template used to render the response. Actual template(s) used: home.html
 
-But changing to 'poll.html' gives:
+Then:
 
     TemplateDoesNotExist: poll.html
 
@@ -2008,10 +2017,10 @@ FT should now get to the `self.fail`
 [NOTE]
 .Advanced task
 ==============================================================================
-* Figure out how to use **url includes** to put the poll url into
+1. Figure out how to use **url includes** to put the poll url into
 'polls/urls.py' instead of 'mysite/urls.py'
 
-* DRY! We shouldn't have these URL strings hard-coded all over the place. Find
+2. DRY! We shouldn't have these URL strings hard-coded all over the place. Find
 out how to remove them from the template
 ==============================================================================
 
