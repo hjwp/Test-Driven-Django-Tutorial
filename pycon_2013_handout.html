@@ -850,8 +850,8 @@ python manage.py runserver</code></pre>
 <td class="icon">
 <div class="title">Tip</div>
 </td>
-<td class="content">If it doesn&#8217;t work, check the port&#8201;&#8212;&#8201;is <code>runserver</code> using port 8000, or is
-it on a different one? 8001?</td>
+<td class="content">If it doesn&#8217;t work, check the port&#8201;&#8212;&#8201;is <code>runserver</code> using port 8000, or
+is it on a different one? 8001?</td>
 </tr></table>
 </div>
 <div class="admonitionblock">
@@ -1051,7 +1051,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-style: italic"><span style="color: #9A1900">        """</span></span>
 <span style="font-style: italic"><span style="color: #9A1900">        Tests that 1 + 1 always equals 2.</span></span>
 <span style="font-style: italic"><span style="color: #9A1900">        """</span></span>
-        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span><span style="color: #993399">1</span> <span style="color: #990000">+</span> <span style="color: #993399">1</span><span style="color: #990000">,</span> <span style="color: #993399">2</span><span style="color: #990000">)</span></tt></pre></div></div>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span><span style="color: #993399">1</span> <span style="color: #990000">+</span> <span style="color: #993399">1</span><span style="color: #990000">,</span> <span style="color: #993399">3</span><span style="color: #990000">)</span></tt></pre></div></div>
 <div class="paragraph"><p>To run it: <code>python manage.py test</code></p></div>
 <div class="paragraph"><p>Expected Failure 1:</p></div>
 <div class="literalblock">
@@ -1215,8 +1215,20 @@ http://www.gnu.org/software/src-highlite -->
 </td>
 <td class="content">
 <div class="title">Advanced task</div>
-<div class="paragraph"><p>Would a lambda function work? Are there any other Python objects you could use
-that would still get the tests to pass?</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Would a lambda function work? Are there any other Python objects you could
+use that would still get the tests to pass?
+</p>
+</li>
+<li>
+<p>
+What happens when you use the empty string ('') as the URL you call in the
+test?  What about two slashes (//)
+</p>
+</li>
+</ul></div>
 </td>
 </tr></table>
 </div>
@@ -1392,6 +1404,18 @@ OK</code></pre>
 </div></div>
 <div class="paragraph"><p>Now we re-run our functional test, and we expect them to get past the
 <code>assertIn</code> and stop on the <code>self.fail</code></p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Advanced task</div>
+<div class="paragraph"><p>Can you rewrite the view as a one-liner?  Well done.  But don&#8217;t do that in real
+life!</p></div>
+</td>
+</tr></table>
+</div>
 </div>
 </div>
 </div>
@@ -1547,6 +1571,17 @@ http://www.gnu.org/software/src-highlite -->
 [...]</code></pre>
 </div></div>
 <div class="paragraph"><p><strong>Hopefully we&#8217;ll have a break at this point!</strong></p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Advanced task</div>
+<div class="paragraph"><p>How would you test that we are returning valid (standards-compliant) HTML?</p></div>
+</td>
+</tr></table>
+</div>
 </div>
 </div>
 </div>
@@ -1651,12 +1686,13 @@ http://www.gnu.org/software/src-highlite -->
 <div class="content">
 <pre><code>python manage.py syncdb</code></pre>
 </div></div>
-<div class="paragraph"><p>Remember the username and password you use&#8201;&#8212;&#8201;I&#8217;m using <em>admin</em> and <em>adm1n</em></p></div>
+<div class="paragraph"><p>Remember the username and password you use&#8201;&#8212;&#8201;I&#8217;m using <code>admin</code> and <code>adm1n</code></p></div>
 <div class="paragraph"><p>Should now get to:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code>AssertionError: Finish this test</code></pre>
 </div></div>
+<div class="paragraph"><p>Now the FT should be able to log into the admin site:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
 by Lorenzo Bettini
@@ -1691,6 +1727,19 @@ http://www.gnu.org/software/src-highlite -->
 <div class="content">
 <pre><code>AssertionError: Use the admin site to create a poll</code></pre>
 </div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Advanced task</div>
+<div class="paragraph"><p>What other methods could we have used, apart from <code>find_element_by_name</code>, to
+find the username and password fields?  What about clicking instead of
+pressing RETURN?</p></div>
+</td>
+</tr></table>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1950,210 +1999,232 @@ it?  Hint: the model <code>._meta</code> attribute might work&#8230; Is there an
 </td>
 </tr></table>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_part_7_optional_liveservertestcase_and_test_fixtures">Part 7 (optional): LiveServerTestCase and test fixtures</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Start by extending the FT to actually create a new poll via the admin site:</p></div>
+<div class="paragraph"><p>Part 7: LiveServerTestCase and test fixtures</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>    <span style="font-style: italic"><span style="color: #9A1900"># He clicks the 'Add poll' link</span></span>
-    new_poll_link <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_link_text</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'Add poll'</span><span style="color: #990000">)</span>
-    new_poll_link<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">click</span></span><span style="color: #990000">()</span>
+<div class="content">
+<pre><code>Start by extending the FT to actually create a new poll via the admin site:
 
-    <span style="font-style: italic"><span style="color: #9A1900"># He types in an interesting question for the Poll</span></span>
-    question_field <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_name</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'question'</span><span style="color: #990000">)</span>
-    question_field<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">send_keys</span></span><span style="color: #990000">(</span><span style="color: #FF0000">"How awesome is Test-Driven Development?"</span><span style="color: #990000">)</span>
-
-    <span style="font-style: italic"><span style="color: #9A1900"># He sets the date and time of publication - it'll be a new year's</span></span>
-    <span style="font-style: italic"><span style="color: #9A1900"># poll!</span></span>
-    date_field <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_name</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'pub_date_0'</span><span style="color: #990000">)</span>
-    date_field<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">send_keys</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'01/01/12'</span><span style="color: #990000">)</span>
-    time_field <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_name</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'pub_date_1'</span><span style="color: #990000">)</span>
-    time_field<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">send_keys</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'00:00'</span><span style="color: #990000">)</span>
-
-    <span style="font-style: italic"><span style="color: #9A1900"># Mo clicks the save button</span></span>
-    save_button <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_css_selector</span></span><span style="color: #990000">(</span><span style="color: #FF0000">"input[value='Save']"</span><span style="color: #990000">)</span>
-    save_button<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">click</span></span><span style="color: #990000">()</span>
-
-    <span style="font-style: italic"><span style="color: #9A1900"># He is returned to the "Polls" listing, where he can see his</span></span>
-    <span style="font-style: italic"><span style="color: #9A1900"># new poll, listed as a clickable link</span></span>
-    new_poll_links <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_elements_by_link_text</span></span><span style="color: #990000">(</span>
-<span style="font-style: italic"><span style="color: #9A1900">            "How awesome is Test-Driven Development?"</span></span>
-    <span style="color: #990000">)</span>
-    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEquals</span></span><span style="color: #990000">(</span><span style="font-weight: bold"><span style="color: #000000">len</span></span><span style="color: #990000">(</span>new_poll_links<span style="color: #990000">),</span> <span style="color: #993399">1</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>First expected fail -</p></div>
+[source,python]</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code># He clicks the 'Add poll' link
+new_poll_link = self.browser.find_element_by_link_text('Add poll')
+new_poll_link.click()</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code># He types in an interesting question for the Poll
+question_field = self.browser.find_element_by_name('question')
+question_field.send_keys("How awesome is Test-Driven Development?")</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code># He sets the date and time of publication - it'll be a new year's
+# poll!
+date_field = self.browser.find_element_by_name('pub_date_0')
+date_field.send_keys('01/01/12')
+time_field = self.browser.find_element_by_name('pub_date_1')
+time_field.send_keys('00:00')</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code># Mo clicks the save button
+save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+save_button.click()</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code># He is returned to the "Polls" listing, where he can see his
+# new poll, listed as a clickable link
+new_poll_links = self.browser.find_elements_by_link_text(
+        "How awesome is Test-Driven Development?"
+)
+self.assertEquals(len(new_poll_links), 1)</code></pre>
+</div></div>
 <div class="listingblock">
+<div class="content">
+<pre><code>First expected fail -</code></pre>
+</div></div>
+<div class="literalblock">
 <div class="content">
 <pre><code>    self.assertEquals(len(new_poll_links), 1)
 AssertionError: 0 != 1</code></pre>
 </div></div>
-<div class="sect2">
-<h3 id="_code___unicode___code"><code>__unicode__</code></h3>
-<div class="paragraph"><p>Fix by changing the string representation of a poll:</p></div>
-<div class="paragraph"><p>in <em>polls/tests.py</em>, add to <code>PollModelTest</code>:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_string_representation</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-        poll <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">()</span>
-        poll<span style="color: #990000">.</span>question <span style="color: #990000">=</span> <span style="color: #FF0000">"Why?"</span>
-        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span><span style="font-weight: bold"><span style="color: #000000">unicode</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">),</span> <span style="color: #FF0000">"Why?"</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>Expected fail:</p></div>
+<div class="content">
+<pre><code>`__unicode__`
+~~~~~~~~~~~~~
+
+Fix by changing the string representation of a poll:
+
+in 'polls/tests.py', add to `PollModelTest`:
+
+
+[source,python]</code></pre>
+</div></div>
 <div class="literalblock">
 <div class="content">
-<pre><code>AssertionError: u'Poll object' != 'Why?'</code></pre>
+<pre><code>def test_string_representation(self):
+    poll = Poll()
+    poll.question = "Why?"
+    self.assertEqual(unicode(poll), "Why?")</code></pre>
 </div></div>
-<div class="paragraph"><p><em>models.py</em>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>models<span style="color: #990000">.</span>Model<span style="color: #990000">):</span>
-    question <span style="color: #990000">=</span> models<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">CharField</span></span><span style="color: #990000">(</span>max_length<span style="color: #990000">=</span><span style="color: #993399">200</span><span style="color: #990000">)</span>
-    pub_date <span style="color: #990000">=</span> models<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">DateTimeField</span></span><span style="color: #990000">()</span>
-
-    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">__unicode__</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-        <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> self<span style="color: #990000">.</span>question</tt></pre></div></div>
-<div class="paragraph"><p>Unit tests should now pass</p></div>
-</div>
-<div class="sect2">
-<h3 id="_liveservertestcase_and_the_test_database">LiveServerTestCase and the test database</h3>
-<div class="paragraph"><p>Functional tests should pass once&#8230; but fail the second time:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>AssertionError: '0 polls' not found in u'Django administration\nWelcome, admin.
+<pre><code>Expected fail:
+
+    AssertionError: u'Poll object' != 'Why?'
+
+'models.py':
+
+
+[source,python]</code></pre>
+</div></div>
+<div class="paragraph"><p>class Poll(models.Model):
+    question = models.CharField(max_length=200)
+    pub_date = models.DateTimeField()</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>def __unicode__(self):
+    return self.question</code></pre>
+</div></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Unit tests should now pass
+
+LiveServerTestCase and the test database
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Functional tests should pass once... but fail the second time:</code></pre>
+</div></div>
+<div class="paragraph"><p>AssertionError: <em>0 polls</em> not found in u&#8217;Django administration\nWelcome, admin.
 Change password / Log out\nHome \u203a Polls \u203a Polls\nSelect poll to
 change\nAdd poll\nAction:\n---------\nDelete selected polls\nGo 0 of 1
-selected\nPoll\nHow awesome is Test-Driven Development?\n1 poll'</code></pre>
-</div></div>
-<div class="paragraph"><p>change <em>functional_tests.py</em> to being tests inside a new Django app called <em>fts</em>:</p></div>
+selected\nPoll\nHow awesome is Test-Driven Development?\n1 poll'</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>python manage.py startapp fts
-mv functional_tests.py fts/tests.py</code></pre>
+<pre><code>change 'functional_tests.py' to being tests inside a new Django app called 'fts':</code></pre>
 </div></div>
-<div class="paragraph"><p>then edit <em>fts/tests.py</em> to inherit from <code>LiveServerTestCase</code>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000080">from</span></span> django<span style="color: #990000">.</span>test <span style="font-weight: bold"><span style="color: #000080">import</span></span> LiveServerTestCase
-<span style="font-weight: bold"><span style="color: #000080">from</span></span> selenium <span style="font-weight: bold"><span style="color: #000080">import</span></span> webdriver
-<span style="font-weight: bold"><span style="color: #000080">from</span></span> selenium<span style="color: #990000">.</span>webdriver<span style="color: #990000">.</span>common<span style="color: #990000">.</span>keys <span style="font-weight: bold"><span style="color: #000080">import</span></span> Keys
-
-<span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">PollsFunctionalTest</span></span><span style="color: #990000">(</span>LiveServerTestCase<span style="color: #990000">):</span>
-
-    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">setUp</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-        self<span style="color: #990000">.</span>browser <span style="color: #990000">=</span> webdriver<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">Firefox</span></span><span style="color: #990000">()</span>
-        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">implicitly_wait</span></span><span style="color: #990000">(</span><span style="color: #993399">3</span><span style="color: #990000">)</span>
-
-    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">tearDown</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">quit</span></span><span style="color: #990000">()</span>
-
-    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_voting_on_a_poll</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-        <span style="font-style: italic"><span style="color: #9A1900"># Elspeth goes to check out a cool new polls site she's heard about</span></span>
-        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span>self<span style="color: #990000">.</span>live_server_url<span style="color: #990000">)</span>
-
-        <span style="color: #990000">[...]</span>
-
-    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_can_create_a_new_poll_via_admin_site</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-        <span style="font-style: italic"><span style="color: #9A1900"># Mo the administrator goes to the admin page</span></span>
-        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span>self<span style="color: #990000">.</span>live_server_url <span style="color: #990000">+</span> <span style="color: #FF0000">'/admin/'</span><span style="color: #990000">)</span>
-        <span style="color: #990000">[...]</span>
-</tt></pre></div></div>
-<div class="ulist"><ul>
-<li>
-<p>
-make sure to use <code>self.live_server_url</code> in both test methods
-</p>
-</li>
-<li>
-<p>
-also delete the <code>if __name__ == __main__</code> block
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>Add <code>fts</code> to <em>settings.py</em>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt>INSTALLED_APPS <span style="color: #990000">=</span> <span style="color: #990000">(</span>
-    <span style="color: #FF0000">'django.contrib.auth'</span><span style="color: #990000">,</span>
-    <span style="color: #FF0000">'django.contrib.contenttypes'</span><span style="color: #990000">,</span>
-    <span style="color: #FF0000">'django.contrib.sessions'</span><span style="color: #990000">,</span>
-    <span style="color: #FF0000">'django.contrib.sites'</span><span style="color: #990000">,</span>
-    <span style="color: #FF0000">'django.contrib.messages'</span><span style="color: #990000">,</span>
-    <span style="color: #FF0000">'django.contrib.staticfiles'</span><span style="color: #990000">,</span>
-    <span style="font-style: italic"><span style="color: #9A1900"># Uncomment the next line to enable the admin:</span></span>
-    <span style="color: #FF0000">'django.contrib.admin'</span><span style="color: #990000">,</span>
-    <span style="font-style: italic"><span style="color: #9A1900"># Uncomment the next line to enable admin documentation:</span></span>
-    <span style="font-style: italic"><span style="color: #9A1900"># 'django.contrib.admindocs',</span></span>
-    <span style="color: #FF0000">'polls'</span><span style="color: #990000">,</span>
-    <span style="color: #FF0000">'fts'</span><span style="color: #990000">,</span>
-<span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>Now run</p></div>
+<div class="paragraph"><p>python manage.py startapp fts
+mv functional_tests.py fts/tests.py</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>$ python manage.py test fts</code></pre>
+<pre><code>then edit 'fts/tests.py' to inherit from `LiveServerTestCase`:
+
+
+[source,python]</code></pre>
 </div></div>
-<div class="paragraph"><p>Should see one <code>self.fail</code> (can DONTify this test now) and one:</p></div>
+<div class="paragraph"><p>from django.test import LiveServerTestCase
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys</p></div>
+<div class="paragraph"><p>class PollsFunctionalTest(LiveServerTestCase):</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>def setUp(self):
+    self.browser = webdriver.Firefox()
+    self.browser.implicitly_wait(3)</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>def tearDown(self):
+    self.browser.quit()</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>def test_voting_on_a_poll(self):
+    # Elspeth goes to check out a cool new polls site she's heard about
+    self.browser.get(self.live_server_url)</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>[...]</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>def test_can_create_a_new_poll_via_admin_site(self):
+    # Mo the administrator goes to the admin page
+    self.browser.get(self.live_server_url + '/admin/')
+    [...]</code></pre>
+</div></div>
 <div class="listingblock">
+<div class="content">
+<pre><code>* make sure to use `self.live_server_url` in both test methods
+* also delete the `if __name__ == __main__` block
+
+Add `fts` to 'settings.py':
+
+[source,python]</code></pre>
+</div></div>
+<div class="paragraph"><p>INSTALLED_APPS = (
+    <em>django.contrib.auth</em>,
+    <em>django.contrib.contenttypes</em>,
+    <em>django.contrib.sessions</em>,
+    <em>django.contrib.sites</em>,
+    <em>django.contrib.messages</em>,
+    <em>django.contrib.staticfiles</em>,
+    # Uncomment the next line to enable the admin:
+    <em>django.contrib.admin</em>,
+    # Uncomment the next line to enable admin documentation:
+    # <em>django.contrib.admindocs</em>,
+    <em>polls</em>,
+    <em>fts</em>,
+)</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Now run</code></pre>
+</div></div>
+<div class="paragraph"><p>$ python manage.py test fts</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Should see one `self.fail` (can DONTify this test now) and one:</code></pre>
+</div></div>
+<div class="literalblock">
 <div class="content">
 <pre><code>    self.assertIn('Site administration', body.text)
 AssertionError: 'Site administration' not found in u'Django
 administration\nPlease enter the correct username and password for a staff
 account. Note that both fields may be case-sensitive.\nUsername:\nPassword:\n '</code></pre>
 </div></div>
-</div>
-<div class="sect2">
-<h3 id="_test_fixture_setup">Test fixture setup</h3>
-<div class="ulist"><ul>
-<li>
-<p>
-make a new directory at <em>polls/fixtures</em>
-</p>
-</li>
-</ul></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>python manage.py dumpdata auth.user &gt; polls/fixtures/admin_user.json</code></pre>
+<pre><code>Test fixture setup
+~~~~~~~~~~~~~~~~~~
+
+* make a new directory at 'polls/fixtures'</code></pre>
 </div></div>
-<div class="paragraph"><p>Add to <em>fts/tests.py</em>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">PollsFunctionalTest</span></span><span style="color: #990000">(</span>LiveServerTestCase<span style="color: #990000">):</span>
-
-    fixtures <span style="color: #990000">=</span> <span style="color: #990000">[</span><span style="color: #FF0000">'admin_user.json'</span><span style="color: #990000">]</span>
-
-    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">setUp</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-        <span style="color: #990000">[...]</span></tt></pre></div></div>
-<div class="paragraph"><p>FT should now pass, no matter how many times you run them!</p></div>
-<div class="paragraph"><p>By the end, your folder structure should look like this:</p></div>
+<div class="paragraph"><p>python manage.py dumpdata auth.user &gt; polls/fixtures/admin_user.json</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>.
+<pre><code>Add to 'fts/tests.py':
+
+[source,python]</code></pre>
+</div></div>
+<div class="paragraph"><p>class PollsFunctionalTest(LiveServerTestCase):</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>fixtures = ['admin_user.json']</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>def setUp(self):
+    [...]</code></pre>
+</div></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>FT should now pass, no matter how many times you run them!
+
+By the end, your folder structure should look like this:</code></pre>
+</div></div>
+<div class="paragraph"><p>.
 |-- fts
-|   |-- __init__.py
+|   |-- <em>init</em>.py
 |   |-- models.py
 |   |-- tests.py
 |   `-- views.py
 |-- manage.py
 |-- mysite
-|   |-- __init__.py
+|   |-- <em>init</em>.py
 |   |-- settings.py
 |   |-- urls.py
 |   `-- wsgi.py
@@ -2161,19 +2232,16 @@ http://www.gnu.org/software/src-highlite -->
     |-- admin.py
     |-- fixtures
     |   `-- admin_user.json
-    |-- __init__.py
+    |-- <em>init</em>.py
     |-- models.py
     |-- templates
     |   `-- home.html
     |-- tests.py
-    `-- views.py</code></pre>
+    `-- views.py</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Part 8 - Add the Choice model</code></pre>
 </div></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_part_8_add_the_choice_model">Part 8 - Add the Choice model</h2>
-<div class="sectionbody">
 <div class="paragraph"><p>Add a bit to the FT (<em>fts/tests.py</em>), just before we save the new poll</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
@@ -2200,7 +2268,8 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Expected failure for <code>manage.py test fts</code>:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><code>NoSuchElementException: Message: u'Unable to locate element: {"method":"name","selector":"choice_set-0-choice"}' ; Stacktrace: [...]</code></pre>
+<pre><code>NoSuchElementException: Message: u'Unable to locate element:
+{"method":"name","selector":"choice_set-0-choice"}' ; Stacktrace: [...]</code></pre>
 </div></div>
 <div class="paragraph"><p>Now in the unit tests - <em>polls/tests.py</em></p></div>
 <div class="listingblock">
@@ -2606,9 +2675,20 @@ http://www.gnu.org/software/src-highlite -->
 <pre><code>NoSuchElementException: Message: u'Unable to locate element:
 {"method":"link text","selector":"How awesome is TDD?"}' [...]</code></pre>
 </div></div>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">Fixing that darned 500 template error!</div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Advanced task</div>
+<div class="paragraph"><p>Remove some of the duplicated strings like the poll question, and use some
+constants instead</p></div>
+</td>
+</tr></table>
+</div>
+<div class="sect2">
+<h3 id="_fixing_that_darned_500_template_error">Fixing that darned 500 template error!</h3>
 <div class="paragraph"><p>It&#8217;s about time we sorted this out!</p></div>
 <div class="listingblock">
 <div class="content">
@@ -2629,13 +2709,71 @@ TEMPLATE_DIRS <span style="color: #990000">=</span> <span style="color: #990000"
     <span style="font-style: italic"><span style="color: #9A1900"># Don't forget to use absolute paths, not relative paths.</span></span>
     os<span style="color: #990000">.</span>path<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">join</span></span><span style="color: #990000">(</span>os<span style="color: #990000">.</span>path<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">dirname</span></span><span style="color: #990000">(</span>__file__<span style="color: #990000">),</span> <span style="color: #FF0000">'templates'</span><span style="color: #990000">).</span><span style="font-weight: bold"><span style="color: #000000">replace</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'\\'</span><span style="color: #990000">,</span> <span style="color: #FF0000">'/'</span><span style="color: #990000">),</span>
 <span style="color: #990000">)</span></tt></pre></div></div>
-</div></div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_part_10_listing_polls_on_the_home_page_template">Part 10 - Listing polls on the home page template</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>We can start by editing our template, <em>polls/templates/home.html</em>:</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Skipping ahead to this section</div>
+<div class="paragraph"><p>From the top-level folder of the repo</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git stash # if you want to save what you had so far
+git checkout PYCON_2013_PART_10 -- mysite</code></pre>
+</div></div>
+<div class="paragraph"><p>Those two commands will blow away everything in <em>mysite</em> and replace them
+with versions as if you&#8217;d skipped to this part</p></div>
+</td>
+</tr></table>
+</div>
+<div class="paragraph"><p><code>python manage.py test fts</code> should give:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>NoSuchElementException: Message: u'Unable to locate element: {"method":"link
+text","selector":"How awesome is TDD?"}'</code></pre>
+</div></div>
+<div class="paragraph"><p>So start by adding check for poll questions to our view unit test. In
+<em>polls/tests.py</em>, change <code>test_home_page_renders_correct_template</code> inside
+<code>HomePageTest</code>, to:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_home_page_renders_home_template_with_current_polls</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+    <span style="font-style: italic"><span style="color: #9A1900"># set up some polls</span></span>
+    poll1 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'6 times 7'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
+    poll1<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+    poll2 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'life, the universe and everything'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
+    poll2<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+
+    request <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">HttpRequest</span></span><span style="color: #990000">()</span>
+    response <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">home_page</span></span><span style="color: #990000">(</span>request<span style="color: #990000">)</span>
+
+    <span style="font-style: italic"><span style="color: #9A1900"># check template rendered correctly</span></span>
+    expected_html <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">render_to_string</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'home.html'</span><span style="color: #990000">)</span>
+    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span>response<span style="color: #990000">.</span>content<span style="color: #990000">,</span> expected_html<span style="color: #990000">)</span>
+
+    <span style="font-style: italic"><span style="color: #9A1900"># check template includes all polls</span></span>
+    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span>poll1<span style="color: #990000">.</span>question<span style="color: #990000">,</span> response<span style="color: #990000">.</span>content<span style="color: #990000">)</span>
+    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span>poll2<span style="color: #990000">.</span>question<span style="color: #990000">,</span> response<span style="color: #990000">.</span>content<span style="color: #990000">)</span>
+</tt></pre></div></div>
+<div class="paragraph"><p>Should fail:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>AssertionError: '6 times 7' not found in '&lt;html&gt;\n    &lt;head&gt;\n
+&lt;title&gt;Poll ALL The Things&lt;/title&gt;\n    &lt;/head&gt;\n    &lt;body&gt;\n
+&lt;h1&gt;Current polls&lt;/h1&gt;\n    &lt;/body&gt;\n&lt;/html&gt;\n'</code></pre>
+</div></div>
+<div class="paragraph"><p>Now add them to our template, <em>polls/templates/home.html</em>, using special Django
+template tags&#8201;&#8212;&#8201;<code>{% %}</code> and <code>{{ }}</code></p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
 by Lorenzo Bettini
@@ -2649,11 +2787,12 @@ http://www.gnu.org/software/src-highlite -->
         <span style="font-weight: bold"><span style="color: #0000FF">&lt;h1&gt;</span></span>Current polls<span style="font-weight: bold"><span style="color: #0000FF">&lt;/h1&gt;</span></span>
         <span style="font-weight: bold"><span style="color: #0000FF">&lt;ul&gt;</span></span>
         {% for poll in current_polls %}
-            <span style="font-weight: bold"><span style="color: #0000FF">&lt;li&gt;&lt;a</span></span> <span style="color: #009900">href</span><span style="color: #990000">=</span><span style="color: #FF0000">"#"</span><span style="font-weight: bold"><span style="color: #0000FF">&gt;</span></span>{{ poll.question }}<span style="font-weight: bold"><span style="color: #0000FF">&lt;/a&gt;&lt;/li&gt;</span></span>
+            <span style="font-weight: bold"><span style="color: #0000FF">&lt;li&gt;</span></span>{{ poll.question }}<span style="font-weight: bold"><span style="color: #0000FF">&lt;/li&gt;</span></span>
         {% endfor %}
         <span style="font-weight: bold"><span style="color: #0000FF">&lt;/ul&gt;</span></span>
     <span style="font-weight: bold"><span style="color: #0000FF">&lt;/body&gt;</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">&lt;/html&gt;</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Tests still fail - v. slightly different error.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -2662,35 +2801,26 @@ http://www.gnu.org/software/src-highlite -->
 <td class="content">ask me about&#8201;&#8212;&#8201;Django template syntax. obviously</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Tests should still pass.  But where do <code>current_polls</code> come from?</p></div>
-<div class="paragraph"><p>in <em>polls/tests.py</em>, change <code>test_home_page_renders_correct_template</code> inside
-<code>HomePageTest</code>, changing it to:</p></div>
+<div class="paragraph"><p>Where would <code>current_polls</code> come from?  They&#8217;re actually passed into the render
+call - we can test that! In <em>polls/tests.py</em>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_home_page_renders_home_template_with_current_polls</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
-    <span style="font-style: italic"><span style="color: #9A1900"># set up some polls</span></span>
-    poll1 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'6 times 7'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
-    poll1<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
-    poll2 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'life, the universe and everything'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
-    poll2<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
-    request <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">HttpRequest</span></span><span style="color: #990000">()</span>
-    response <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">home_page</span></span><span style="color: #990000">(</span>request<span style="color: #990000">)</span>
-    <span style="font-style: italic"><span style="color: #9A1900"># render template with polls</span></span>
-    expected_html <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">render_to_string</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'home.html'</span><span style="color: #990000">,</span> <span style="color: #990000">{</span><span style="color: #FF0000">'current_polls'</span><span style="color: #990000">:</span> <span style="color: #990000">[</span>poll1<span style="color: #990000">,</span> poll2<span style="color: #990000">]})</span>
+<pre><tt>    expected_html <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">render_to_string</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'home.html'</span><span style="color: #990000">,</span> <span style="color: #990000">{</span><span style="color: #FF0000">'current_polls'</span><span style="color: #990000">:</span> <span style="color: #990000">[</span>poll1<span style="color: #990000">,</span> poll2<span style="color: #990000">]})</span>
     self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span>response<span style="color: #990000">.</span>content<span style="color: #990000">,</span> expected_html<span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>Failure:</p></div>
+<div class="paragraph"><p>Now test failure happens earlier :</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>AssertionError: '&lt;html&gt;\n    &lt;head&gt;\n        &lt;title&gt;Poll ALL The
+<pre><code>    self.assertEqual(response.content, expected_html)
+AssertionError: '&lt;html&gt;\n    &lt;head&gt;\n        &lt;title&gt;Poll ALL The
 Things&lt;/title&gt;\n    &lt;/head&gt;\n    &lt;body&gt;\n        &lt;h1&gt;Current polls&lt;/h1&gt;\n
-&lt;ul&gt;\n        \n        &lt;/ul&gt;\n    &lt;/body&gt;\n&lt;/html&gt;\n' != u'&lt;html&gt;\n
-&lt;head&gt;\n        &lt;title&gt;Poll ALL The Things&lt;/title&gt;\n    &lt;/head&gt;\n    &lt;body&gt;\n
-&lt;h1&gt;Current polls&lt;/h1&gt;\n        &lt;ul&gt;\n        \n            &lt;li&gt;&lt;a href="#"&gt;6
-times 7&lt;/a&gt;&lt;/li&gt;\n        \n            &lt;li&gt;&lt;a href="#"&gt;life, the universe and
-everything&lt;/a&gt;&lt;/li&gt;\n        \n        &lt;/ul&gt;\n    &lt;/body&gt;\n&lt;/html&gt;\n'</code></pre>
+&lt;ul&gt;\n        \n        &lt;/ul&gt;\n    &lt;/body&gt;\n&lt;/html&gt;\n' != u'&lt;html&gt;\n &lt;head&gt;\n
+&lt;title&gt;Poll ALL The Things&lt;/title&gt;\n    &lt;/head&gt;\n    &lt;body&gt;\n &lt;h1&gt;Current
+polls&lt;/h1&gt;\n        &lt;ul&gt;\n        \n            &lt;li&gt;6 times 7&lt;/li&gt;\n        \n
+&lt;li&gt;life, the universe and everything&lt;/li&gt;\n        \n        &lt;/ul&gt;\n
+&lt;/body&gt;\n&lt;/html&gt;\n'</code></pre>
 </div></div>
 <div class="paragraph"><p>Yuk!  Let&#8217;s try using <code>assertMultiLineEqual</code>:</p></div>
 <div class="listingblock">
@@ -2714,10 +2844,9 @@ Things&lt;/title&gt;\n    &lt;/head&gt;\n   [truncated]... != u'&lt;html&gt;\n  
       &lt;body&gt;
           &lt;h1&gt;Current polls&lt;/h1&gt;
           &lt;ul&gt;
-
-+             &lt;li&gt;&lt;a href="#"&gt;6 times 7&lt;/a&gt;&lt;/li&gt;
++             &lt;li&gt;6 times 7&lt;/li&gt;
 +
-+             &lt;li&gt;&lt;a href="#"&gt;life, the universe and everything&lt;/a&gt;&lt;/li&gt;
++             &lt;li&gt;life, the universe and everything&lt;/li&gt;
 +
           &lt;/ul&gt;
       &lt;/body&gt;
@@ -2735,6 +2864,21 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">home_page</span></span><span style="color: #990000">(</span>request<span style="color: #990000">):</span>
     <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> <span style="font-weight: bold"><span style="color: #000000">render</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> <span style="color: #FF0000">'home.html'</span><span style="color: #990000">,</span> <span style="color: #990000">{</span><span style="color: #FF0000">'current_polls'</span><span style="color: #990000">:</span> Poll<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">all</span></span><span style="color: #990000">()})</span></tt></pre></div></div>
 <div class="paragraph"><p>Unit tests should now pass - how about FTs? Not quite - but they do get further</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>NoSuchElementException: Message: u'Unable to locate element: {"method":"link
+text","selector":"How awesome is TDD?"}' ;</code></pre>
+</div></div>
+<div class="paragraph"><p>Let&#8217;s make our poll questions into hyperlinks in the template:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>    {% for poll in current_polls %}
+        <span style="font-weight: bold"><span style="color: #0000FF">&lt;li&gt;&lt;a&gt;</span></span>{{ poll.question }}<span style="font-weight: bold"><span style="color: #0000FF">&lt;/a&gt;&lt;/li&gt;</span></span>
+    {% endfor %}</tt></pre></div></div>
+<div class="paragraph"><p>FT gets a little further</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><code>AssertionError: 'No-one has voted on this poll yet' not found in u'Current
@@ -2766,9 +2910,9 @@ http://www.gnu.org/software/src-highlite -->
     <span style="font-weight: bold"><span style="color: #0000FF">&lt;/body&gt;</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">&lt;/html&gt;</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Of course that URL doesn&#8217;t exist yet - try running the FT and you&#8217;ll get a
-404 server error</p></div>
+500 server error</p></div>
 <div class="paragraph"><p>So let&#8217;s add a test for our new url, in <em>polls/tests.py</em>. This time we
-use the "Django Test Client":</p></div>
+use the <em>Django Test Client</em>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
 by Lorenzo Bettini
@@ -2835,65 +2979,27 @@ http://www.gnu.org/software/src-highlite -->
 <pre><code>ViewDoesNotExist: Could not import polls.views.poll. View does not exist in
 module polls.views.</code></pre>
 </div></div>
-<div class="paragraph"><p>So, in <em>polls/views.py</em>:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="color: #990000">[...]</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> <span style="font-weight: bold"><span style="color: #000000">render</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> <span style="color: #FF0000">'home.html'</span><span style="color: #990000">,</span> <span style="color: #990000">{</span><span style="color: #FF0000">'current_polls'</span><span style="color: #990000">:</span> Poll<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">all</span></span><span style="color: #990000">()})</span>
-
-<span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">poll</span></span><span style="color: #990000">(</span>request<span style="color: #990000">):</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">pass</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Now we get:</p></div>
+<div class="paragraph"><p>Now enter a TDD/code cycle. I will show just the failures:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code>TypeError: poll() takes exactly 1 argument (2 given)</code></pre>
 </div></div>
-<div class="paragraph"><p>Change to:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">poll</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> poll_id<span style="color: #990000">):</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">pass</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Now</p></div>
+<div class="paragraph"><p>Then:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code>ValueError: The view polls.views.poll didn't return an HttpResponse object.</code></pre>
 </div></div>
-<div class="paragraph"><p>So</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #000080">from</span></span> django<span style="color: #990000">.</span>http <span style="font-weight: bold"><span style="color: #000080">import</span></span> HttpResponse
-<span style="color: #990000">[...]</span>
-
-<span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">poll</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> poll_id<span style="color: #990000">):</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> <span style="font-weight: bold"><span style="color: #000000">HttpResponse</span></span><span style="color: #990000">()</span></tt></pre></div></div>
-<div class="paragraph"><p>And:</p></div>
+<div class="paragraph"><p>Then:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code>AssertionError: No templates used to render the response</code></pre>
 </div></div>
-<div class="paragraph"><p>So (deliberately wrong):</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">poll</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> poll_id<span style="color: #990000">):</span>
-    <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> <span style="font-weight: bold"><span style="color: #000000">render</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> <span style="color: #FF0000">'home.html'</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>Gives:</p></div>
+<div class="paragraph"><p>(deliberate mistake)</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code>AssertionError: Template 'poll.html' was not a template used to render the response. Actual template(s) used: home.html</code></pre>
 </div></div>
-<div class="paragraph"><p>But changing to <em>poll.html</em> gives:</p></div>
+<div class="paragraph"><p>Then:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code>TemplateDoesNotExist: poll.html</code></pre>
@@ -2981,8 +3087,8 @@ http://www.gnu.org/software/src-highlite -->
 <div class="title">Note</div>
 </td>
 <td class="content">
-<div class="title">Advanced task</div>
-<div class="ulist"><ul>
+<div class="title">Advanced tasks</div>
+<div class="olist arabic"><ol class="arabic">
 <li>
 <p>
 Figure out how to use <strong>url includes</strong> to put the poll url into
@@ -2995,7 +3101,13 @@ DRY! We shouldn&#8217;t have these URL strings hard-coded all over the place. Fi
 out how to remove them from the template
 </p>
 </li>
-</ul></div>
+<li>
+<p>
+Look up how template inheritance works in Django.  Make <em>poll.html</em> and
+<em>home.html</em> inherit from a common base template.
+</p>
+</li>
+</ol></div>
 </td>
 </tr></table>
 </div>
@@ -3049,13 +3161,80 @@ http://www.gnu.org/software/src-highlite -->
 
     <span style="font-style: italic"><span style="color: #9A1900"># Elspeth decides to try to vote again</span></span>
     self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">fail</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'second vote'</span><span style="color: #990000">)</span></tt></pre></div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph"><p>Shortcut to typing all that in:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git checkout PYCON_2013_PART_12_FT -- polls/fts/tests.py</code></pre>
+</div></div>
+</td>
+</tr></table>
+</div>
 <div class="paragraph"><p>Expected fail:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><code>    self.assertEquals(len(choice_inputs), 3)
 AssertionError: 0 != 3</code></pre>
 </div></div>
-<div class="paragraph"><p>Fix in the template:</p></div>
+<div class="sect2">
+<h3 id="_unit_testing_template_logic">Unit testing template logic</h3>
+<div class="paragraph"><p>Choice inputs can be a bit tricky. Better have a unit test for them. In
+<em>polls/tests.py</em>, change the test method in <code>SinglePollViewTest</code>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">SinglePollViewTest</span></span><span style="color: #990000">(</span>TestCase<span style="color: #990000">):</span>
+
+    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_template_rendered_with_poll_and_choice_radio_buttons_and_no_votes</span></span><span style="color: #990000">(</span>
+            self
+    <span style="color: #990000">):</span>
+        <span style="font-style: italic"><span style="color: #9A1900"># set up two polls, to check the right one is displayed</span></span>
+        poll1 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'6 times 7'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
+        poll1<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+        poll2 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'life, the universe and everything'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
+        poll2<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+
+        <span style="font-style: italic"><span style="color: #9A1900"># add a couple of choices</span></span>
+        choice1 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Choice</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">=</span>poll2<span style="color: #990000">,</span> choice<span style="color: #990000">=</span><span style="color: #FF0000">"42"</span><span style="color: #990000">)</span>
+        choice1<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+        choice2 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Choice</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">=</span>poll2<span style="color: #990000">,</span> choice<span style="color: #990000">=</span><span style="color: #FF0000">"the Spice"</span><span style="color: #990000">)</span>
+        choice2<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+
+        response <span style="color: #990000">=</span> self<span style="color: #990000">.</span>client<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'/poll/%d/'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>poll2<span style="color: #990000">.</span>id<span style="color: #990000">,</span> <span style="color: #990000">))</span>
+
+        <span style="font-style: italic"><span style="color: #9A1900"># check we've used the poll template</span></span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertTemplateUsed</span></span><span style="color: #990000">(</span>response<span style="color: #990000">,</span> <span style="color: #FF0000">'poll.html'</span><span style="color: #990000">)</span>
+
+        <span style="font-style: italic"><span style="color: #9A1900"># check we've passed the right poll into the context</span></span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEquals</span></span><span style="color: #990000">(</span>response<span style="color: #990000">.</span>context<span style="color: #990000">[</span><span style="color: #FF0000">'poll'</span><span style="color: #990000">],</span> poll2<span style="color: #990000">)</span>
+
+        <span style="font-style: italic"><span style="color: #9A1900"># check the poll's question appears on the page</span></span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span>poll2<span style="color: #990000">.</span>question<span style="color: #990000">,</span> response<span style="color: #990000">.</span>content<span style="color: #990000">)</span>
+
+        <span style="font-style: italic"><span style="color: #9A1900"># check our 'no votes yet' message appears</span></span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'No-one has voted on this poll yet'</span><span style="color: #990000">,</span> response<span style="color: #990000">.</span>content<span style="color: #990000">)</span>
+
+        <span style="font-style: italic"><span style="color: #9A1900"># check the choices appear as radio buttons, with the</span></span>
+        <span style="font-style: italic"><span style="color: #9A1900"># correct 'name' and 'value'</span></span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span>
+            <span style="color: #FF0000">'&lt;input type="radio" name="vote" value="%d" /&gt;'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>choice1<span style="color: #990000">.</span>id<span style="color: #990000">,),</span>
+            response<span style="color: #990000">.</span>content
+        <span style="color: #990000">)</span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span>
+            <span style="color: #FF0000">'&lt;input type="radio" name="vote" value="%d" /&gt;'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>choice2<span style="color: #990000">.</span>id<span style="color: #990000">,),</span>
+            response<span style="color: #990000">.</span>content
+        <span style="color: #990000">)</span>
+        <span style="font-style: italic"><span style="color: #9A1900"># check there are labels too</span></span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'&lt;label&gt;%s'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>choice1<span style="color: #990000">.</span>choice<span style="color: #990000">,),</span> response<span style="color: #990000">.</span>content<span style="color: #990000">)</span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'&lt;label&gt;%s'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>choice2<span style="color: #990000">.</span>choice<span style="color: #990000">,),</span> response<span style="color: #990000">.</span>content<span style="color: #990000">)</span></tt></pre></div></div>
+<div class="paragraph"><p>Now the tests drive what we add to the template:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
 by Lorenzo Bettini
@@ -3068,83 +3247,109 @@ http://www.gnu.org/software/src-highlite -->
         <span style="font-weight: bold"><span style="color: #0000FF">&lt;li&gt;&lt;input</span></span> <span style="color: #009900">type</span><span style="color: #990000">=</span><span style="color: #FF0000">"radio"</span> <span style="color: #009900">name</span><span style="color: #990000">=</span><span style="color: #FF0000">"vote"</span> <span style="color: #009900">value</span><span style="color: #990000">=</span><span style="color: #FF0000">"{{ choice.id }}"</span><span style="font-weight: bold"><span style="color: #0000FF">/&gt;&lt;/li&gt;</span></span>
     {% endfor %}
     <span style="font-weight: bold"><span style="color: #0000FF">&lt;/ul&gt;</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Gets past the <code>&lt;input&gt;</code> tests:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>AssertionError: '&lt;label&gt;42' not found in '&lt;html&gt;\n    &lt;head&gt;\n
+&lt;title&gt;life, the universe and everything&lt;/title&gt;\n    &lt;/head&gt;\n    &lt;body&gt;\n
+&lt;h1&gt;life, the universe and everything&lt;/h1&gt;\n        &lt;p&gt;No-one has voted on this
+poll yet&lt;/p&gt;\n        \n            &lt;input type="radio" name="vote" value="1"
+/&gt;\n        \n            &lt;input type="radio" name="vote" value="2" /&gt;\n
+\n    &lt;/body&gt;\n&lt;/html&gt;\n'</code></pre>
+</div></div>
+<div class="paragraph"><p>Let&#8217;s add a <code>&lt;label&gt;</code> or two:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>    {% for choice in poll.choice_set.all %}
+        <span style="font-weight: bold"><span style="color: #0000FF">&lt;label&gt;</span></span>{{ choice.choice }}
+            <span style="font-weight: bold"><span style="color: #0000FF">&lt;input</span></span> <span style="color: #009900">type</span><span style="color: #990000">=</span><span style="color: #FF0000">"radio"</span> <span style="color: #009900">name</span><span style="color: #990000">=</span><span style="color: #FF0000">"vote"</span> <span style="color: #009900">value</span><span style="color: #990000">=</span><span style="color: #FF0000">"{{ choice.id }}"</span> <span style="font-weight: bold"><span style="color: #0000FF">/&gt;</span></span>
+        <span style="font-weight: bold"><span style="color: #0000FF">&lt;/label&gt;</span></span>
+    {% endfor %}</tt></pre></div></div>
+<div class="paragraph"><p>And unit tests should now pass.  The FTs want a submit input:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>NoSuchElementException: Message: u'Unable to locate element: {"method":"css selector","selector":"input[type=\'submit\']"}' ;</code></pre>
+</div></div>
+<div class="paragraph"><p>Now that we&#8217;re asking for a submit button, we should probably have a real form
+that sends a POST to a real URL.  Let&#8217;s do that. Maybe in a new test:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_poll_has_vote_form_which_posts_to_correct_url</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        poll <span style="color: #990000">=</span> Poll<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">create</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'question'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
+
+        response <span style="color: #990000">=</span> self<span style="color: #990000">.</span>client<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'/poll/%d/'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>poll<span style="color: #990000">.</span>id<span style="color: #990000">,</span> <span style="color: #990000">))</span>
+
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span>
+            <span style="color: #FF0000">'&lt;form method="POST" action="/poll/%d/vote"&gt;'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>poll<span style="color: #990000">.</span>id<span style="color: #990000">,),</span>
+            response<span style="color: #990000">.</span>content
+        <span style="color: #990000">)</span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span>
+            <span style="color: #FF0000">'&lt;input type="submit"'</span><span style="color: #990000">,</span>
+            response<span style="color: #990000">.</span>content
+        <span style="color: #990000">)</span></tt></pre></div></div>
+<div class="paragraph"><p>AssertionError: <em>&lt;form method="POST" action="/poll/1/vote"&gt;</em> not found in <em>&lt;html&gt;\n    &lt;head&gt;\n        &lt;title&gt;question&lt;/title&gt;\n    &lt;/head&gt;\n    &lt;body&gt;\n        &lt;h1&gt;question&lt;/h1&gt;\n        &lt;p&gt;No-one has voted on this poll yet&lt;/p&gt;\n        \n    &lt;/body&gt;\n&lt;/html&gt;\n</em></p></div>
+<div class="paragraph"><p>So we fix that:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>    <span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>No-one has voted on this poll yet<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span>
+    <span style="font-weight: bold"><span style="color: #0000FF">&lt;form</span></span> <span style="color: #009900">method</span><span style="color: #990000">=</span><span style="color: #FF0000">"POST"</span> <span style="color: #009900">action</span><span style="color: #990000">=</span><span style="color: #FF0000">"/poll/{{ poll.id }}/vote"</span><span style="font-weight: bold"><span style="color: #0000FF">&gt;</span></span>
+        {% for choice in poll.choice_set.all %}</tt></pre></div></div>
+<div class="paragraph"><p>And the next fail is about the input, so we add that:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>        {% endfor %}
+        <span style="font-weight: bold"><span style="color: #0000FF">&lt;input</span></span> <span style="color: #009900">type</span><span style="color: #990000">=</span><span style="color: #FF0000">"submit"</span> <span style="color: #009900">value</span><span style="color: #990000">=</span><span style="color: #FF0000">"Vote"</span> <span style="font-weight: bold"><span style="color: #0000FF">/&gt;</span></span>
+    <span style="font-weight: bold"><span style="color: #0000FF">&lt;/form&gt;</span></span></tt></pre></div></div>
+<div class="paragraph"><p>And now the FT should get to this:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>AssertionError: '1 vote' not found in u'Page not found (404) :-/'</code></pre>
+</div></div>
+<div class="paragraph"><p>Because we don&#8217;t yet have a URL and view to submit votes to.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <div class="title">Note</div>
 </td>
-<td class="content">ask me about - testing template logic</td>
+<td class="content">
+<div class="title">Advanced task</div>
+<div class="paragraph"><p>Remove any hard-coded references to urls as strings - we should have these
+defined in one place only.  Hint: find the <code>reverse</code> function.</p></div>
+</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Failure:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>AssertionError: Lists differ: [] != ['Very awesome', 'Quite awesom...</code></pre>
-</div></div>
-<div class="paragraph"><p>So</p></div>
+</div>
+<div class="sect2">
+<h3 id="_a_new_url_view_for_post_submissions">A new URL + view for POST submissions</h3>
+<div class="paragraph"><p>Test the new URL + view with the Django Test Client. In <em>polls/tests.py</em>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>{% for choice in poll.choice_set.all %}
-    <span style="font-weight: bold"><span style="color: #0000FF">&lt;li&gt;</span></span>
-        <span style="font-weight: bold"><span style="color: #0000FF">&lt;label&gt;</span></span>{{ choice.choice }}
-            <span style="font-weight: bold"><span style="color: #0000FF">&lt;input</span></span> <span style="color: #009900">type</span><span style="color: #990000">=</span><span style="color: #FF0000">"radio"</span> <span style="color: #009900">value</span><span style="color: #990000">=</span><span style="color: #FF0000">"{{ choice.id }}"</span><span style="font-weight: bold"><span style="color: #0000FF">/&gt;</span></span>
-        <span style="font-weight: bold"><span style="color: #0000FF">&lt;/label&gt;</span></span>
-    <span style="font-weight: bold"><span style="color: #0000FF">&lt;/li&gt;</span></span>
-{% endfor %}</tt></pre></div></div>
-<div class="paragraph"><p>And now</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>NoSuchElementException: Message: u'Unable to locate element: {"method":"css
-selector","selector":"input[type=\'submit\']"}' [...]</code></pre>
-</div></div>
-<div class="paragraph"><p>But it&#8217;s a do-nothing submit&#8230;</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>AssertionError: 'No-one has voted on this poll yet' unexpectedly found in u'How
-awesome is TDD?\nNo-one has voted on this poll yet\nVery awesome\nQuite
-awesome\nModerately awesome'</code></pre>
-</div></div>
-<div class="paragraph"><p>So we wrap it in a form and give it a URL to POST to:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">&lt;body&gt;</span></span>
-    <span style="font-weight: bold"><span style="color: #0000FF">&lt;h1&gt;</span></span>{{ poll.question }}<span style="font-weight: bold"><span style="color: #0000FF">&lt;/h1&gt;</span></span>
-    <span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>No-one has voted on this poll yet<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span>
-    <span style="font-weight: bold"><span style="color: #0000FF">&lt;form</span></span> <span style="color: #009900">action</span><span style="color: #990000">=</span><span style="color: #FF0000">"/post/{{ post.id }}/vote"</span> <span style="color: #009900">method</span><span style="color: #990000">=</span><span style="color: #FF0000">"POST"</span><span style="font-weight: bold"><span style="color: #0000FF">&gt;</span></span>
-        <span style="font-weight: bold"><span style="color: #0000FF">&lt;ul&gt;</span></span>
-        {% for choice in poll.choice_set.all %}
-            <span style="font-weight: bold"><span style="color: #0000FF">&lt;li&gt;</span></span>
-                <span style="font-weight: bold"><span style="color: #0000FF">&lt;label&gt;</span></span>{{ choice.choice }}
-                    <span style="font-weight: bold"><span style="color: #0000FF">&lt;input</span></span> <span style="color: #009900">type</span><span style="color: #990000">=</span><span style="color: #FF0000">"radio"</span> <span style="color: #009900">name</span><span style="color: #990000">=</span><span style="color: #FF0000">"vote"</span> <span style="color: #009900">value</span><span style="color: #990000">=</span><span style="color: #FF0000">"{{ choice.id }}"</span><span style="font-weight: bold"><span style="color: #0000FF">/&gt;</span></span>
-                <span style="font-weight: bold"><span style="color: #0000FF">&lt;/label&gt;</span></span>
-            <span style="font-weight: bold"><span style="color: #0000FF">&lt;/li&gt;</span></span>
-        {% endfor %}
-        <span style="font-weight: bold"><span style="color: #0000FF">&lt;/ul&gt;</span></span>
-        <span style="font-weight: bold"><span style="color: #0000FF">&lt;input</span></span> <span style="color: #009900">type</span><span style="color: #990000">=</span><span style="color: #FF0000">"submit"</span> <span style="font-weight: bold"><span style="color: #0000FF">/&gt;</span></span>
-    <span style="font-weight: bold"><span style="color: #0000FF">&lt;/form&gt;</span></span>
-<span style="font-weight: bold"><span style="color: #0000FF">&lt;/body&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Test the new URL + view with the Django Test Client:</p></div>
-<div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">PollVoteViewTest</span></span><span style="color: #990000">(</span>TestCase<span style="color: #990000">):</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">SinglePollViewTest</span></span><span style="color: #990000">(</span>TestCase<span style="color: #990000">):</span>
+    <span style="color: #990000">[...]</span>
+
+<span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">PollVoteViewTest</span></span><span style="color: #990000">(</span>TestCase<span style="color: #990000">):</span>
 
     <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_can_vote_via_POST</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
         <span style="font-style: italic"><span style="color: #9A1900"># set up a poll with choices</span></span>
-        poll1 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'6 times 7'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
-        poll1<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
-        choice1 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Choice</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">=</span>poll1<span style="color: #990000">,</span> choice<span style="color: #990000">=</span><span style="color: #FF0000">'42'</span><span style="color: #990000">,</span> votes<span style="color: #990000">=</span><span style="color: #993399">1</span><span style="color: #990000">)</span>
-        choice1<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
-        choice2 <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Choice</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">=</span>poll1<span style="color: #990000">,</span> choice<span style="color: #990000">=</span><span style="color: #FF0000">'The Ultimate Answer'</span><span style="color: #990000">,</span> votes<span style="color: #990000">=</span><span style="color: #993399">3</span><span style="color: #990000">)</span>
-        choice2<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+        poll <span style="color: #990000">=</span> Poll<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">create</span></span><span style="color: #990000">(</span>question<span style="color: #990000">=</span><span style="color: #FF0000">'who?'</span><span style="color: #990000">,</span> pub_date<span style="color: #990000">=</span>timezone<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">now</span></span><span style="color: #990000">())</span>
+        poll<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+        choice1 <span style="color: #990000">=</span> Choice<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">create</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">=</span>poll<span style="color: #990000">,</span> choice<span style="color: #990000">=</span><span style="color: #FF0000">'me'</span><span style="color: #990000">,</span> votes<span style="color: #990000">=</span><span style="color: #993399">1</span><span style="color: #990000">)</span>
+        choice2 <span style="color: #990000">=</span> Choice<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">create</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">=</span>poll<span style="color: #990000">,</span> choice<span style="color: #990000">=</span><span style="color: #FF0000">'you'</span><span style="color: #990000">,</span> votes<span style="color: #990000">=</span><span style="color: #993399">3</span><span style="color: #990000">)</span>
 
         <span style="font-style: italic"><span style="color: #9A1900"># set up our POST data - keys and values are unicode</span></span>
         post_data <span style="color: #990000">=</span> <span style="color: #990000">{</span>u<span style="color: #FF0000">'vote'</span><span style="color: #990000">:</span> <span style="font-weight: bold"><span style="color: #000000">unicode</span></span><span style="color: #990000">(</span>choice2<span style="color: #990000">.</span>id<span style="color: #990000">)}</span>
@@ -3162,7 +3367,7 @@ http://www.gnu.org/software/src-highlite -->
         <span style="font-style: italic"><span style="color: #9A1900"># check it's votes have gone up by 1</span></span>
         self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEquals</span></span><span style="color: #990000">(</span>choice_in_db<span style="color: #990000">.</span>votes<span style="color: #990000">,</span> <span style="color: #993399">4</span><span style="color: #990000">)</span>
 
-        <span style="font-style: italic"><span style="color: #9A1900"># "always redirect after a POST", in this case, we go back</span></span>
+        <span style="font-style: italic"><span style="color: #9A1900"># "always redirect after a POST". In this case, we go back</span></span>
         <span style="font-style: italic"><span style="color: #9A1900"># to the poll page.</span></span>
         self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertRedirects</span></span><span style="color: #990000">(</span>response<span style="color: #990000">,</span> <span style="color: #FF0000">"/poll/%d/"</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>poll1<span style="color: #990000">.</span>id<span style="color: #990000">,))</span></tt></pre></div></div>
 <div class="paragraph"><p>Gives:</p></div>
@@ -3196,7 +3401,11 @@ AssertionError: 3 != 4</code></pre>
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">vote</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> poll_id<span style="color: #990000">):</span>
+<pre><tt><span style="font-weight: bold"><span style="color: #000080">from</span></span> polls<span style="color: #990000">.</span>models <span style="font-weight: bold"><span style="color: #000080">import</span></span> Choice<span style="color: #990000">,</span> Poll
+
+<span style="color: #990000">[...]</span>
+
+<span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">vote</span></span><span style="color: #990000">(</span>request<span style="color: #990000">,</span> poll_id<span style="color: #990000">):</span>
     poll <span style="color: #990000">=</span> Poll<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span>id<span style="color: #990000">=</span>poll_id<span style="color: #990000">)</span>
     choice <span style="color: #990000">=</span> Choice<span style="color: #990000">.</span>objects<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span>id<span style="color: #990000">=</span>request<span style="color: #990000">.</span>POST<span style="color: #990000">[</span><span style="color: #FF0000">'vote'</span><span style="color: #990000">])</span>
     choice<span style="color: #990000">.</span>votes <span style="color: #990000">+=</span> <span style="color: #993399">1</span>
@@ -3214,7 +3423,12 @@ http://www.gnu.org/software/src-highlite -->
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt>    <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> <span style="font-weight: bold"><span style="color: #000000">redirect</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'/poll/%d/'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>poll<span style="color: #990000">.</span>id<span style="color: #990000">,))</span></tt></pre></div></div>
+<pre><tt><span style="font-weight: bold"><span style="color: #000080">from</span></span> django<span style="color: #990000">.</span>shortcuts <span style="font-weight: bold"><span style="color: #000080">import</span></span> redirect<span style="color: #990000">,</span> render
+
+<span style="color: #990000">[...]</span>
+
+    choice<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">save</span></span><span style="color: #990000">()</span>
+    <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> <span style="font-weight: bold"><span style="color: #000000">redirect</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'/poll/%d/'</span> <span style="color: #990000">%</span> <span style="color: #990000">(</span>poll<span style="color: #990000">.</span>id<span style="color: #990000">,))</span></tt></pre></div></div>
 <div class="paragraph"><p>Unit tests now pass.  What about the FT?</p></div>
 <div class="listingblock">
 <div class="content">
@@ -3237,26 +3451,53 @@ http://www.gnu.org/software/src-highlite -->
 awesome is TDD?\nNo-one has voted on this poll yet\nVery awesome\nQuite
 awesome\nModerately awesome'</code></pre>
 </div></div>
-<div class="paragraph"><p>TODO: Still need to display results on the page:</p></div>
+<div class="paragraph"><p>Next would be printing the votes&#8230; But that&#8217;s up to you!</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <div class="title">Note</div>
 </td>
 <td class="content">
-<div class="title">Advanced task</div>
-<div class="paragraph"><p>Look up the docs for the <code>redirect</code> function. What would be a better solution?</p></div>
+<div class="title">Advanced tasks</div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Find out how CSRF protection works
+</p>
+</li>
+<li>
+<p>
+Look up the docs for the <code>redirect</code> function. What would be a better
+solution?
+</p>
+</li>
+</ol></div>
 </td>
 </tr></table>
 </div>
-<div class="paragraph"><p>TODO: Test the template. I made a hard-to-debug mistake!</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_end_8230_for_now">THE END&#8230;. for now?</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Thanks for coming along!  I hope you enjoyed it, and I hope you found it
+useful.</p></div>
+<div class="paragraph"><p>Let me have your feedback!  What went well, what could I improve?  Let me
+know via <a href="mailto:harry.percival@gmail.com">harry.percival@gmail.com</a></p></div>
+<div class="paragraph"><p>This doesn&#8217;t need to be the end of your TDD journey&#8201;&#8212;&#8201;there&#8217;s <strong>loads</strong> more
+content in my tutorial, at <a href="http://www.tdd-django-tutorial.com/">http://www.tdd-django-tutorial.com/</a></p></div>
+<div class="paragraph"><p>You can find me on Twitter via <strong>@hjwp</strong></p></div>
+<div class="paragraph"><p>Finally, watch out for my book, due later this year on O&#8217;Reilly!  It should
+be in the Early Release Program by the time PyCon comes around, so check it
+out and let me know what you think!</p></div>
 </div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-03-05 10:10:32 GMT
+Last updated 2013-03-06 14:23:36 GMT
 </div>
 </div>
 </body>
