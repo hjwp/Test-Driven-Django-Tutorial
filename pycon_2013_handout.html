@@ -736,8 +736,6 @@ asciidoc.install();
 <div class="sect1">
 <h2 id="_part_0_pre_requisites">Part 0 - Pre-requisites</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>If you haven&#8217;t got the pre-requisites, you&#8217;ll have to follow along with someone
-else&#8217;s PC.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -765,22 +763,25 @@ Selenium (latest version)
 </p>
 </li>
 </ul></div>
+<div class="paragraph"><p>If you haven&#8217;t got the pre-requisites, you&#8217;ll have to follow along with someone
+else&#8217;s PC.  That&#8217;s OK, my whole tutorial is available online, so you can go
+through the whole thing in your own time later.</p></div>
 <div class="sect2">
 <h3 id="_testing_you_have_the_pre_requisites_installed">Testing you have the pre-requisites installed</h3>
 <div class="sect3">
 <h4 id="_git">Git:</h4>
-<div class="paragraph"><p>cd to wherever you have my repo checked out</p></div>
+<div class="paragraph"><p><code>cd</code> to wherever you have my repo checked out</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><code>git checkout pycon_2013
-ls pycon_2013_handout.asciidoc</code></pre>
+dir pycon_2013_handout.asciidoc</code></pre>
 </div></div>
 </div>
 <div class="sect3">
 <h4 id="_django">Django:</h4>
 <div class="listingblock">
 <div class="content">
-<pre><code>cd /tmp #or wherever
+<pre><code>cd /tmp    # or wherever
 django-admin.py startproject delete_me
 cd delete_me
 python manage.py runserver</code></pre>
@@ -798,7 +799,8 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000080">from</span></span> selenium <span style="font-weight: bold"><span style="color: #000080">import</span></span> webdriver
 browser <span style="color: #990000">=</span> webdriver<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">Firefox</span></span><span style="color: #990000">()</span>
 browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'http://www.google.com'</span><span style="color: #990000">)</span>
-<span style="font-weight: bold"><span style="color: #0000FF">print</span></span> browser<span style="color: #990000">.</span>title</tt></pre></div></div>
+<span style="font-weight: bold"><span style="color: #0000FF">print</span></span> browser<span style="color: #990000">.</span>title
+browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">quit</span></span><span style="color: #990000">()</span></tt></pre></div></div>
 <div class="paragraph"><p>should print &#8220;Google&#8221;</p></div>
 </div>
 </div>
@@ -807,6 +809,16 @@ browser<span style="color: #990000">.</span><span style="font-weight: bold"><spa
 <div class="sect1">
 <h2 id="_part_1_getting_django_set_up_using_a_selenium_functional_test">Part 1 - Getting Django set up using a Selenium Functional Test</h2>
 <div class="sectionbody">
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content"><strong>You should use my repo (which is fairly empty) as the base directory for
+all your work.  That will let you do the occasional <code>checkout</code> to get files we
+need for later stages</strong></td>
+</tr></table>
+</div>
 <div class="paragraph"><p>Open a new file called <em>functional_tests.py</em></p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
@@ -819,31 +831,42 @@ browser <span style="color: #990000">=</span> webdriver<span style="color: #9900
 browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'http://localhost:8000'</span><span style="color: #990000">)</span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">assert</span></span> <span style="color: #FF0000">'Django'</span> <span style="font-weight: bold"><span style="color: #0000FF">in</span></span> browser<span style="color: #990000">.</span>title
-<span style="font-weight: bold"><span style="color: #0000FF">print</span></span> <span style="color: #FF0000">'OK!'</span></tt></pre></div></div>
+<span style="font-weight: bold"><span style="color: #0000FF">print</span></span> <span style="color: #FF0000">'OK!'</span>
+browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">quit</span></span><span style="color: #990000">()</span></tt></pre></div></div>
+<div class="paragraph"><p>Run the file with</p></div>
+<div class="paragraph"><p><strong><code>python functional_tests.py</code></strong></p></div>
 <div class="paragraph"><p>Expected failure:  <code>AssertionError</code></p></div>
-<div class="paragraph"><p>In a separate console window:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>django-admin.py startproject mysite</code></pre>
-</div></div>
+<div class="paragraph"><p>Then start a Django project:</p></div>
+<div class="paragraph"><p><strong><code>django-admin.py startproject mysite</code></strong></p></div>
 <div class="paragraph"><p>Should give you a folder structure like this:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>mysite
-|-- manage.py
-`-- mysite
-    |-- __init__.py
-    |-- settings.py
-    |-- urls.py
-    `-- wsgi.py</code></pre>
+<pre><code> tree --charset=ascii -I *.pyc
+.
+|-- mysite
+|   |-- manage.py
+|   `-- mysite
+|       |-- __init__.py
+|       |-- settings.py
+|       |-- urls.py
+|       `-- wsgi.py
+|-- old_tutorial/
+|-- pycon_2013_handout.asciidoc
+|-- pycon_2013_handout.html
+|-- reference_project/
+`-- workshop.rst</code></pre>
 </div></div>
-<div class="paragraph"><p>If it doesn&#8217;t, you&#8217;re probably on the wrong version of Django. You&#8217;ll probably
-have to switch to someone else&#8217;s PC.</p></div>
+<div class="paragraph"><p>If your folder structure doesn&#8217;t look like that&#8201;&#8212;&#8201;particularly if you don&#8217;t
+have the double <em>mysite/mysite</em> folder&#8201;&#8212;&#8201;that means you&#8217;re on the wrong
+version of Django. Switch to someone else&#8217;s PC.</p></div>
+<div class="paragraph"><p>Now, <strong>in a separate console window</strong></p></div>
 <div class="listingblock">
 <div class="content">
 <pre><code>cd mysite
 python manage.py runserver</code></pre>
 </div></div>
+<div class="paragraph"><p>Back in your original console window,</p></div>
+<div class="paragraph"><p><strong><code>python functional_tests.py</code></strong></p></div>
 <div class="paragraph"><p>Expected pass: test prints <em>OK!</em></p></div>
 <div class="admonitionblock">
 <table><tr>
@@ -950,7 +973,7 @@ What is <code>assertIn</code>?
 </td>
 <td class="content">If you get a message saying &#8220;Problem loading page&#8221; or
 &#8220;Unable to connect&#8221;, could it be because the dev server isn&#8217;t running?
-Use <code>python manage.py runserver</code> to start it up again&#8230;</td>
+Use <strong><code>python manage.py runserver</code></strong> to start it up again&#8230;</td>
 </tr></table>
 </div>
 <div class="paragraph"><p>Finish writing the FT as comments:</p></div>
@@ -996,6 +1019,20 @@ http://www.gnu.org/software/src-highlite -->
 
 <span style="color: #990000">[...]</span>
 </tt></pre></div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph"><p>Shortcut to typing all that in: from the top-level of the repo (not in mysite):</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git checkout PYCON_2013_PART_2_FT -- functional_tests.py</code></pre>
+</div></div>
+</td>
+</tr></table>
+</div>
 <div class="paragraph"><p>Finish up by <strong>moving</strong> <em>functional_tests.py</em> into the <em>mysite</em> folder</p></div>
 <div class="admonitionblock">
 <table><tr>
@@ -1017,10 +1054,7 @@ sense?  What might you use <em>assertItemsEqual</em> for?</p></div>
 <div class="sect2">
 <h3 id="_create_a_polls_app_and_run_its_unit_tests">Create a polls app and run its unit tests</h3>
 <div class="paragraph"><p>Run the following command:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>python manage.py startapp polls</code></pre>
-</div></div>
+<div class="paragraph"><p><strong><code>python manage.py startapp polls</code></strong></p></div>
 <div class="paragraph"><p>Your directory tree will now look like this:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -1052,7 +1086,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-style: italic"><span style="color: #9A1900">        Tests that 1 + 1 always equals 2.</span></span>
 <span style="font-style: italic"><span style="color: #9A1900">        """</span></span>
         self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span><span style="color: #993399">1</span> <span style="color: #990000">+</span> <span style="color: #993399">1</span><span style="color: #990000">,</span> <span style="color: #993399">3</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>To run it: <code>python manage.py test</code></p></div>
+<div class="paragraph"><p>To run it: <strong><code>python manage.py test</code></strong></p></div>
 <div class="paragraph"><p>Expected Failure 1:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -1076,11 +1110,8 @@ http://www.gnu.org/software/src-highlite -->
     <span style="color: #FF0000">'default'</span><span style="color: #990000">:</span> <span style="color: #990000">{</span>
         <span style="color: #FF0000">'ENGINE'</span><span style="color: #990000">:</span> <span style="color: #FF0000">'django.db.backends.sqlite3'</span><span style="color: #990000">,</span>
         <span style="color: #FF0000">'NAME'</span><span style="color: #990000">:</span> <span style="color: #FF0000">''</span><span style="color: #990000">,</span>               <span style="font-style: italic"><span style="color: #9A1900"># Or path to database file if using sqlite3.</span></span></tt></pre></div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>$ python manage.py test
-$ python manage.py test polls</code></pre>
-</div></div>
+<div class="paragraph"><p><code>$ python manage.py test   #  so many tests!</code></p></div>
+<div class="paragraph"><p><code>$</code>  <strong><code>python manage.py test polls</code></strong></p></div>
 <div class="paragraph"><p>Expected Failure:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -1135,7 +1166,7 @@ http://www.gnu.org/software/src-highlite -->
     <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_root_url_resolves_to_home_page_view</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
         found <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">resolve</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'/'</span><span style="color: #990000">)</span>
         self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span>found<span style="color: #990000">.</span>func<span style="color: #990000">,</span> home_page<span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>Expected failure:</p></div>
+<div class="paragraph"><p>Expected failure from <code>manage.py test polls</code>:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code>ImportError: cannot import name home_page</code></pre>
@@ -1746,21 +1777,21 @@ pressing RETURN?</p></div>
 <h2 id="_part_6_a_model_for_polls">Part 6: A model for Polls</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Extend the FT:</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>[...]
-# His username and password are accepted, and he is taken to
-# the Site Administration page
-body = self.browser.find_element_by_tag_name('body')
-self.assertIn('Site administration', body.text)</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code># He sees a section named "Polls" with a model called "Polls" in it
-polls_links = self.browser.find_elements_by_link_text('Polls')
-self.assertEquals(len(polls_links), 2)
-self.fail('Use the admin site to create a poll')</code></pre>
-</div></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>    <span style="color: #990000">[...]</span>
+    <span style="font-style: italic"><span style="color: #9A1900"># His username and password are accepted, and he is taken to</span></span>
+    <span style="font-style: italic"><span style="color: #9A1900"># the Site Administration page</span></span>
+    body <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_tag_name</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'body'</span><span style="color: #990000">)</span>
+    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertIn</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'Site administration'</span><span style="color: #990000">,</span> body<span style="color: #990000">.</span>text<span style="color: #990000">)</span>
+
+    <span style="font-style: italic"><span style="color: #9A1900"># He sees a section named "Polls" with a model called "Polls" in it</span></span>
+    polls_links <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_elements_by_link_text</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'Polls'</span><span style="color: #990000">)</span>
+    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEquals</span></span><span style="color: #990000">(</span><span style="font-weight: bold"><span style="color: #000000">len</span></span><span style="color: #990000">(</span>polls_links<span style="color: #990000">),</span> <span style="color: #993399">2</span><span style="color: #990000">)</span>
+    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">fail</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'Use the admin site to create a poll'</span><span style="color: #990000">)</span></tt></pre></div></div>
 <div class="paragraph"><p>Expected failure:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -1999,232 +2030,210 @@ it?  Hint: the model <code>._meta</code> attribute might work&#8230; Is there an
 </td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Part 7: LiveServerTestCase and test fixtures</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_part_7_liveservertestcase_and_test_fixtures">Part 7: LiveServerTestCase and test fixtures</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Start by extending the FT to actually create a new poll via the admin site:</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>Start by extending the FT to actually create a new poll via the admin site:
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>    <span style="font-style: italic"><span style="color: #9A1900"># He clicks the 'Add poll' link</span></span>
+    new_poll_link <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_link_text</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'Add poll'</span><span style="color: #990000">)</span>
+    new_poll_link<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">click</span></span><span style="color: #990000">()</span>
 
-[source,python]</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code># He clicks the 'Add poll' link
-new_poll_link = self.browser.find_element_by_link_text('Add poll')
-new_poll_link.click()</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code># He types in an interesting question for the Poll
-question_field = self.browser.find_element_by_name('question')
-question_field.send_keys("How awesome is Test-Driven Development?")</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code># He sets the date and time of publication - it'll be a new year's
-# poll!
-date_field = self.browser.find_element_by_name('pub_date_0')
-date_field.send_keys('01/01/12')
-time_field = self.browser.find_element_by_name('pub_date_1')
-time_field.send_keys('00:00')</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code># Mo clicks the save button
-save_button = self.browser.find_element_by_css_selector("input[value='Save']")
-save_button.click()</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code># He is returned to the "Polls" listing, where he can see his
-# new poll, listed as a clickable link
-new_poll_links = self.browser.find_elements_by_link_text(
-        "How awesome is Test-Driven Development?"
-)
-self.assertEquals(len(new_poll_links), 1)</code></pre>
-</div></div>
+    <span style="font-style: italic"><span style="color: #9A1900"># He types in an interesting question for the Poll</span></span>
+    question_field <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_name</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'question'</span><span style="color: #990000">)</span>
+    question_field<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">send_keys</span></span><span style="color: #990000">(</span><span style="color: #FF0000">"How awesome is Test-Driven Development?"</span><span style="color: #990000">)</span>
+
+    <span style="font-style: italic"><span style="color: #9A1900"># He sets the date and time of publication - it'll be a new year's</span></span>
+    <span style="font-style: italic"><span style="color: #9A1900"># poll!</span></span>
+    date_field <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_name</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'pub_date_0'</span><span style="color: #990000">)</span>
+    date_field<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">send_keys</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'01/01/12'</span><span style="color: #990000">)</span>
+    time_field <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_name</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'pub_date_1'</span><span style="color: #990000">)</span>
+    time_field<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">send_keys</span></span><span style="color: #990000">(</span><span style="color: #FF0000">'00:00'</span><span style="color: #990000">)</span>
+
+    <span style="font-style: italic"><span style="color: #9A1900"># Mo clicks the save button</span></span>
+    save_button <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_element_by_css_selector</span></span><span style="color: #990000">(</span><span style="color: #FF0000">"input[value='Save']"</span><span style="color: #990000">)</span>
+    save_button<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">click</span></span><span style="color: #990000">()</span>
+
+    <span style="font-style: italic"><span style="color: #9A1900"># He is returned to the "Polls" listing, where he can see his</span></span>
+    <span style="font-style: italic"><span style="color: #9A1900"># new poll, listed as a clickable link</span></span>
+    new_poll_links <span style="color: #990000">=</span> self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">find_elements_by_link_text</span></span><span style="color: #990000">(</span>
+<span style="font-style: italic"><span style="color: #9A1900">            "How awesome is Test-Driven Development?"</span></span>
+    <span style="color: #990000">)</span>
+    self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEquals</span></span><span style="color: #990000">(</span><span style="font-weight: bold"><span style="color: #000000">len</span></span><span style="color: #990000">(</span>new_poll_links<span style="color: #990000">),</span> <span style="color: #993399">1</span><span style="color: #990000">)</span></tt></pre></div></div>
+<div class="paragraph"><p>First expected fail -</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>First expected fail -</code></pre>
-</div></div>
-<div class="literalblock">
 <div class="content">
 <pre><code>    self.assertEquals(len(new_poll_links), 1)
 AssertionError: 0 != 1</code></pre>
 </div></div>
+<div class="sect2">
+<h3 id="_code___unicode___code"><code>__unicode__</code></h3>
+<div class="paragraph"><p>Fix by changing the string representation of a poll:</p></div>
+<div class="paragraph"><p>in <em>polls/tests.py</em>, add to <code>PollModelTest</code>:</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>`__unicode__`
-~~~~~~~~~~~~~
-
-Fix by changing the string representation of a poll:
-
-in 'polls/tests.py', add to `PollModelTest`:
-
-
-[source,python]</code></pre>
-</div></div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_string_representation</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        poll <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">()</span>
+        poll<span style="color: #990000">.</span>question <span style="color: #990000">=</span> <span style="color: #FF0000">"Why?"</span>
+        self<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">assertEqual</span></span><span style="color: #990000">(</span><span style="font-weight: bold"><span style="color: #000000">unicode</span></span><span style="color: #990000">(</span>poll<span style="color: #990000">),</span> <span style="color: #FF0000">"Why?"</span><span style="color: #990000">)</span></tt></pre></div></div>
+<div class="paragraph"><p>Expected fail:</p></div>
 <div class="literalblock">
 <div class="content">
-<pre><code>def test_string_representation(self):
-    poll = Poll()
-    poll.question = "Why?"
-    self.assertEqual(unicode(poll), "Why?")</code></pre>
+<pre><code>AssertionError: u'Poll object' != 'Why?'</code></pre>
 </div></div>
+<div class="paragraph"><p><em>models.py</em>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">Poll</span></span><span style="color: #990000">(</span>models<span style="color: #990000">.</span>Model<span style="color: #990000">):</span>
+    question <span style="color: #990000">=</span> models<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">CharField</span></span><span style="color: #990000">(</span>max_length<span style="color: #990000">=</span><span style="color: #993399">200</span><span style="color: #990000">)</span>
+    pub_date <span style="color: #990000">=</span> models<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">DateTimeField</span></span><span style="color: #990000">()</span>
+
+    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">__unicode__</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> self<span style="color: #990000">.</span>question</tt></pre></div></div>
+<div class="paragraph"><p>Unit tests should now pass</p></div>
+</div>
+<div class="sect2">
+<h3 id="_liveservertestcase_and_the_test_database">LiveServerTestCase and the test database</h3>
+<div class="paragraph"><p>Functional tests should pass once&#8230; but fail the second time:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>Expected fail:
-
-    AssertionError: u'Poll object' != 'Why?'
-
-'models.py':
-
-
-[source,python]</code></pre>
-</div></div>
-<div class="paragraph"><p>class Poll(models.Model):
-    question = models.CharField(max_length=200)
-    pub_date = models.DateTimeField()</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>def __unicode__(self):
-    return self.question</code></pre>
-</div></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>Unit tests should now pass
-
-LiveServerTestCase and the test database
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Functional tests should pass once... but fail the second time:</code></pre>
-</div></div>
-<div class="paragraph"><p>AssertionError: <em>0 polls</em> not found in u&#8217;Django administration\nWelcome, admin.
+<pre><code>AssertionError: '0 polls' not found in u'Django administration\nWelcome, admin.
 Change password / Log out\nHome \u203a Polls \u203a Polls\nSelect poll to
 change\nAdd poll\nAction:\n---------\nDelete selected polls\nGo 0 of 1
-selected\nPoll\nHow awesome is Test-Driven Development?\n1 poll'</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>change 'functional_tests.py' to being tests inside a new Django app called 'fts':</code></pre>
+selected\nPoll\nHow awesome is Test-Driven Development?\n1 poll'</code></pre>
 </div></div>
-<div class="paragraph"><p>python manage.py startapp fts
-mv functional_tests.py fts/tests.py</p></div>
+<div class="paragraph"><p>change <em>functional_tests.py</em> to being tests inside a new Django app called <em>fts</em>:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>then edit 'fts/tests.py' to inherit from `LiveServerTestCase`:
+<pre><code>python manage.py startapp fts
+mv functional_tests.py fts/tests.py</code></pre>
+</div></div>
+<div class="paragraph"><p>then edit <em>fts/tests.py</em> to inherit from <code>LiveServerTestCase</code>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000080">from</span></span> django<span style="color: #990000">.</span>test <span style="font-weight: bold"><span style="color: #000080">import</span></span> LiveServerTestCase
+<span style="font-weight: bold"><span style="color: #000080">from</span></span> selenium <span style="font-weight: bold"><span style="color: #000080">import</span></span> webdriver
+<span style="font-weight: bold"><span style="color: #000080">from</span></span> selenium<span style="color: #990000">.</span>webdriver<span style="color: #990000">.</span>common<span style="color: #990000">.</span>keys <span style="font-weight: bold"><span style="color: #000080">import</span></span> Keys
 
+<span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">PollsFunctionalTest</span></span><span style="color: #990000">(</span>LiveServerTestCase<span style="color: #990000">):</span>
 
-[source,python]</code></pre>
-</div></div>
-<div class="paragraph"><p>from django.test import LiveServerTestCase
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys</p></div>
-<div class="paragraph"><p>class PollsFunctionalTest(LiveServerTestCase):</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>def setUp(self):
-    self.browser = webdriver.Firefox()
-    self.browser.implicitly_wait(3)</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>def tearDown(self):
-    self.browser.quit()</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>def test_voting_on_a_poll(self):
-    # Elspeth goes to check out a cool new polls site she's heard about
-    self.browser.get(self.live_server_url)</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>[...]</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>def test_can_create_a_new_poll_via_admin_site(self):
-    # Mo the administrator goes to the admin page
-    self.browser.get(self.live_server_url + '/admin/')
-    [...]</code></pre>
-</div></div>
+    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">setUp</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        self<span style="color: #990000">.</span>browser <span style="color: #990000">=</span> webdriver<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">Firefox</span></span><span style="color: #990000">()</span>
+        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">implicitly_wait</span></span><span style="color: #990000">(</span><span style="color: #993399">3</span><span style="color: #990000">)</span>
+
+    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">tearDown</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">quit</span></span><span style="color: #990000">()</span>
+
+    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_voting_on_a_poll</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        <span style="font-style: italic"><span style="color: #9A1900"># Elspeth goes to check out a cool new polls site she's heard about</span></span>
+        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span>self<span style="color: #990000">.</span>live_server_url<span style="color: #990000">)</span>
+
+        <span style="color: #990000">[...]</span>
+
+    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">test_can_create_a_new_poll_via_admin_site</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        <span style="font-style: italic"><span style="color: #9A1900"># Mo the administrator goes to the admin page</span></span>
+        self<span style="color: #990000">.</span>browser<span style="color: #990000">.</span><span style="font-weight: bold"><span style="color: #000000">get</span></span><span style="color: #990000">(</span>self<span style="color: #990000">.</span>live_server_url <span style="color: #990000">+</span> <span style="color: #FF0000">'/admin/'</span><span style="color: #990000">)</span>
+        <span style="color: #990000">[...]</span>
+</tt></pre></div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+make sure to use <code>self.live_server_url</code> in both test methods
+</p>
+</li>
+<li>
+<p>
+also delete the <code>if __name__ == __main__</code> block
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Add <code>fts</code> to <em>settings.py</em>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>INSTALLED_APPS <span style="color: #990000">=</span> <span style="color: #990000">(</span>
+    <span style="color: #FF0000">'django.contrib.auth'</span><span style="color: #990000">,</span>
+    <span style="color: #FF0000">'django.contrib.contenttypes'</span><span style="color: #990000">,</span>
+    <span style="color: #FF0000">'django.contrib.sessions'</span><span style="color: #990000">,</span>
+    <span style="color: #FF0000">'django.contrib.sites'</span><span style="color: #990000">,</span>
+    <span style="color: #FF0000">'django.contrib.messages'</span><span style="color: #990000">,</span>
+    <span style="color: #FF0000">'django.contrib.staticfiles'</span><span style="color: #990000">,</span>
+    <span style="font-style: italic"><span style="color: #9A1900"># Uncomment the next line to enable the admin:</span></span>
+    <span style="color: #FF0000">'django.contrib.admin'</span><span style="color: #990000">,</span>
+    <span style="font-style: italic"><span style="color: #9A1900"># Uncomment the next line to enable admin documentation:</span></span>
+    <span style="font-style: italic"><span style="color: #9A1900"># 'django.contrib.admindocs',</span></span>
+    <span style="color: #FF0000">'polls'</span><span style="color: #990000">,</span>
+    <span style="color: #FF0000">'fts'</span><span style="color: #990000">,</span>
+<span style="color: #990000">)</span></tt></pre></div></div>
+<div class="paragraph"><p>Now run</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>* make sure to use `self.live_server_url` in both test methods
-* also delete the `if __name__ == __main__` block
-
-Add `fts` to 'settings.py':
-
-[source,python]</code></pre>
+<pre><code>$ python manage.py test fts</code></pre>
 </div></div>
-<div class="paragraph"><p>INSTALLED_APPS = (
-    <em>django.contrib.auth</em>,
-    <em>django.contrib.contenttypes</em>,
-    <em>django.contrib.sessions</em>,
-    <em>django.contrib.sites</em>,
-    <em>django.contrib.messages</em>,
-    <em>django.contrib.staticfiles</em>,
-    # Uncomment the next line to enable the admin:
-    <em>django.contrib.admin</em>,
-    # Uncomment the next line to enable admin documentation:
-    # <em>django.contrib.admindocs</em>,
-    <em>polls</em>,
-    <em>fts</em>,
-)</p></div>
+<div class="paragraph"><p>Should see one <code>self.fail</code> (can DONTify this test now) and one:</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>Now run</code></pre>
-</div></div>
-<div class="paragraph"><p>$ python manage.py test fts</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>Should see one `self.fail` (can DONTify this test now) and one:</code></pre>
-</div></div>
-<div class="literalblock">
 <div class="content">
 <pre><code>    self.assertIn('Site administration', body.text)
 AssertionError: 'Site administration' not found in u'Django
 administration\nPlease enter the correct username and password for a staff
 account. Note that both fields may be case-sensitive.\nUsername:\nPassword:\n '</code></pre>
 </div></div>
+</div>
+<div class="sect2">
+<h3 id="_test_fixture_setup">Test fixture setup</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+make a new directory at <em>polls/fixtures</em>
+</p>
+</li>
+</ul></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>Test fixture setup
-~~~~~~~~~~~~~~~~~~
-
-* make a new directory at 'polls/fixtures'</code></pre>
+<pre><code>python manage.py dumpdata auth.user &gt; polls/fixtures/admin_user.json</code></pre>
 </div></div>
-<div class="paragraph"><p>python manage.py dumpdata auth.user &gt; polls/fixtures/admin_user.json</p></div>
+<div class="paragraph"><p>Add to <em>fts/tests.py</em>:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> <span style="font-weight: bold"><span style="color: #000000">PollsFunctionalTest</span></span><span style="color: #990000">(</span>LiveServerTestCase<span style="color: #990000">):</span>
+
+    fixtures <span style="color: #990000">=</span> <span style="color: #990000">[</span><span style="color: #FF0000">'admin_user.json'</span><span style="color: #990000">]</span>
+
+    <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #000000">setUp</span></span><span style="color: #990000">(</span>self<span style="color: #990000">):</span>
+        <span style="color: #990000">[...]</span></tt></pre></div></div>
+<div class="paragraph"><p>FT should now pass, no matter how many times you run them!</p></div>
+<div class="paragraph"><p>By the end, your folder structure should look like this:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>Add to 'fts/tests.py':
-
-[source,python]</code></pre>
-</div></div>
-<div class="paragraph"><p>class PollsFunctionalTest(LiveServerTestCase):</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>fixtures = ['admin_user.json']</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>def setUp(self):
-    [...]</code></pre>
-</div></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>FT should now pass, no matter how many times you run them!
-
-By the end, your folder structure should look like this:</code></pre>
-</div></div>
-<div class="paragraph"><p>.
+<pre><code>.
 |-- fts
-|   |-- <em>init</em>.py
+|   |-- __init__.py
 |   |-- models.py
 |   |-- tests.py
 |   `-- views.py
 |-- manage.py
 |-- mysite
-|   |-- <em>init</em>.py
+|   |-- __init__.py
 |   |-- settings.py
 |   |-- urls.py
 |   `-- wsgi.py
@@ -2232,16 +2241,19 @@ By the end, your folder structure should look like this:</code></pre>
     |-- admin.py
     |-- fixtures
     |   `-- admin_user.json
-    |-- <em>init</em>.py
+    |-- __init__.py
     |-- models.py
     |-- templates
     |   `-- home.html
     |-- tests.py
-    `-- views.py</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>Part 8 - Add the Choice model</code></pre>
+    `-- views.py</code></pre>
 </div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_part_8_add_the_choice_model">Part 8 - Add the Choice model</h2>
+<div class="sectionbody">
 <div class="paragraph"><p>Add a bit to the FT (<em>fts/tests.py</em>), just before we save the new poll</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
@@ -3497,7 +3509,7 @@ out and let me know what you think!</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-03-06 14:23:36 GMT
+Last updated 2013-03-06 22:51:05 GMT
 </div>
 </div>
 </body>
