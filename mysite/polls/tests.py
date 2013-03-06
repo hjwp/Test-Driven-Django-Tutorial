@@ -106,12 +106,20 @@ class HomePageTest(TestCase):
 
 class SinglePollViewTest(TestCase):
 
-    def test_page_shows_poll_title_and_no_votes_message(self):
+    def test_template_rendered_with_poll_and_choice_radio_buttons_and_no_votes(
+            self
+    ):
         # set up two polls, to check the right one is displayed
         poll1 = Poll(question='6 times 7', pub_date=timezone.now())
         poll1.save()
         poll2 = Poll(question='life, the universe and everything', pub_date=timezone.now())
         poll2.save()
+
+        # add a couple of choices
+        choice1 = Choice(poll=poll2, choice="42")
+        choice1.save()
+        choice2 = Choice(poll=poll2, choice="the Spice")
+        choice2.save()
 
         response = self.client.get('/poll/%d/' % (poll2.id, ))
 
@@ -127,4 +135,31 @@ class SinglePollViewTest(TestCase):
         # check our 'no votes yet' message appears
         self.assertIn('No-one has voted on this poll yet', response.content)
 
+        # check the choices appear as radio buttons, with the
+        # correct 'name' and 'value'
+        self.assertIn(
+            '<input type="radio" name="vote" value="%d" />' % (choice1.id,),
+            response.content
+        )
+        self.assertIn(
+            '<input type="radio" name="vote" value="%d" />' % (choice2.id,),
+            response.content
+        )
+        # check there are labels too
+        self.assertIn('<label>%s' % (choice1.choice,), response.content)
+        self.assertIn('<label>%s' % (choice2.choice,), response.content)
 
+
+    def test_poll_has_vote_form_which_posts_to_correct_url(self):
+        poll = Poll.objects.create(question='question', pub_date=timezone.now())
+
+        response = self.client.get('/poll/%d/' % (poll.id, ))
+
+        self.assertIn(
+            '<form method="POST" action="/poll/%d/vote">' % (poll.id,),
+            response.content
+        )
+        self.assertIn(
+            '<input type="submit"',
+            response.content
+        )

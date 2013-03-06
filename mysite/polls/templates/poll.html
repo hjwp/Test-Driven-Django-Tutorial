@@ -5,5 +5,14 @@
     <body>
         <h1>{{ poll.question }}</h1>
         <p>No-one has voted on this poll yet</p>
+        <form method="POST" action="/poll/{{ poll.id }}/vote">
+            {% for choice in poll.choice_set.all %}
+                <label>{{ choice.choice }}
+                    <input type="radio" name="vote" value="{{ choice.id }}" />
+                </label>
+            {% endfor %}
+            <input type="submit" value="Vote" />
+        </form>
+
     </body>
 </html>
