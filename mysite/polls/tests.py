@@ -163,3 +163,33 @@ class SinglePollViewTest(TestCase):
             '<input type="submit"',
             response.content
         )
+
+
+class PollVoteViewTest(TestCase):
+
+    def test_can_vote_via_POST(self):
+        # set up a poll with choices
+        poll = Poll.objects.create(question='who?', pub_date=timezone.now())
+        poll.save()
+        choice1 = Choice.objects.create(poll=poll, choice='me', votes=1)
+        choice2 = Choice.objects.create(poll=poll, choice='you', votes=3)
+
+        # set up our POST data - keys and values are unicode
+        post_data = {u'vote': unicode(choice2.id)}
+
+        # make our request to the view
+        poll_url = '/poll/%d/vote' % (poll.id,)
+        response = self.client.post(poll_url, data=post_data)
+
+        # check it wasn't a 404
+        self.assertNotEqual(response.status_code, 404)
+
+        # retrieve the updated choice from the database
+        choice_in_db = Choice.objects.get(pk=choice2.id)
+
+        # check it's votes have gone up by 1
+        self.assertEquals(choice_in_db.votes, 4)
+
+        # "always redirect after a POST". In this case, we go back
+        # to the poll page.
+        self.assertRedirects(response, "/poll/%d/" % (poll.id,))
