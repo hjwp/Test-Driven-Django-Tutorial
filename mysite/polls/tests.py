@@ -34,6 +34,7 @@ class PollModelTest(TestCase):
         self.assertEqual(unicode(poll), "Why?")
 
 
+
 class ChoiceModelTest(TestCase):
 
     def test_creating_some_choices_for_a_poll(self):
@@ -72,6 +73,8 @@ class ChoiceModelTest(TestCase):
     def test_choice_defaults(self):
         choice = Choice()
         self.assertEquals(choice.votes, 0)
+
+
 
 class HomePageTest(TestCase):
 
