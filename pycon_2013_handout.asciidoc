@@ -7,9 +7,10 @@ Part 0 - Pre-requisites
 * Django 1.4 or 1.5
 * Selenium (latest version)
 
-If you haven't got the pre-requisites, you'll have to follow along with someone
-else's PC.  That's OK, my whole tutorial is available online, so you can go
-through the whole thing in your own time later.
+If you haven’t got the pre-requisites, you’ll have to follow along with someone
+else’s PC. That’s OK, pairing is both fun and edumecational, plus my whole
+tutorial is available online so you can go through the whole thing in your own
+time later.
 
 Testing you have the pre-requisites installed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
