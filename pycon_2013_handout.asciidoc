@@ -1693,6 +1693,8 @@ From the top-level folder of the repo
 Those two commands will blow away everything in 'mysite' and replace them 
 with versions as if you'd skipped to this part
 
+NB - make sure you're at the top-level of the repo, NOT inside 'mysite'
+
 ==============================================================================
 
 `python manage.py test fts` should give:
@@ -1703,8 +1705,8 @@ text","selector":"How awesome is TDD?"}'
 ----
 
 So start by adding check for poll questions to our view unit test. In
-'polls/tests.py', change `test_home_page_renders_correct_template` inside 
-`HomePageTest`, to:
+'polls/tests.py', at the bottom, change
+`test_home_page_renders_correct_template` inside `HomePageTest`, to:
 
 
 [source,python]
