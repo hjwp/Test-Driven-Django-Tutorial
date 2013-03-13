@@ -196,7 +196,7 @@ Finish writing the FT as comments:
 [source,python]
 ----
 def test_voting_on_a_poll(self):
-    # Elspeth goest to check out a cool new polls site she's heard about
+    # Elspeth goes to check out a cool new polls site she's heard about
     self.browser.get('http://localhost:8000')
 
     # It is obviously all about polls:
@@ -849,6 +849,9 @@ Now the FT should be able to log into the admin site:
         self.fail('Use the admin site to create a poll')
 
 ----
+
+NOTE: at this point, can  do a 
+`git checkout PYCON_2013_FT_FOR_ADMIN_SITE -- mysite/functional_test.py` 
 
 Expected failure:
 
