@@ -321,7 +321,7 @@ At the end, I've left a ``TODO`` - calling ``self.fail()`` means the test will
 always fail at the end there, so that will be a reminder that we're not quite
 finished.
 
-Oh, and one las thing: it's always nice to give the user a name... Mine is
+Oh, and one last thing: it's always nice to give the user a name... Mine is
 called Gertrude!
 
 
