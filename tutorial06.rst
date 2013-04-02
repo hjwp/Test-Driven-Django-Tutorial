@@ -2,6 +2,10 @@
 Part 6 - The Book!
 ==================
 
+*[update April 2012] : The book is now coming out on O'Reilly!  more info here:*
+
+http://www.tdd-django-tutorial.com/blog/articles/2013/test-driven-development-web-applications-book-exis/
+
 Thanks so much for following on this far! I'm afraid that's all there is for
 now, but I am about to start on the next stage -- a proper book on TDD for 
 web apps.
