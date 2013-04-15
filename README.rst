@@ -1,3 +1,23 @@
+Update - this tutorial needs updating, please see the book
+----------------------------------------------------------
+
+[update 2013-04-15] Two things:  firstly this tutorial needs a re-write. Last
+time I presented it (at Pycon 2013), I did so following a completely re-vamped
+ordering, which makes *much* more sense.  As it is, I feel it introduces far
+too many concepts all in one go in the first section.
+
+If you're looking for (what I think is) a better introduction to TDD and Django,
+please check out 
+
+http://www.obeythetestinggoat.com
+
+The site for my book, which I'm currently writing.  It covers all the same materials
+as this tutorial, and I think it does a better job.
+
+**Yes there is still a free version**.  Although, of course, I'd appreciated it
+if you did consider paying for the actual book.
+
+
 The Concept
 -----------
 
