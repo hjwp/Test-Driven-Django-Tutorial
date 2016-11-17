@@ -1,27 +1,24 @@
-Update - this tutorial needs updating, please see the book
-----------------------------------------------------------
+Update - this tutorial is out of date, and no longer being updated
+------------------------------------------------------------------
 
-[update 2013-04-15] Two things:  firstly this tutorial needs a re-write. Last
-time I presented it (at Pycon 2013), I did so following a completely re-vamped
-ordering, which makes *much* more sense.  As it is, I feel it introduces far
-too many concepts all in one go in the first section.
-
-If you're looking for (what I think is) a better introduction to TDD and Django,
+This tutorial dates back to 2012, and was originally written for Django 1.3. It
+is totally out of date now, and I'm not maintaining it. If you're looking for
+(what I think is) a better introduction to TDD and Django,
 please check out 
 
 http://www.obeythetestinggoat.com
 
-The site for my book, which I'm currently writing.  It covers all the same materials
-as this tutorial, and I think it does a better job.
+The site for my book, which contains everything that used to be in here, and
+much, much more, and is available **entirely free** (but also for money if
+you like)
 
-**Yes there is still a free version**.  Although, of course, I'd appreciated it
-if you did consider paying for the actual book.
 
+For hysterical purposes, here is some of the old blurb.
 
 The Concept
 -----------
 
-This idea is to provide an introduction to Test-Driven web development using
+This idea was to provide an introduction to Test-Driven web development using
 Django (and Python).  Essentially, we run through the same material as the
 official Django tutorial, but instead of 'just' writing code, we write tests
 first at each stage - both "functional tests", in which we actually pretend to
@@ -31,12 +28,6 @@ to design and piece together the individual working parts of the code.
 The tutorial uses the new release of Django (1.4), and covers 95% of what's covered
 in the official Django tutorial.  Suggestions, comments and feedback are gratefully
 received... What should I do next??
-
-Website:
---------
-
-http://tdd-django-tutorial.com/
-
 
 
 Who is this for?
@@ -127,8 +118,6 @@ http://harry.pythonanywhere.com/tutorial/1/
 
 USEFUL LINKS
 ------------
-
-https://tdd-django-tutorial.com
 
 https://github.com/hjwp/Test-Driven-Django-Tutorial
 
